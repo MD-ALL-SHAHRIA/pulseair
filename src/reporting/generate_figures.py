@@ -418,61 +418,94 @@ def fig_advisory_tradeoff() -> plt.Figure:
 
 
 @figure("04_ctgan_validity",
-        "Physical validity of CTGAN output after the constraint fix",
-        ["gan_h6.json"],
-        caveat=("The pre-fix state (dict-form constraint silently ignored, ~51% of "
-                "synthetic rows with DEWP > TEMP) is described in gan_quality_report_h6.md "
-                "but was never written to a metrics JSON -- the buggy run was discarded "
-                "rather than archived. Only the post-fix columns are plotted; the 'before' "
-                "bar is deliberately absent rather than hardcoded from prose."))
+        "CTGAN physical validity, before and after the constraint fix",
+        ["gan_h6.json", "gan_validity_before_fix.json"],
+        caveat=("The 'before' column comes from src/gan/validity_before_fix.py, which "
+                "deliberately re-runs the original broken configuration (cyclical "
+                "encodings modelled as free continuous columns; DEWP <= TEMP passed as "
+                "a dict SDV ignores) purely to measure it. CTGAN is stochastic and the "
+                "original RNG state was not saved, so these reproduce the same failure, "
+                "not the same draw; per-check agreement with the numbers already in "
+                "gan_quality_report_h6.md section 5 is recorded in that JSON and printed "
+                "on the figure. Nothing from that run enters the pipeline."))
 def fig_ctgan_validity() -> plt.Figure:
-    src = "gan_h6.json"
-    v = require(load(src), "validity", src)
-    rows = []
-    for which in ("real", "synthetic"):
-        blk = require(v, which, src)
-        rows += [
-            {"Source": which.capitalize(), "Check": "hour on unit circle (%)",
-             "Value": req_num(blk, "hour.on_unit_circle_pct", f"{src}:validity.{which}")},
-            {"Source": which.capitalize(), "Check": "month on unit circle (%)",
-             "Value": req_num(blk, "month.on_unit_circle_pct", f"{src}:validity.{which}")},
-            {"Source": which.capitalize(), "Check": "DEWP > TEMP (%)",
-             "Value": req_num(blk, "dewp_above_temp_pct", f"{src}:validity.{which}")},
-        ]
-    df = pd.DataFrame(rows)
+    """The finding the SDV quality score could not see.
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(FIG_WIDTH, 3.2),
-                                   gridspec_kw={"width_ratios": [1.5, 1]})
-    circ = df[df["Check"].str.contains("unit circle")]
-    sns.barplot(circ, x="Check", y="Value", hue="Source",
-                palette=[C_BEIJING, C_GAN], ax=ax1, edgecolor="white", linewidth=0.7)
-    ax1.set_ylim(0, 112)
-    ax1.axhline(100, color=C_MODEL, ls="--", lw=1.4, label="valid (100%)")
-    _annotate_bars(ax1, fmt="{:.1f}")
-    ax1.set_title("Cyclical encodings", fontsize=FS_LABEL)
-    ax1.set_xlabel(""); ax1.set_ylabel("% of rows")
-    ax1.tick_params(axis="x", rotation=12)
-    ax1.legend(loc="lower right", ncol=2, fontsize=FS_ANNOT)
+    Both configurations scored ~0.9 on SDV's report. One of them emitted four fifths
+    of its rows at a time of day that does not exist.
+    """
+    after_src, before_src = "gan_h6.json", "gan_validity_before_fix.json"
+    after = require(load(after_src), "validity", after_src)
+    before = load(before_src)
+    b_val = require(before, "validity", before_src)
 
-    dewp = df[df["Check"].str.contains("DEWP")]
-    sns.barplot(dewp, x="Source", y="Value", hue="Source",
-                palette=[C_BEIJING, C_GAN], legend=False, ax=ax2,
-                edgecolor="white", linewidth=0.7)
-    _annotate_bars(ax2, fmt="{:.4f}")
-    ax2.set_ylim(0, max(dewp["Value"].max() * 1.6, 0.004))
-    ax2.set_title("Impossible air\n(dew point above temperature)", fontsize=FS_LABEL)
-    ax2.set_xlabel(""); ax2.set_ylabel("% of rows")
+    n_after = req_num(after, "synthetic.n", after_src)
+    n_before = req_num(b_val, "synthetic.n", before_src)
 
-    n_syn = req_num(v, "synthetic.n", f"{src}:validity")
-    n_clip = sum(req_num(load(src), f"quality.{c}.n_dewp_clipped", src)
-                 for c in require(load(src), "quality", src))
-    fig.suptitle("After the sdv.cag.Inequality fix: 0 violations in "
-                 f"{int(n_syn):,} synthetic rows", y=1.02)
-    fig.text(0.5, -0.06,
-             f"Real data carries {req_num(v, 'real.dewp_above_temp_n', src):.0f} violating rows "
-             f"({req_num(v, 'real.dewp_above_temp_pct', src):.4f}%); "
-             f"{int(n_clip):,} were clipped to saturation before fitting, "
-             "because SDV refuses to fit a constraint the training data violates.",
+    panels = [
+        ("Cyclical encoding valid\n(hour_sin² + hour_cos² = 1)", "% of synthetic rows",
+         req_num(b_val, "synthetic.hour.on_unit_circle_pct", before_src),
+         req_num(after, "synthetic.hour.on_unit_circle_pct", after_src),
+         100.0, "must be 100%", False, "{:.2f}"),
+        ("Distinct hour_sin values\n(24 hours exist)", "distinct values",
+         req_num(b_val, "synthetic.hour.distinct_sin", before_src),
+         req_num(after, "synthetic.hour.distinct_sin", after_src),
+         req_num(after, "synthetic.hour.expected_distinct", after_src),
+         "24 possible", True, "{:,.0f}"),
+        ("Impossible air\n(dew point above temperature)", "% of synthetic rows",
+         req_num(b_val, "synthetic.dewp_above_temp_pct", before_src),
+         req_num(after, "synthetic.dewp_above_temp_pct", after_src),
+         req_num(after, "real.dewp_above_temp_pct", after_src), "real data", False,
+         "{:.4g}"),
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=(FIG_WIDTH * 1.4, 4.6))
+    for ax, (title, ylab, b, a, ref, reflab, log, fmt) in zip(axes, panels):
+        df = pd.DataFrame([{"Configuration": "Before\n(broken)", "Value": b},
+                           {"Configuration": "After\n(sdv.cag.Inequality)", "Value": a}])
+        sns.barplot(df, x="Configuration", y="Value", hue="Configuration",
+                    palette=[C_BAD, C_MODEL], legend=False, ax=ax,
+                    edgecolor="white", linewidth=0.8)
+        if log:
+            ax.set_yscale("log")
+            ax.set_ylim(0.5, max(b, a, ref) * 6)
+        else:
+            ax.set_ylim(0, max(b, a, ref) * 1.30 or 1)
+        ax.axhline(ref, color="#444444", ls=":", lw=1.5, zorder=4,
+                   label=f"{reflab} ({fmt.format(ref)})")
+        for i, r in df.iterrows():
+            ax.annotate(fmt.format(r["Value"]), (i, r["Value"]),
+                        textcoords="offset points", xytext=(0, 5), ha="center",
+                        fontsize=FS_ANNOT, fontweight="bold")
+        ax.set_title(title, fontsize=FS_LABEL - 0.5)
+        ax.set_xlabel(""); ax.set_ylabel(ylab)
+        ax.legend(loc="upper right", fontsize=7.2, framealpha=0.95)
+
+    # Whether the reconstruction lands on the numbers already in the report is the
+    # figure's own provenance, so it is stated on the figure rather than in a caption
+    # somewhere else.
+    comp = require(before, "comparison", before_src)
+    bits = []
+    for key in ("on_unit_circle_pct", "distinct_hour_sin", "dewp_above_temp_pct"):
+        c = require(comp, key, before_src)
+        rep = c["reported_in_gan_quality_report_h6_section_5"]
+        got = c["regenerated"]
+        num = "{:,.0f}" if key == "distinct_hour_sin" else "{:.4g}"
+        bits.append(f"{key}: report {num.format(rep)} / re-run {num.format(got)}"
+                    f"{'' if c['matches'] else '  (OUTSIDE TOLERANCE)'}")
+    verdict = ("reproduces the reported numbers"
+               if require(before, "all_checks_match", before_src)
+               else "does NOT fully reproduce the reported numbers — see the JSON")
+
+    fig.suptitle(f"Both configurations scored ~0.9 on SDV's quality report",
+                 y=1.03)
+    fig.text(0.5, -0.13,
+             f"'Before' re-runs the original broken configuration on "
+             f"{int(n_before):,} synthetic rows and {verdict}.\n"
+             + "   ·   ".join(bits) +
+             f"\nCTGAN is stochastic and the original seed was not saved, so this is a "
+             f"reproduction of the failure, not of the draw. 'After' is the shipped "
+             f"configuration ({int(n_after):,} rows).",
              ha="center", fontsize=FS_ANNOT, color="#555555")
     fig.tight_layout()
     return fig
@@ -1495,7 +1528,7 @@ def fig_pipeline() -> plt.Figure:
     ax.text(77, 91.5, "BANGLADESH  —  deployment track", ha="center",
             fontsize=FS_LABEL, fontweight="bold", color=C_BANGLADESH)
     box(58, 82, 38, 6.5, "Phase 10  Mendeley 9j447cynb9 v2\n"
-                         "integrity audit: 81% of rows rejected, 2022-08-05 onward kept",
+                         "integrity audit: 87% of the advertised span is backfill; 2022-08-05 onward kept",
         pale(C_BANGLADESH), C_BANGLADESH)
     box(58, 73.5, 38, 5.5, "7 shared channels (PM2.5, PM10, CO + cyclical)\n"
                            "no TEMP/DEWP — the 9-channel set cannot transfer",
@@ -1549,6 +1582,237 @@ def fig_pipeline() -> plt.Figure:
     return fig
 
 
+# ================================================ 22 deployed system architecture
+
+
+@figure("22_deployed_architecture",
+        "Deployed system architecture, Bangladesh predictor",
+        [],
+        caveat="Schematic: hand-specified structure, not read from metrics. The "
+               "numbers labelling the stages are still read from JSON at render time.")
+def fig_deployed_architecture() -> plt.Figure:
+    """Vertical flow through the deployed stack, one box per stage.
+
+    Schematic, but not number-free: every figure in the boxes is pulled from the
+    deployment and Bangladesh metrics, so the diagram cannot describe a system that
+    differs from the one the reports measured.
+    """
+    dep, bd = "deployment_h6_bd.json", "bangladesh_h6.json"
+    feats = require(load(dep), "features", dep)
+    n_trees = int(req_num(load(dep), "compressed.n_estimators", dep))
+    depth = int(req_num(load(dep), "compressed.max_depth", dep))
+    pickle_kb = req_num(load(dep), "compressed.pickle_kb", dep)
+    onnx_kb = req_num(load(dep), "onnx.bytes", dep) / 1024
+    coverage = req_num(load(dep), "conformal_new.test.coverage", dep)
+    mean_set = req_num(load(dep), "conformal_new.test.mean_set_size", dep)
+    n_classes = len(require(load(bd), "meta.class_labels", bd))
+    cities = require(load(bd), "meta.cities", bd)
+
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH * 1.15, 8.2))
+    ax.set_xlim(0, 100); ax.set_ylim(11, 100)
+    ax.axis("off"); ax.grid(False)
+
+    def box(y, h, text, face, edge, *, x=14, w=72, fontsize=8.6, weight="normal"):
+        ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                    boxstyle="round,pad=0.6,rounding_size=1.2",
+                                    facecolor=face, edgecolor=edge, linewidth=1.4,
+                                    zorder=2))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+                fontsize=fontsize, fontweight=weight, zorder=3, linespacing=1.5)
+
+    def down(y_from, y_to, label=""):
+        ax.add_patch(FancyArrowPatch((50, y_from), (50, y_to), arrowstyle="-|>",
+                                     mutation_scale=14, color="#666666", lw=1.6,
+                                     zorder=1, shrinkA=0, shrinkB=0))
+        if label:
+            ax.text(52.5, (y_from + y_to) / 2, label, fontsize=7.6, va="center",
+                    color="#555555", style="italic")
+
+    pale = lambda c: sns.light_palette(c, n_colors=8)[1]
+
+    ax.text(50, 98, "Deployed predictor — Bangladesh", ha="center",
+            fontsize=FS_TITLE + 1, fontweight="bold")
+    ax.text(50, 94.4, f"trained on {', '.join(cities)}, 2022-08-05 onward",
+            ha="center", fontsize=FS_ANNOT + 0.5, color="#666666", style="italic")
+
+    stages = [
+        (85.5, 6.4, f"SENSOR WINDOW\n{len(feats)} scaled features: "
+                    f"{', '.join(feats[:3])} + {len(feats) - 3} cyclical",
+         pale(C_BANGLADESH), C_BANGLADESH, "normal"),
+        (74.5, 6.6, f"RANDOM FOREST  —  class_weight='balanced'\n"
+                    f"compressed to {n_trees} trees x depth {depth}  ·  "
+                    f"{pickle_kb:,.0f} KB pickle  ·  {onnx_kb:,.0f} KB ONNX",
+         pale(C_MODEL), C_MODEL, "bold"),
+        (63.5, 6.4, f"MONDRIAN CONFORMAL THRESHOLDS\n"
+                    f"one quantile per class, re-derived on the compressed model",
+         pale(C_GAN), C_GAN, "normal"),
+        (52.5, 6.6, f"PREDICTION SET  —  not an argmax\n"
+                    f"{coverage:.4f} empirical coverage  ·  "
+                    f"mean {mean_set:.2f} of {n_classes} categories",
+         pale(C_GAN), C_GAN, "bold"),
+        (41.5, 6.4, "TOP-3 SHAP CONTRIBUTIONS  +  WEARER PROFILE\n"
+                    "which channels drove it, and who is being advised",
+         pale(C_BEIJING), C_BEIJING, "normal"),
+        (30.5, 6.6, "GEMINI ADVISORY  (gemini-3.1-flash-lite)\n"
+                    "validated before use — rule-based template on any failure",
+         pale(C_ACCENT), C_ACCENT, "normal"),
+        (19.5, 6.4, "WEARER-FACING OUTPUT\n"
+                    "two to four sentences naming the ambiguity, never a bare number",
+         pale(C_MODEL), C_MODEL, "bold"),
+    ]
+    for y, h, text, face, edge, weight in stages:
+        box(y, h, text, face, edge, weight=weight)
+
+    labels = ["features", "probabilities", "per-class quantiles",
+              "the set", "attribution + profile", "validated text"]
+    tops = [85.5, 74.5, 63.5, 52.5, 41.5, 30.5]
+    for i, lbl in enumerate(labels):
+        down(tops[i], tops[i] - 4.4, lbl)
+
+    # the honesty constraint sits outside the model, so it is drawn outside the column
+    ax.add_patch(FancyBboxPatch((3.5, 28.6), 9.0, 10.4,
+                                boxstyle="round,pad=0.4,rounding_size=1.0",
+                                facecolor="#f7f7f7", edgecolor="#999999",
+                                linewidth=1.2, linestyle="--", zorder=2))
+    ax.text(8.0, 33.8, "validator\n(outside\nthe model)", ha="center", va="center",
+            fontsize=7.4, color="#555555", zorder=3, linespacing=1.4)
+    ax.add_patch(FancyArrowPatch((12.5, 33.8), (14, 33.8), arrowstyle="-|>",
+                                 mutation_scale=11, color="#999999", lw=1.3, zorder=1))
+
+    ax.text(50, 13.5,
+            "Every stage above is measured in reports/bangladesh_deployment.md. The "
+            "advisory classes\n(Very unhealthy, Hazardous) are NOT validated for this "
+            "model — see figure 19 for what is.",
+            ha="center", va="center", fontsize=7.9, color="#555555", style="italic")
+
+    fig.tight_layout()
+    return fig
+
+
+# =================================================== 23 dataset coverage timeline
+
+
+@figure("23_dataset_coverage_timeline",
+        "Dataset coverage: nominal span against verified-clean window",
+        [],
+        caveat="Schematic: hand-specified layout, not read from metrics. The dates, "
+               "row counts and fractions on it are read from JSON at render time.")
+def fig_coverage_timeline() -> plt.Figure:
+    """Horizontal timeline. The point is the gap between advertised and usable.
+
+    Beijing is used in full. The Bangladesh reanalysis advertises a quarter-century
+    and delivers 3.3 usable years; the discarded part is 19% of the rows but 87% of
+    the span, and drawing it on a time axis is the only way that reads correctly.
+    """
+    bd = "bangladesh_h6.json"
+    a = require(load(bd), "audit", bd)
+    nom_start = pd.Timestamp(require(a, "actual_range.0", bd))
+    nom_end = pd.Timestamp(require(a, "actual_range.1", bd))
+    cut = pd.Timestamp(require(a, "clean_start", bd))
+    file_rows = int(req_num(a, "file_rows", bd))
+    clean_rows = int(req_num(a, "clean_rows", bd))
+    clean_cities = int(req_num(a, "clean_cities", bd))
+    trend_r2 = req_num(a, "dhaka_pm25_linear_trend_r2", bd)
+    clip_pct = req_num(a, "pre_clip_at_250_pct", bd)
+
+    gt = "dhaka_ground_truth.json"
+    emb_start = pd.Timestamp(require(load(gt), "audit.start", gt))
+    emb_end = pd.Timestamp(require(load(gt), "audit.end", gt))
+
+    bj_start, bj_end = pd.Timestamp("2013-03-01"), pd.Timestamp("2017-02-28")
+
+    discarded_rows = file_rows - clean_rows
+    row_pct = discarded_rows / file_rows * 100
+    span_pct = (cut - nom_start) / (nom_end - nom_start) * 100
+
+    yr = lambda t: t.year + (t.dayofyear - 1) / 365.25
+    x0, x1 = yr(nom_start) - 0.8, yr(nom_end) + 0.8
+
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH * 1.5, 5.4))
+    ax.set_xlim(x0, x1); ax.set_ylim(0, 10)
+    ax.set_yticks([]); ax.grid(axis="y", visible=False)
+    ax.grid(axis="x", alpha=0.3)
+    for side in ("left", "right", "top"):
+        ax.spines[side].set_visible(False)
+
+    def band(y, h, a0, a1, face, edge, hatch=None):
+        ax.add_patch(plt.Rectangle((yr(a0), y), yr(a1) - yr(a0), h, facecolor=face,
+                                   edgecolor=edge, linewidth=1.3, hatch=hatch, zorder=2))
+
+    # Text sitting on a hatched fill is unreadable without a plate behind it.
+    PLATE = dict(facecolor="white", alpha=0.88, edgecolor="none",
+                 boxstyle="round,pad=0.28")
+    pale = lambda c: sns.light_palette(c, n_colors=8)[2]
+
+    # --- Beijing
+    ax.text(x0 + 0.25, 9.25, "BEIJING  (UCI multi-site)", fontsize=FS_LABEL,
+            fontweight="bold", color=C_BEIJING)
+    band(7.5, 1.35, bj_start, bj_end, pale(C_BEIJING), C_BEIJING)
+    ax.text(yr(bj_start) + (yr(bj_end) - yr(bj_start)) / 2, 8.18,
+            "used in full\n420,768 h × 12 stations", ha="center", va="center",
+            fontsize=7.8, fontweight="bold", zorder=3, linespacing=1.4)
+
+    # --- Bangladesh
+    ax.text(x0 + 0.25, 6.75, "BANGLADESH  (Mendeley 9j447cynb9 v2)",
+            fontsize=FS_LABEL, fontweight="bold", color=C_BANGLADESH)
+    band(4.75, 1.35, nom_start, cut, "#f7f2f1", C_BAD, hatch="///")
+    band(4.75, 1.35, cut, nom_end, pale(C_BANGLADESH), C_BANGLADESH)
+
+    mid_bad = yr(nom_start) + (yr(cut) - yr(nom_start)) / 2
+    ax.text(mid_bad, 5.42,
+            f"DISCARDED — backfilled / spliced\n"
+            f"{discarded_rows:,} rows  ·  {row_pct:.0f}% of rows  ·  "
+            f"{span_pct:.0f}% of the advertised span",
+            ha="center", va="center", fontsize=8.0, color=C_BAD, fontweight="bold",
+            zorder=4, linespacing=1.5, bbox=PLATE)
+    ax.text(mid_bad, 4.12,
+            f"near-linear trend R² = {trend_r2:.3f}   ·   hard clip at exactly "
+            f"250.0 µg/m³ ({clip_pct:.1f}% of rows)   ·   CO unit change mid-file   ·   "
+            "Dhaka alone",
+            ha="center", va="center", fontsize=7.3, color="#8a2f2f", zorder=3)
+
+    mid_ok = yr(cut) + (yr(nom_end) - yr(cut)) / 2
+    ax.text(mid_ok, 5.42, "VERIFIED\nCLEAN", ha="center", va="center",
+            fontsize=7.8, fontweight="bold", zorder=3, linespacing=1.4)
+    ax.annotate(f"{clean_rows:,} rows · {clean_cities} cities\n"
+                f"{(nom_end - cut).days / 365.25:.2f} years, hourly",
+                (mid_ok, 6.1), xytext=(mid_ok + 0.9, 7.45), ha="center",
+                fontsize=7.6, color=C_BANGLADESH, fontweight="bold", zorder=4,
+                linespacing=1.4,
+                arrowprops=dict(arrowstyle="-", color=C_BANGLADESH, lw=1.1))
+
+    # --- the boundary. Annotated to the right, over empty space, so the leader does
+    #     not cross the Beijing band.
+    ax.axvline(yr(cut), color=C_BAD, lw=2.2, ls="--", zorder=4)
+    ax.annotate(f"{cut.date()}\nverified clean boundary",
+                (yr(cut), 3.6), xytext=(yr(cut) + 2.9, 2.5),
+                fontsize=8.2, fontweight="bold", color=C_BAD, ha="center",
+                zorder=5, linespacing=1.4,
+                arrowprops=dict(arrowstyle="-|>", color=C_BAD, lw=1.5))
+
+    # --- reference monitor
+    ax.text(x0 + 0.25, 2.55, "GROUND TRUTH", fontsize=FS_LABEL - 0.5,
+            fontweight="bold", color=C_MODEL)
+    band(0.85, 1.25, emb_start, emb_end, pale(C_MODEL), C_MODEL)
+    ax.text(yr(emb_start) + (yr(emb_end) - yr(emb_start)) / 2, 1.48,
+            "US Embassy Dhaka reference monitor — 75,344 QC-passed hours",
+            ha="center", va="center", fontsize=7.8, fontweight="bold", zorder=3)
+
+    ax.set_xlabel("Year")
+    ax.set_xticks(range(2000, 2027, 2))
+    ax.tick_params(axis="x", labelsize=FS_TICK)
+    ax.set_title("What each dataset advertises, and what survives inspection")
+    fig.text(0.5, -0.04,
+             "The advertised quarter-century is mostly backfill: dropping it costs "
+             f"{row_pct:.0f}% of the rows but {span_pct:.0f}% of the years, because the "
+             "discarded portion is Dhaka alone at low density while the\nclean window is "
+             f"{clean_cities} cities hourly. Boundary and fractions are recomputed from "
+             "the raw file by bangladesh.audit(), not asserted.",
+             ha="center", fontsize=FS_ANNOT, color="#555555")
+    fig.tight_layout()
+    return fig
+
+
 # ------------------------------------------------------------------------- driver
 
 
@@ -1592,7 +1856,8 @@ def _print_audit(results: list[Result]) -> None:
     for r in results:
         if r.path:
             kb = r.path.stat().st_size / 1024
-            src = ", ".join(r.fig.sources) if r.fig.sources else "(schematic — no metrics)"
+            src = (", ".join(r.fig.sources) if r.fig.sources
+                   else "schematic — no metrics source, by design")
             print(f"\n  {r.fig.slug}.png   {kb:,.0f} KB")
             print(f"    {r.fig.title}")
             print(f"    sources: {src}")
@@ -1616,11 +1881,19 @@ def write_index(results: list[Result]) -> Path:
     reader who finds a figure in the thesis can trace it back to the JSON it came
     from without running anything.
     """
+    n_ok = sum(1 for r in results if r.path)
+    n_schematic = sum(1 for r in results if r.path and not r.fig.sources)
     lines = ["# Figures",
              "",
-             "Generated by `python -m src.reporting.generate_figures`. Every value is read",
-             "from `reports/metrics/*.json` at render time -- none is typed in here, and a",
-             "missing field fails the figure rather than being substituted.",
+             f"{n_ok} figures: {n_ok - n_schematic} generated from data and "
+             f"{n_schematic} hand-specified schematics.",
+             "",
+             "Generated by `python -m src.reporting.generate_figures`. Every value in a",
+             "data-driven figure is read from `reports/metrics/*.json` at render time --",
+             "none is typed in here, and a missing field fails the figure rather than",
+             "being substituted. The schematics describe structure rather than results,",
+             "so they declare no metrics source; the numbers that label them are still",
+             "read from JSON.",
              "",
              "| # | Figure | Reads from |",
              "| --- | --- | --- |"]
@@ -1629,7 +1902,8 @@ def write_index(results: list[Result]) -> Path:
         if not r.path:
             continue
         num, _, rest = r.fig.slug.partition("_")
-        src = ", ".join(f"`{x}`" for x in r.fig.sources) or "_schematic_"
+        src = (", ".join(f"`{x}`" for x in r.fig.sources)
+               or "**schematic — no metrics source, by design**")
         lines.append(f"| {num} | [{r.fig.title}]({r.path.name}) | {src} |")
         if r.fig.caveat:
             caveats.append((num, r.fig.title, r.fig.caveat))

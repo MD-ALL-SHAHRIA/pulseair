@@ -35,9 +35,16 @@ Four independent signals put the boundary at **2022-08-05**:
 | CO median | 1.56 | 424 | a unit change mid-file (≈250×), i.e. two sources spliced |
 | PM2.5 lag-1 autocorrelation | 0.905 | 0.983 | the later block behaves like real hourly air quality |
 
-Only **Dhaka** carries the pre-2022 history; every other city begins at
-2022-08-05. The most likely explanation is that Dhaka was
-back-filled synthetically to give the dataset a longer nominal span.
+**Dhaka carries 99.7% of the pre-2022 rows** (198,048 of 198,720);
+every other city starts within a day of 2022-08-05, contributing 24 hours
+each at the boundary. The most likely explanation is that Dhaka was back-filled
+synthetically to give the dataset a longer nominal span.
+
+Discarding everything before 2022-08-05 costs **19% of the rows but 87% of
+the advertised span** -- the two fractions differ because the discarded portion is one
+city at low density while the clean window is 30 cities hourly. The
+span figure is the one worth quoting: the dataset's selling point is a quarter-century
+of history, and that history is the part that is generated.
 
 **Everything below uses the 2022-08-05 onward window only**:
 849,831 rows (81% of the file),
@@ -46,7 +53,7 @@ back-filled synthetically to give the dataset a longer nominal span.
 
 > **For the thesis.** This audit is worth a paragraph in its own right. The dataset is
 > the top Google result for Bangladeshi air-quality data and is published on a
-> reputable repository with a DOI; 81% of it is not usable, and nothing in the record
+> reputable repository with a DOI; 87% of its advertised span is backfill, and nothing in the record
 > says so. Any external-validation claim built on the advertised 2000–2025 span would
 > be built on generated numbers.
 

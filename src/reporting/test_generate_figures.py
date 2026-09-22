@@ -30,8 +30,27 @@ def rendered():
     return gf.generate()
 
 
-def test_registry_is_not_empty():
-    assert len(gf.REGISTRY) >= 20, f"only {len(gf.REGISTRY)} figures registered"
+EXPECTED_FIGURES = 23
+
+
+def test_registry_holds_the_expected_figure_count():
+    assert len(gf.REGISTRY) == EXPECTED_FIGURES, (
+        f"{len(gf.REGISTRY)} figures registered, expected {EXPECTED_FIGURES}. "
+        "Update EXPECTED_FIGURES deliberately, not to make the test pass.")
+
+
+def test_schematics_declare_no_metrics_sources_but_still_carry_a_caveat():
+    """The two hand-specified figures must say so, in the registry and the index.
+
+    A schematic with no declared source is fine; a schematic that looks data-driven
+    and is not would be the problem this whole module exists to avoid.
+    """
+    schematics = [f for f in gf.REGISTRY if not f.sources]
+    assert len(schematics) == 3, (
+        f"expected 3 schematics (pipeline overview, deployed architecture, coverage "
+        f"timeline), found {[f.slug for f in schematics]}")
+    for f in schematics:
+        assert "chematic" in f.caveat, f"{f.slug} does not declare itself a schematic"
 
 
 def test_slugs_are_unique():

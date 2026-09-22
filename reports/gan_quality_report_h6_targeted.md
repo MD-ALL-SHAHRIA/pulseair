@@ -205,6 +205,14 @@ What this implies for anyone using a tabular synthesizer:
   accepts a no-op without complaint is exactly the kind of thing a validity check
   catches and a quality score does not.
 
+**The "before" numbers above are reproducible.** `src/gan/validity_before_fix.py`
+re-runs the broken configuration and writes
+`reports/metrics/gan_validity_before_fix.json`, which records each regenerated value
+beside the one quoted here. It exists to supply the before column of figure 04 and
+feeds nothing else -- no training table, no model, no reported metric. CTGAN is
+stochastic and the original seed was not saved, so the re-run reproduces the failure
+rather than the draw; the JSON states the gap per check.
+
 A further wrinkle worth recording: 196 real training rows
 (0.44%) have `DEWP` marginally above `TEMP` — instrument tolerance, since
 the two are measured to 0.1 °C by separate sensors. SDV correctly refuses to fit an

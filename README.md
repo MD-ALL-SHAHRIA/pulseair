@@ -114,13 +114,15 @@ Written for a reader who will never open the thesis.
   marginal target while covering Hazardous only **84.3%** of the time — the slack lands
   exactly on the rare classes. Mondrian (class-conditional) calibration fixed it (0.908).
 
-- **81% of a published dataset was fabricated.** The Mendeley Bangladesh AQI dataset
-  (`9j447cynb9`) carries a near-linear synthetic trend, a hard clip at exactly 250.0 µg/m³,
-  and CO in inconsistent units before 2022-08-05. Only the post-2022 portion survives
-  inspection. Checking against the US Embassy reference monitor over the overlap:
-  **17 Hazardous hours in the reanalysis against 1,602 in the instrument.** The integrity
-  audit is recomputed from the raw file by `audit()`, not asserted — see
-  [`reports/bangladesh_validation.md`](reports/bangladesh_validation.md).
+- **A published dataset's advertised 25-year history is 87% backfill.** The Mendeley
+  Bangladesh AQI dataset (`9j447cynb9`) sells 2000–2025; everything before 2022-08-05
+  carries a near-linear synthetic trend (R² = 0.992), a hard clip at exactly 250.0 µg/m³,
+  and CO in inconsistent units. Dropping it costs **19% of the rows but 87% of the
+  years** — the discarded portion is Dhaka alone at low density, while the usable window
+  is 30 cities hourly. Checking the survivors against the US Embassy reference monitor
+  over the overlap: **17 Hazardous hours in the reanalysis against 1,602 in the
+  instrument.** The audit is recomputed from the raw file by `audit()`, not asserted —
+  see [`reports/bangladesh_validation.md`](reports/bangladesh_validation.md).
 
 - **ONNX on the ESP32 is a portability proxy, not a flashability claim.** There is no ONNX
   Runtime for the ESP32. A real port needs a C tree traversal, `emlearn`, or a different
@@ -249,6 +251,8 @@ python -m src.gan.augment                               # ~2.5 h: 4 synthesizers
 python -m src.models.baseline --augmented               # retrain on the augmented table
 python -m src.gan.ablation                              # -> reports/gan_ablation_h6.md
 python -m src.gan.smote_control                         # SMOTE control (2.0 s)
+python -m src.gan.validity_before_fix                   # figure-only: re-measures the
+                                                        # original broken config (~20 min)
 
 # Phase 5 — sequence models with MC dropout
 python -m src.models.dl_forecast                        # -> reports/dl_metrics_h6.md
@@ -267,7 +271,7 @@ python -m src.deployment.compress_export --class-weight # class-weighted variant
 python -m src.models.rolling_cv                         # -> reports/rolling_origin_cv_h6.md
 python -m src.models.hj633_sensitivity                  # EPA vs HJ 633-2012 breakpoints
 python -m src.reporting.compile_results                 # -> reports/final_results_summary.md
-python -m src.reporting.generate_figures                # -> reports/figures/ (21 thesis figures)
+python -m src.reporting.generate_figures                # -> reports/figures/ (23 thesis figures)
 
 # Phase 10 — Bangladesh external validation + deployment
 python -m src.preprocessing.bangladesh                  # -> data/processed/bd_h6/
@@ -337,7 +341,7 @@ is readable without running anything. Start with:
 | [`bangladesh_validation.md`](reports/bangladesh_validation.md) | the dataset integrity audit |
 | [`dhaka_ground_truth_model_h6.md`](reports/dhaka_ground_truth_model_h6.md) | the validated advisory-class result |
 | [`deployment_report_h6.md`](reports/deployment_report_h6.md) | compression sweep, ONNX, latency |
-| [`figures/`](reports/figures/README.md) | 21 publication figures, each with the JSON it was built from |
+| [`figures/`](reports/figures/README.md) | 23 publication figures, each with the JSON it was built from |
 
 ---
 

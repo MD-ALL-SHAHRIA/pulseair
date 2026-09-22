@@ -509,8 +509,8 @@ model**, so it does not depend on trusting the LLM.
   p = 0.0156) — the largest and best-powered effect in the project. It validates
   the *task*, not the 7-channel deployed model, which cannot run on a
   single-pollutant source.
-- **A data-integrity audit of the external dataset** (Mendeley 9j447cynb9): 81% of the
-  published 2000–2025 span fails inspection — a synthetic near-linear trend
+- **A data-integrity audit of the external dataset** (Mendeley 9j447cynb9): 87% of the
+  published 2000–2025 *span* fails inspection — a synthetic near-linear trend
   (R² = 0.992), a hard clip at 250 µg/m³, and a mid-file unit change in CO.
 
 ### 1. Introduction — lead with the persistence floor
@@ -667,11 +667,15 @@ every rolling-origin fold**, and it does so on the target population.
 
 ### Two findings that qualify it
 
-1. **81% of the published dataset is not usable.** Mendeley `9j447cynb9` advertises
-   103 cities and 2000–2025; it contains 30 cities, and everything
-   before 2022-08-05 carries a synthetic near-linear trend
-   (R² = 0.9920), a hard clip at exactly 250 µg/m³, and
-   carbon monoxide in different units. Only the 81% from
+1. **The advertised 2000–2025 span is 87% backfill.** Mendeley
+   `9j447cynb9` advertises 103 cities and 2000–2025; it contains
+   30 cities, and everything before 2022-08-05 carries a
+   synthetic near-linear trend (R² = 0.9920), a hard clip
+   at exactly 250 µg/m³, and carbon monoxide in different units. Discarding it costs
+   19% of the *rows* (198,720 of
+   1,048,551) but 87% of the *years*, because the pre-2022
+   portion is Dhaka alone at low density while the clean window is
+   30 cities hourly. The 81% of rows from
    2022-08-05 onward survives inspection. The audit is in
    `reports/bangladesh_validation.md` §1 and is a contribution in itself.
 2. **The advisory classes are absent from the Bangladesh test split** — Hazardous

@@ -1,0 +1,178 @@
+{
+  "_purpose": "REGENERATED FOR FIGURE PURPOSES ONLY. Reconstructs the original, deliberately-broken CTGAN configuration (cyclical encodings modelled as free continuous columns; DEWP <= TEMP passed as a dict SDV ignores) so figure 04 can show the before column from measured data instead of from prose. It changes no modelling result and no conclusion; the augmented training tables, the ablation and every downstream number come from the FIXED configuration in src/gan/augment.py and are untouched by this file.",
+  "_matches_prose_in": "reports/gan_quality_report_h6.md section 5",
+  "_not_used_for": [
+    "training",
+    "model selection",
+    "any reported metric"
+  ],
+  "_caveat": "CTGAN is stochastic and the original run's RNG state was not saved, so these are a reproduction of the same failure, not the same random draw. Per-check agreement with the reported numbers is recorded in 'comparison'.",
+  "config": {
+    "modelled_columns": [
+      "PM2.5",
+      "PM10",
+      "CO",
+      "TEMP",
+      "DEWP",
+      "hour_sin",
+      "hour_cos",
+      "month_sin",
+      "month_cos"
+    ],
+    "modelled_as": "standardized feature matrix, every column typed numerical",
+    "constraint_form": "dict passed to add_constraints (no-op)",
+    "epochs": 300,
+    "batch_size": 500,
+    "horizon": 6,
+    "classes": [
+      "Good",
+      "Unhealthy (sensitive)",
+      "Very unhealthy",
+      "Hazardous"
+    ],
+    "n_synthetic": 82958,
+    "fit_minutes": {
+      "Good": 8.58,
+      "Unhealthy (sensitive)": 7.42,
+      "Very unhealthy": 6.51,
+      "Hazardous": 2.52
+    },
+    "constraint_outcome": {
+      "Good": {
+        "dict_constraint": "accepted_and_ignored",
+        "sdv_warnings": [
+          "The `add_constraints` function no longer supports constraints using the older dictionary-style definition. Such constraints will be ignored. Please supply objects from `sdv.cag` instead."
+        ],
+        "detail": "SDV accepted the dict and warned that it is ignored. The original run predated that warning and got silence, but the behaviour is the same: the constraint does nothing."
+      },
+      "Unhealthy (sensitive)": {
+        "dict_constraint": "accepted_and_ignored",
+        "sdv_warnings": [
+          "The `add_constraints` function no longer supports constraints using the older dictionary-style definition. Such constraints will be ignored. Please supply objects from `sdv.cag` instead."
+        ],
+        "detail": "SDV accepted the dict and warned that it is ignored. The original run predated that warning and got silence, but the behaviour is the same: the constraint does nothing."
+      },
+      "Very unhealthy": {
+        "dict_constraint": "accepted_and_ignored",
+        "sdv_warnings": [
+          "The `add_constraints` function no longer supports constraints using the older dictionary-style definition. Such constraints will be ignored. Please supply objects from `sdv.cag` instead."
+        ],
+        "detail": "SDV accepted the dict and warned that it is ignored. The original run predated that warning and got silence, but the behaviour is the same: the constraint does nothing."
+      },
+      "Hazardous": {
+        "dict_constraint": "accepted_and_ignored",
+        "sdv_warnings": [
+          "The `add_constraints` function no longer supports constraints using the older dictionary-style definition. Such constraints will be ignored. Please supply objects from `sdv.cag` instead."
+        ],
+        "detail": "SDV accepted the dict and warned that it is ignored. The original run predated that warning and got silence, but the behaviour is the same: the constraint does nothing."
+      }
+    }
+  },
+  "validity": {
+    "real": {
+      "n": 288032,
+      "hour": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 21,
+        "expected_distinct": 24
+      },
+      "month": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 11,
+        "expected_distinct": 12
+      },
+      "dewp_above_temp_pct": 0.0014,
+      "dewp_above_temp_n": 4,
+      "dewp_excess_max_degc": 0.5,
+      "dewp_within_float_noise_n": 521,
+      "negative_concentration_pct": {
+        "PM2.5": 0.0,
+        "PM10": 0.0,
+        "CO": 0.0
+      }
+    },
+    "synthetic": {
+      "n": 82958,
+      "hour": {
+        "on_unit_circle_pct": 22.06,
+        "radius_min": 0.0,
+        "radius_max": 1.9642,
+        "distinct_sin": 82710,
+        "expected_distinct": 24
+      },
+      "month": {
+        "on_unit_circle_pct": 74.28,
+        "radius_min": 0.0,
+        "radius_max": 2.0,
+        "distinct_sin": 74530,
+        "expected_distinct": 12
+      },
+      "dewp_above_temp_pct": 10.8923,
+      "dewp_above_temp_n": 9036,
+      "dewp_excess_max_degc": 30.3,
+      "dewp_within_float_noise_n": 0,
+      "negative_concentration_pct": {
+        "PM2.5": 0.0,
+        "PM10": 0.0,
+        "CO": 0.0
+      }
+    }
+  },
+  "validity_zero_tolerance_dewp": {
+    "real": {
+      "dewp_above_temp_pct": 0.1823,
+      "dewp_above_temp_n": 525,
+      "n": 288032
+    },
+    "synthetic": {
+      "dewp_above_temp_pct": 10.8923,
+      "dewp_above_temp_n": 9036,
+      "n": 82958
+    }
+  },
+  "regenerated": {
+    "on_unit_circle_pct": 22.06,
+    "distinct_hour_sin": 82710,
+    "dewp_above_temp_pct": 10.8923,
+    "dewp_above_temp_pct_real": 0.1823
+  },
+  "comparison": {
+    "on_unit_circle_pct": {
+      "reported_in_gan_quality_report_h6_section_5": 19.5,
+      "regenerated": 22.06,
+      "difference": 2.56,
+      "difference_unit": "absolute",
+      "tolerance": 8.0,
+      "matches": true
+    },
+    "distinct_hour_sin": {
+      "reported_in_gan_quality_report_h6_section_5": 82885,
+      "regenerated": 82710,
+      "difference": 0.0021,
+      "difference_unit": "relative",
+      "tolerance": 0.05,
+      "matches": true
+    },
+    "dewp_above_temp_pct": {
+      "reported_in_gan_quality_report_h6_section_5": 13.1,
+      "regenerated": 10.8923,
+      "difference": 2.2077,
+      "difference_unit": "absolute",
+      "tolerance": 5.0,
+      "matches": true
+    },
+    "dewp_above_temp_pct_real": {
+      "reported_in_gan_quality_report_h6_section_5": 0.18,
+      "regenerated": 0.1823,
+      "difference": 0.0023,
+      "difference_unit": "absolute",
+      "tolerance": 0.05,
+      "matches": true
+    }
+  },
+  "all_checks_match": true
+}

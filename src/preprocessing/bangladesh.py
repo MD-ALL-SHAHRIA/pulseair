@@ -6,7 +6,7 @@ README's Data section); ``audit()`` re-derives every integrity number from that 
 
 **Read the data audit in ``reports/bangladesh_validation.md`` before using this.** The
 published dataset covers 2000-2025, but only the portion from **2022-08-05** onward
-survives inspection; the earlier 81% of Dhaka's rows carry a near-linear synthetic
+survives inspection; the earlier 87% of Dhaka's rows carry a near-linear synthetic
 trend, a hard clip at exactly 250.0 ug/m3, and carbon monoxide in different units.
 ``CLEAN_START`` is where this module begins reading, and the audit numbers are
 recomputed by ``audit()`` rather than asserted.

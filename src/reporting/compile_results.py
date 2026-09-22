@@ -804,8 +804,8 @@ def paper_section(d: dict) -> str:
   p = {gtm_p:.4f}) — the largest and best-powered effect in the project. It validates
   the *task*, not the 7-channel deployed model, which cannot run on a
   single-pollutant source.
-- **A data-integrity audit of the external dataset** (Mendeley 9j447cynb9): 81% of the
-  published 2000–2025 span fails inspection — a synthetic near-linear trend
+- **A data-integrity audit of the external dataset** (Mendeley 9j447cynb9): 87% of the
+  published 2000–2025 *span* fails inspection — a synthetic near-linear trend
   (R² = 0.992), a hard clip at 250 µg/m³, and a mid-file unit change in CO.
 
 ### 1. Introduction — lead with the persistence floor
@@ -1064,11 +1064,15 @@ That distinction is the point. What transfers is the *discipline*, not the weigh
 
 ### Two findings that qualify it
 
-1. **81% of the published dataset is not usable.** Mendeley `9j447cynb9` advertises
-   103 cities and 2000–2025; it contains {a['actual_cities']} cities, and everything
-   before {a['clean_start'][:10]} carries a synthetic near-linear trend
-   (R² = {a['dhaka_pm25_linear_trend_r2']:.4f}), a hard clip at exactly 250 µg/m³, and
-   carbon monoxide in different units. Only the {a['clean_pct']:.0f}% from
+1. **The advertised 2000–2025 span is {_span_pct(a):.0f}% backfill.** Mendeley
+   `9j447cynb9` advertises 103 cities and 2000–2025; it contains
+   {a['actual_cities']} cities, and everything before {a['clean_start'][:10]} carries a
+   synthetic near-linear trend (R² = {a['dhaka_pm25_linear_trend_r2']:.4f}), a hard clip
+   at exactly 250 µg/m³, and carbon monoxide in different units. Discarding it costs
+   {_discarded_pct(a):.0f}% of the *rows* ({a['file_rows'] - a['clean_rows']:,} of
+   {a['file_rows']:,}) but {_span_pct(a):.0f}% of the *years*, because the pre-{a['clean_start'][:4]}
+   portion is Dhaka alone at low density while the clean window is
+   {a['clean_cities']} cities hourly. The {a['clean_pct']:.0f}% of rows from
    {a['clean_start'][:10]} onward survives inspection. The audit is in
    `reports/bangladesh_validation.md` §1 and is a contribution in itself.
 2. **The advisory classes are absent from the Bangladesh test split** — Hazardous
@@ -1099,6 +1103,33 @@ what a framework should: it rejects the transferred model, accepts a native one,
 recomputes the floor rather than assuming it, and catches a data-integrity problem in
 the external source before any result is built on it.
 """
+
+
+# --------------------------------------------------- Bangladesh audit fractions
+#
+# These were conflated once, in a way that survived into the README and the release
+# notes: `clean_pct` is the share of rows KEPT, and it was also being quoted as the
+# share discarded. They are 81% and 19%. Naming them separately makes the mistake
+# hard to repeat, and the span fraction is the one worth quoting anyway -- it is the
+# advertised 25-year history that is mostly backfill, not the bulk of the rows.
+
+
+def _discarded_pct(a: dict) -> float:
+    """Share of ROWS dropped by the 2022-08-05 cut."""
+    return (a["file_rows"] - a["clean_rows"]) / a["file_rows"] * 100
+
+
+def _span_pct(a: dict) -> float:
+    """Share of the advertised TIME SPAN dropped by the same cut.
+
+    stdlib datetime, not pandas: this module reads JSON and writes markdown, and
+    adding a dataframe dependency for one subtraction would be the wrong trade.
+    """
+    from datetime import datetime
+    start, cut, end = (datetime.fromisoformat(a["actual_range"][0]),
+                       datetime.fromisoformat(a["clean_start"]),
+                       datetime.fromisoformat(a["actual_range"][1]))
+    return (cut - start) / (end - start) * 100
 
 
 # --------------------------------------------------- multiple comparisons (§5c)
