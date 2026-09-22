@@ -59,3 +59,6 @@ reports/tables/*
 build/
 dist/
 *.egg-info/
+
+# the social preview is a committed asset, not a generated figure
+!.github/social-preview.png
