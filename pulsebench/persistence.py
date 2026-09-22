@@ -71,8 +71,12 @@ def persistence_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
 
     now = merged[target_col].to_numpy()
     future = merged["__future"].to_numpy()
+    # .tolist() matters: np.unique hands back numpy scalars, which become numpy
+    # scalars in the returned dicts' KEYS. That makes the result unserializable by
+    # json.dump and, since numpy 2 changed scalar repr, makes it print differently
+    # depending on which numpy is installed. Callers get plain Python values.
     classes = list(labels) if labels is not None else sorted(
-        set(np.unique(now)) | set(np.unique(future)))
+        set(np.unique(now).tolist()) | set(np.unique(future).tolist()))
     idx = list(range(len(classes)))
     code = {c: i for i, c in enumerate(classes)}
     a = np.array([code[v] for v in now])

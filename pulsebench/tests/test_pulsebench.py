@@ -7,6 +7,8 @@ that needed Beijing air-quality data would not demonstrate that.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -125,6 +127,26 @@ def test_rolling_origin_cv_model_beats_baseline_when_it_should():
                             n_folds=4, embargo_hours=1, horizon=1,
                             feature_cols=["x"], baseline_col="naive")
     assert out["aggregate"]["macro_f1"]["wins"] == 4
+
+
+def test_results_are_json_serializable():
+    """Results must survive json.dump, including their dict keys.
+
+    np.unique and pd.unique return numpy scalars. Used as label keys they are not
+    JSON-serializable, and since numpy 2 they also repr differently, so the same
+    code prints differently depending on the installed numpy. Callers get plain
+    Python values.
+    """
+    d = synthetic(n=600)
+    floor = persistence_floor(d, "y", horizon=3)
+    assert all(type(k) is int for k in floor["support"]), \
+        f"support keys are {[type(k).__name__ for k in floor['support']]}"
+    json.dumps(floor)
+
+    out = rolling_origin_cv(d, lambda: DummyClassifier(strategy="most_frequent"),
+                            n_folds=3, embargo_hours=1, horizon=1,
+                            feature_cols=["x"])
+    json.dumps(out)
 
 
 def test_feature_matrix_is_writable_under_copy_on_write():

@@ -122,7 +122,10 @@ def rolling_origin_cv(df: pd.DataFrame, model_fn, n_folds: int = 5,
     if feature_cols is None:
         feature_cols = [c for c in d.columns if c not in reserved and c is not None]
     if labels is None:
-        labels = sorted(pd.unique(d[target_col]))
+        # .tolist() for the same reason as in persistence.py: these become dict
+        # keys in every fold's support block, and numpy scalars there are not
+        # JSON-serializable and repr differently across numpy majors.
+        labels = sorted(pd.unique(d[target_col]).tolist())
 
     folds_meta = make_folds(d[time_col].to_numpy(), n_folds, initial_fraction)
     embargo = pd.Timedelta(hours=embargo_hours)
