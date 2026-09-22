@@ -24,12 +24,25 @@ data/external/*
 *.tflite
 *.h5
 *.keras
-models/
-checkpoints/
+# Anchored to the repo root on purpose. Unanchored, `models/` matches at any
+# depth and silently swallowed src/models/ -- the package holding every
+# baseline, the sequence models, conformal calibration and rolling-origin CV.
+/models/
+/checkpoints/
+src/models/artifacts/
 
 # --- generated reports ---
+# Figures are generated, but they are generated *from committed metrics* and are
+# referenced by the thesis, so the thesis figures themselves are tracked. Anything
+# else that lands in this directory is not.
 reports/figures/*
+!reports/figures/*.png
+!reports/figures/README.md
+# The metrics JSON is the machine-readable form of every number in reports/*.md
+# and the only input to src/reporting/generate_figures.py. It has to be tracked,
+# or a fresh clone can neither check a claim nor rebuild a figure. ~420 KB.
 reports/metrics/*
+!reports/metrics/*.json
 reports/tables/*
 !reports/**/.gitkeep
 

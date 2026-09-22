@@ -1,0 +1,179 @@
+{
+  "tests": {
+    "broad-4": {
+      "macro_f1": {
+        "observed_diff": 0.003905193873966928,
+        "ci_low": 0.0011233646763404216,
+        "ci_high": 0.0066324874339731485,
+        "mean_diff": 0.0038762936106951544,
+        "p_two_sided": 0.008,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": -0.02920770376991244,
+        "ci_low": -0.036029938108716464,
+        "ci_high": -0.022652598561400603,
+        "mean_diff": -0.02925327297988127,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": -0.019039348894055008,
+        "ci_low": -0.02578662073220793,
+        "ci_high": -0.011808767098236733,
+        "mean_diff": -0.01896274064300789,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      }
+    },
+    "targeted-2": {
+      "macro_f1": {
+        "observed_diff": -0.012945231774949106,
+        "ci_low": -0.015364120603936198,
+        "ci_high": -0.010460433027100896,
+        "mean_diff": -0.012927620656648195,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": -0.036239485001018146,
+        "ci_low": -0.04344822230356133,
+        "ci_high": -0.028546130365642935,
+        "mean_diff": -0.03617007530916587,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": -0.025543116343422656,
+        "ci_low": -0.032534688312082206,
+        "ci_high": -0.018084413173472653,
+        "mean_diff": -0.025584328501492837,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      }
+    }
+  },
+  "vs_persistence": {
+    "unaugmented": {
+      "observed_diff": 0.005475208059888548,
+      "ci_low": 0.0015744622286595483,
+      "ci_high": 0.009336604207357612,
+      "mean_diff": 0.00546267984970304,
+      "p_two_sided": 0.002,
+      "significant": true,
+      "n_boot": 1000
+    },
+    "broad-4": {
+      "observed_diff": 0.009380401933855476,
+      "ci_low": 0.005532506299976442,
+      "ci_high": 0.01358004211019424,
+      "mean_diff": 0.009338973460398194,
+      "p_two_sided": 0.0,
+      "significant": true,
+      "n_boot": 1000
+    },
+    "targeted-2": {
+      "observed_diff": -0.007470023715060559,
+      "ci_low": -0.011451324335260176,
+      "ci_high": -0.003263805468762962,
+      "mean_diff": -0.0074649408069451546,
+      "p_two_sided": 0.0,
+      "significant": true,
+      "n_boot": 1000
+    }
+  },
+  "labels": [
+    "Good",
+    "Moderate",
+    "Unhealthy (sensitive)",
+    "Unhealthy",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "n_test": 61530,
+  "n_test_all": 62772,
+  "horizon": 6,
+  "n_boot": 1000,
+  "rows": {
+    "Persistence": {
+      "scores": {
+        "macro_f1": 0.5118085264164492,
+        "accuracy": 0.5355598894848042,
+        "per_class": {
+          "Good": 0.5888181818181818,
+          "Moderate": 0.49632064013717225,
+          "Unhealthy (sensitive)": 0.2570853337463218,
+          "Unhealthy": 0.6285774969468486,
+          "Very unhealthy": 0.5103649248294589,
+          "Hazardous": 0.5896845810207121
+        }
+      },
+      "n_train": 0,
+      "n_synthetic": 0,
+      "description": "Zero-parameter reference; never trained"
+    },
+    "unaugmented": {
+      "scores": {
+        "macro_f1": 0.5172837344763378,
+        "accuracy": 0.5793434097188364,
+        "per_class": {
+          "Good": 0.5981400383801604,
+          "Moderate": 0.5439672801635992,
+          "Unhealthy (sensitive)": 0.1431749770972386,
+          "Unhealthy": 0.6820261809903244,
+          "Very unhealthy": 0.5265469061876248,
+          "Hazardous": 0.6098470240390795
+        }
+      },
+      "selected": "RandomForest",
+      "val_macro_f1": 0.48953720887593305,
+      "n_train": 294192,
+      "n_synthetic": 0,
+      "description": "Real training rows only"
+    },
+    "broad-4": {
+      "scores": {
+        "macro_f1": 0.5211889283503047,
+        "accuracy": 0.5687469527059971,
+        "per_class": {
+          "Good": 0.6094940776788174,
+          "Moderate": 0.5147064462936688,
+          "Unhealthy (sensitive)": 0.2375519778227956,
+          "Unhealthy": 0.6772341907438096,
+          "Very unhealthy": 0.49733920241771234,
+          "Hazardous": 0.5908076751450245
+        }
+      },
+      "selected": "RandomForest",
+      "val_macro_f1": 0.5086909370070006,
+      "n_train": 377150,
+      "n_synthetic": 82958,
+      "description": "CTGAN on every minority class (Good, U(sens), V.unhealthy, Hazardous)"
+    },
+    "targeted-2": {
+      "scores": {
+        "macro_f1": 0.5043385027013887,
+        "accuracy": 0.5677880708597433,
+        "per_class": {
+          "Good": 0.599018645731109,
+          "Moderate": 0.5427722351942262,
+          "Unhealthy (sensitive)": 0.1381208229589831,
+          "Unhealthy": 0.6715079834417504,
+          "Very unhealthy": 0.49030742118660664,
+          "Hazardous": 0.5843039076956569
+        }
+      },
+      "selected": "RandomForest",
+      "val_macro_f1": 0.4913185502595627,
+      "n_train": 352391,
+      "n_synthetic": 58199,
+      "description": "CTGAN on the advisory classes only (V.unhealthy, Hazardous)"
+    }
+  }
+}

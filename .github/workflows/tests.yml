@@ -43,7 +43,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[test]"
           pip install "pandas${{ matrix.pandas }}"
-          pip install pyyaml joblib      # needed by src/preprocessing only
+          pip install pyyaml joblib              # src/preprocessing
+          pip install matplotlib seaborn         # src/reporting figure generation
           python -c "import pandas, numpy, sklearn; print('pandas', pandas.__version__, '| numpy', numpy.__version__, '| sklearn', sklearn.__version__)"
 
       - name: pulsebench unit tests + Phase 9 regression pin
@@ -56,6 +57,13 @@ jobs:
 
       - name: Preprocessing pipeline tests
         run: python -m pytest src/preprocessing/test_pipeline.py -q
+
+      # Renders all 21 figures from the committed metrics JSON. This is the check
+      # that the figures and the reported numbers cannot drift apart: if a phase is
+      # re-run with a different schema, or a metrics file is dropped, the figures
+      # stop building and CI says so.
+      - name: Figure generation smoke test
+        run: python -m pytest src/reporting/test_generate_figures.py -q
 
       - name: Import pulsebench from outside the repo
         working-directory: /tmp

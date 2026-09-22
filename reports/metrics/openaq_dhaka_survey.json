@@ -1,0 +1,1097 @@
+{
+  "locations": [
+    {
+      "id": 22,
+      "name": "SPARTAN - Dhaka University",
+      "provider": "Spartan",
+      "lat": 23.728,
+      "lon": 90.398,
+      "sensors": [
+        {
+          "sensor_id": 41,
+          "parameter": "pm25",
+          "first": null,
+          "last": null,
+          "observed": 0,
+          "years": 0.0
+        }
+      ],
+      "parameters": [
+        "pm25"
+      ]
+    },
+    {
+      "id": 2445,
+      "name": "US Diplomatic Post: Dhaka",
+      "provider": "StateAir Dhaka",
+      "lat": 23.797687,
+      "lon": 90.423698,
+      "sensors": [
+        {
+          "sensor_id": 4680,
+          "parameter": "pm25",
+          "first": "2016-03-10T22:00:00Z",
+          "last": "2016-11-09T16:00:00Z",
+          "observed": 5656,
+          "years": 0.67
+        }
+      ],
+      "parameters": [
+        "pm25"
+      ]
+    },
+    {
+      "id": 8415,
+      "name": "Dhaka",
+      "provider": "AirNow",
+      "lat": 23.796374,
+      "lon": 90.424614,
+      "sensors": [
+        {
+          "sensor_id": 7464180,
+          "parameter": "o3",
+          "first": "2023-11-27T09:00:00Z",
+          "last": "2025-03-24T13:00:00Z",
+          "observed": 11534,
+          "years": 1.32
+        },
+        {
+          "sensor_id": 24434,
+          "parameter": "pm25",
+          "first": "2016-11-09T18:00:00Z",
+          "last": "2025-03-24T13:00:00Z",
+          "observed": 66366,
+          "years": 8.37
+        }
+      ],
+      "parameters": [
+        "o3",
+        "pm25"
+      ]
+    },
+    {
+      "id": 1285342,
+      "name": "SPARTAN - Dhaka University",
+      "provider": "SPARTAN Network",
+      "lat": 23.7284,
+      "lon": 90.3982,
+      "sensors": [
+        {
+          "sensor_id": 6566258,
+          "parameter": "pm25",
+          "first": null,
+          "last": null,
+          "observed": 0,
+          "years": 0.0
+        }
+      ],
+      "parameters": [
+        "pm25"
+      ]
+    },
+    {
+      "id": 3194367,
+      "name": "Dept. of Public Health and Informatics, Jahangirnagar University",
+      "provider": "AirGradient",
+      "lat": 23.888280501941725,
+      "lon": 90.26536993068466,
+      "sensors": [
+        {
+          "sensor_id": 11106526,
+          "parameter": "pm1",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2026-09-01T05:00:00Z",
+          "observed": 8513,
+          "years": 1.84
+        },
+        {
+          "sensor_id": 11106524,
+          "parameter": "pm10",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2025-01-13T23:00:00Z",
+          "observed": 1552,
+          "years": 0.21
+        },
+        {
+          "sensor_id": 11106529,
+          "parameter": "pm25",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2026-09-01T05:00:00Z",
+          "observed": 8513,
+          "years": 1.84
+        },
+        {
+          "sensor_id": 11106525,
+          "parameter": "relativehumidity",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2026-09-01T05:00:00Z",
+          "observed": 8368,
+          "years": 1.84
+        },
+        {
+          "sensor_id": 11106528,
+          "parameter": "temperature",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2026-09-01T05:00:00Z",
+          "observed": 8513,
+          "years": 1.84
+        },
+        {
+          "sensor_id": 11106527,
+          "parameter": "um003",
+          "first": "2024-10-28T08:00:00Z",
+          "last": "2026-09-01T05:00:00Z",
+          "observed": 8513,
+          "years": 1.84
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm10",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 5105944,
+      "name": "smart air bangladesh office",
+      "provider": "AirGradient",
+      "lat": 23.780810956001233,
+      "lon": 90.42464769681916,
+      "sensors": [
+        {
+          "sensor_id": 13623704,
+          "parameter": "pm1",
+          "first": "2025-07-17T09:00:00Z",
+          "last": "2025-10-22T05:00:00Z",
+          "observed": 94,
+          "years": 0.26
+        },
+        {
+          "sensor_id": 13623705,
+          "parameter": "pm25",
+          "first": "2025-07-17T09:00:00Z",
+          "last": "2025-10-22T05:00:00Z",
+          "observed": 94,
+          "years": 0.26
+        },
+        {
+          "sensor_id": 13623706,
+          "parameter": "um003",
+          "first": "2025-07-17T09:00:00Z",
+          "last": "2025-10-22T05:00:00Z",
+          "observed": 94,
+          "years": 0.26
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "um003"
+      ]
+    },
+    {
+      "id": 6157905,
+      "name": "RAJUK Uttara Apartment Project, Sector - 18, Uttara",
+      "provider": "AirGradient",
+      "lat": 23.856237,
+      "lon": 90.356837,
+      "sensors": [
+        {
+          "sensor_id": 14839068,
+          "parameter": "pm1",
+          "first": "2025-12-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 6809,
+          "years": 0.78
+        },
+        {
+          "sensor_id": 14839069,
+          "parameter": "pm25",
+          "first": "2025-12-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 6809,
+          "years": 0.78
+        },
+        {
+          "sensor_id": 14839070,
+          "parameter": "relativehumidity",
+          "first": "2025-12-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 6809,
+          "years": 0.78
+        },
+        {
+          "sensor_id": 14839071,
+          "parameter": "temperature",
+          "first": "2025-12-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 6809,
+          "years": 0.78
+        },
+        {
+          "sensor_id": 14839072,
+          "parameter": "um003",
+          "first": "2025-12-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 6809,
+          "years": 0.78
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6219691,
+      "name": "Abdullahbag, North Badda",
+      "provider": "AirGradient",
+      "lat": 23.78935,
+      "lon": 90.43179,
+      "sensors": [
+        {
+          "sensor_id": 15296732,
+          "parameter": "pm1",
+          "first": "2026-01-29T07:00:00Z",
+          "last": "2026-01-29T12:00:00Z",
+          "observed": 6,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 15296733,
+          "parameter": "pm25",
+          "first": "2026-01-29T07:00:00Z",
+          "last": "2026-01-29T12:00:00Z",
+          "observed": 6,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 15296734,
+          "parameter": "relativehumidity",
+          "first": "2026-01-29T07:00:00Z",
+          "last": "2026-01-29T12:00:00Z",
+          "observed": 6,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 15296735,
+          "parameter": "temperature",
+          "first": "2026-01-29T07:00:00Z",
+          "last": "2026-01-29T12:00:00Z",
+          "observed": 6,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 15296736,
+          "parameter": "um003",
+          "first": "2026-01-29T07:00:00Z",
+          "last": "2026-01-29T12:00:00Z",
+          "observed": 6,
+          "years": 0.0
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6219798,
+      "name": "Kalijung,Gazipur ",
+      "provider": "AirGradient",
+      "lat": 23.900352,
+      "lon": 90.539333,
+      "sensors": [
+        {
+          "sensor_id": 15297526,
+          "parameter": "pm1",
+          "first": "2026-01-29T09:00:00Z",
+          "last": "2026-02-05T05:00:00Z",
+          "observed": 13,
+          "years": 0.02
+        },
+        {
+          "sensor_id": 15297527,
+          "parameter": "pm25",
+          "first": "2026-01-29T09:00:00Z",
+          "last": "2026-02-05T05:00:00Z",
+          "observed": 13,
+          "years": 0.02
+        },
+        {
+          "sensor_id": 15297528,
+          "parameter": "relativehumidity",
+          "first": "2026-01-29T09:00:00Z",
+          "last": "2026-02-05T05:00:00Z",
+          "observed": 13,
+          "years": 0.02
+        },
+        {
+          "sensor_id": 15297529,
+          "parameter": "temperature",
+          "first": "2026-01-29T09:00:00Z",
+          "last": "2026-02-05T05:00:00Z",
+          "observed": 13,
+          "years": 0.02
+        },
+        {
+          "sensor_id": 15297530,
+          "parameter": "um003",
+          "first": "2026-01-29T09:00:00Z",
+          "last": "2026-02-05T05:00:00Z",
+          "observed": 13,
+          "years": 0.02
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6234078,
+      "name": "Kaliganj | Gazipur | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.900343,
+      "lon": 90.539289,
+      "sensors": [
+        {
+          "sensor_id": 15401492,
+          "parameter": "pm1",
+          "first": "2026-02-09T05:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5143,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15401493,
+          "parameter": "pm25",
+          "first": "2026-02-09T05:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5143,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15401494,
+          "parameter": "relativehumidity",
+          "first": "2026-02-09T05:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5220,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15401495,
+          "parameter": "temperature",
+          "first": "2026-02-09T05:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5220,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15401496,
+          "parameter": "um003",
+          "first": "2026-02-09T05:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5220,
+          "years": 0.61
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6234363,
+      "name": "Gulshan Society Lake Park | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.801435,
+      "lon": 90.410545,
+      "sensors": [
+        {
+          "sensor_id": 15403597,
+          "parameter": "pm1",
+          "first": "2026-02-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5052,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15403598,
+          "parameter": "pm25",
+          "first": "2026-02-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5052,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15403599,
+          "parameter": "relativehumidity",
+          "first": "2026-02-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5052,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15403600,
+          "parameter": "temperature",
+          "first": "2026-02-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5052,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15403601,
+          "parameter": "um003",
+          "first": "2026-02-09T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5052,
+          "years": 0.61
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6236590,
+      "name": "Hazaribagh, Jigatola | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.740437369394463,
+      "lon": 90.37358367755498,
+      "sensors": [
+        {
+          "sensor_id": 15420148,
+          "parameter": "pm1",
+          "first": "2026-02-11T13:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5189,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15420149,
+          "parameter": "pm25",
+          "first": "2026-02-11T13:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5189,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15420150,
+          "parameter": "relativehumidity",
+          "first": "2026-02-11T13:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5189,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15420151,
+          "parameter": "temperature",
+          "first": "2026-02-11T13:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5189,
+          "years": 0.61
+        },
+        {
+          "sensor_id": 15420152,
+          "parameter": "um003",
+          "first": "2026-02-11T13:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 5189,
+          "years": 0.61
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6240023,
+      "name": "Dhanmondi, Road No. 7 | Dhaka l Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.744966,
+      "lon": 90.383485,
+      "sensors": [
+        {
+          "sensor_id": 15445820,
+          "parameter": "pm1",
+          "first": "2026-02-14T17:00:00Z",
+          "last": "2026-08-13T12:00:00Z",
+          "observed": 4014,
+          "years": 0.49
+        },
+        {
+          "sensor_id": 15445821,
+          "parameter": "pm25",
+          "first": "2026-02-14T17:00:00Z",
+          "last": "2026-08-13T12:00:00Z",
+          "observed": 4014,
+          "years": 0.49
+        },
+        {
+          "sensor_id": 15445822,
+          "parameter": "relativehumidity",
+          "first": "2026-02-14T17:00:00Z",
+          "last": "2026-08-13T12:00:00Z",
+          "observed": 4014,
+          "years": 0.49
+        },
+        {
+          "sensor_id": 15445823,
+          "parameter": "temperature",
+          "first": "2026-02-14T17:00:00Z",
+          "last": "2026-08-13T12:00:00Z",
+          "observed": 4014,
+          "years": 0.49
+        },
+        {
+          "sensor_id": 15445824,
+          "parameter": "um003",
+          "first": "2026-02-14T17:00:00Z",
+          "last": "2026-08-13T12:00:00Z",
+          "observed": 4014,
+          "years": 0.49
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6240773,
+      "name": "Kalshi, Mirpur-12 | Dhaka l Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.823306,
+      "lon": 90.371752,
+      "sensors": [
+        {
+          "sensor_id": 15451665,
+          "parameter": "pm1",
+          "first": "2026-02-15T10:00:00Z",
+          "last": "2026-09-20T19:00:00Z",
+          "observed": 4164,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15451666,
+          "parameter": "pm25",
+          "first": "2026-02-15T10:00:00Z",
+          "last": "2026-09-20T19:00:00Z",
+          "observed": 4164,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15451667,
+          "parameter": "relativehumidity",
+          "first": "2026-02-15T10:00:00Z",
+          "last": "2026-09-20T19:00:00Z",
+          "observed": 4164,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15451668,
+          "parameter": "temperature",
+          "first": "2026-02-15T10:00:00Z",
+          "last": "2026-09-20T19:00:00Z",
+          "observed": 4164,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15451669,
+          "parameter": "um003",
+          "first": "2026-02-15T10:00:00Z",
+          "last": "2026-09-20T19:00:00Z",
+          "observed": 4164,
+          "years": 0.59
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6242079,
+      "name": "Moghbazar; Bhodro Goli | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.751525098776487,
+      "lon": 90.40418346811546,
+      "sensors": [
+        {
+          "sensor_id": 15461145,
+          "parameter": "pm1",
+          "first": "2026-02-16T11:00:00Z",
+          "last": "2026-09-19T18:00:00Z",
+          "observed": 5012,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15461146,
+          "parameter": "pm25",
+          "first": "2026-02-16T11:00:00Z",
+          "last": "2026-09-19T18:00:00Z",
+          "observed": 5012,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15461147,
+          "parameter": "relativehumidity",
+          "first": "2026-02-16T11:00:00Z",
+          "last": "2026-09-19T18:00:00Z",
+          "observed": 5012,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15461148,
+          "parameter": "temperature",
+          "first": "2026-02-16T11:00:00Z",
+          "last": "2026-09-19T18:00:00Z",
+          "observed": 5012,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15461149,
+          "parameter": "um003",
+          "first": "2026-02-16T11:00:00Z",
+          "last": "2026-09-19T18:00:00Z",
+          "observed": 5012,
+          "years": 0.59
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6242232,
+      "name": "Baridhara, Park Road | Dhaka l Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.8015,
+      "lon": 90.42206,
+      "sensors": [
+        {
+          "sensor_id": 15462182,
+          "parameter": "pm1",
+          "first": "2026-02-16T16:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 4839,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15462183,
+          "parameter": "pm25",
+          "first": "2026-02-16T16:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 4839,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15462184,
+          "parameter": "relativehumidity",
+          "first": "2026-02-16T16:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 4839,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15462185,
+          "parameter": "temperature",
+          "first": "2026-02-16T16:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 4839,
+          "years": 0.59
+        },
+        {
+          "sensor_id": 15462186,
+          "parameter": "um003",
+          "first": "2026-02-16T16:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 4839,
+          "years": 0.59
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6251395,
+      "name": "Mirpur, Shewrapara | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.787855,
+      "lon": 90.3728743,
+      "sensors": [
+        {
+          "sensor_id": 15530268,
+          "parameter": "pm1",
+          "first": "2026-02-24T18:00:00Z",
+          "last": "2026-08-17T02:00:00Z",
+          "observed": 805,
+          "years": 0.47
+        },
+        {
+          "sensor_id": 15530269,
+          "parameter": "pm25",
+          "first": "2026-02-24T18:00:00Z",
+          "last": "2026-08-17T02:00:00Z",
+          "observed": 805,
+          "years": 0.47
+        },
+        {
+          "sensor_id": 15530270,
+          "parameter": "relativehumidity",
+          "first": "2026-02-24T18:00:00Z",
+          "last": "2026-08-17T02:00:00Z",
+          "observed": 805,
+          "years": 0.47
+        },
+        {
+          "sensor_id": 15530271,
+          "parameter": "temperature",
+          "first": "2026-02-24T18:00:00Z",
+          "last": "2026-08-17T02:00:00Z",
+          "observed": 805,
+          "years": 0.47
+        },
+        {
+          "sensor_id": 15530272,
+          "parameter": "um003",
+          "first": "2026-02-24T18:00:00Z",
+          "last": "2026-08-17T02:00:00Z",
+          "observed": 805,
+          "years": 0.47
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6271076,
+      "name": "Baridhara Lakeside",
+      "provider": "AirGradient",
+      "lat": 23.805806130405518,
+      "lon": 90.41580533677225,
+      "sensors": [
+        {
+          "sensor_id": 15677431,
+          "parameter": "pm1",
+          "first": "2026-03-14T04:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 3998,
+          "years": 0.52
+        },
+        {
+          "sensor_id": 15677432,
+          "parameter": "pm25",
+          "first": "2026-03-14T04:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 3998,
+          "years": 0.52
+        },
+        {
+          "sensor_id": 15677433,
+          "parameter": "relativehumidity",
+          "first": "2026-03-14T04:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 3998,
+          "years": 0.52
+        },
+        {
+          "sensor_id": 15677434,
+          "parameter": "temperature",
+          "first": "2026-03-14T04:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 3998,
+          "years": 0.52
+        },
+        {
+          "sensor_id": 15677435,
+          "parameter": "um003",
+          "first": "2026-03-14T04:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 3998,
+          "years": 0.52
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6313504,
+      "name": "Demra | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.715583838984745,
+      "lon": 90.47527286781805,
+      "sensors": [
+        {
+          "sensor_id": 15995176,
+          "parameter": "pm1",
+          "first": "2026-04-19T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 11,
+          "years": 0.42
+        },
+        {
+          "sensor_id": 15995177,
+          "parameter": "pm25",
+          "first": "2026-04-19T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 11,
+          "years": 0.42
+        },
+        {
+          "sensor_id": 15995178,
+          "parameter": "relativehumidity",
+          "first": "2026-04-19T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 11,
+          "years": 0.42
+        },
+        {
+          "sensor_id": 15995179,
+          "parameter": "temperature",
+          "first": "2026-04-19T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 11,
+          "years": 0.42
+        },
+        {
+          "sensor_id": 15995180,
+          "parameter": "um003",
+          "first": "2026-04-19T11:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 11,
+          "years": 0.42
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6322838,
+      "name": "Ahmedbagh, Sabujbagh | Dhaka | Smart Air Bangladesh",
+      "provider": "AirGradient",
+      "lat": 23.73643253019774,
+      "lon": 90.43302496884273,
+      "sensors": [
+        {
+          "sensor_id": 16063807,
+          "parameter": "pm1",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 227,
+          "years": 0.4
+        },
+        {
+          "sensor_id": 16063808,
+          "parameter": "pm25",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 227,
+          "years": 0.4
+        },
+        {
+          "sensor_id": 16063809,
+          "parameter": "relativehumidity",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 227,
+          "years": 0.4
+        },
+        {
+          "sensor_id": 16063810,
+          "parameter": "temperature",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 227,
+          "years": 0.4
+        },
+        {
+          "sensor_id": 16063811,
+          "parameter": "um003",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-09-20T20:00:00Z",
+          "observed": 227,
+          "years": 0.4
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6322839,
+      "name": "Sensor No -04",
+      "provider": "AirGradient",
+      "lat": 23.823305,
+      "lon": 90.440429,
+      "sensors": [
+        {
+          "sensor_id": 16063812,
+          "parameter": "pm1",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-04-26T09:00:00Z",
+          "observed": 3,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 16063813,
+          "parameter": "pm25",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-04-26T09:00:00Z",
+          "observed": 3,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 16063814,
+          "parameter": "relativehumidity",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-04-26T09:00:00Z",
+          "observed": 3,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 16063815,
+          "parameter": "temperature",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-04-26T09:00:00Z",
+          "observed": 3,
+          "years": 0.0
+        },
+        {
+          "sensor_id": 16063816,
+          "parameter": "um003",
+          "first": "2026-04-26T07:00:00Z",
+          "last": "2026-04-26T09:00:00Z",
+          "observed": 3,
+          "years": 0.0
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    },
+    {
+      "id": 6528096,
+      "name": "Dept. of Public Health and Informatics, Jahangirnagar University (S2)",
+      "provider": "AirGradient",
+      "lat": 23.88713,
+      "lon": 90.26499,
+      "sensors": [
+        {
+          "sensor_id": 17535352,
+          "parameter": "pm1",
+          "first": "2026-09-07T11:00:00Z",
+          "last": "2026-09-19T11:00:00Z",
+          "observed": 186,
+          "years": 0.03
+        },
+        {
+          "sensor_id": 17535353,
+          "parameter": "pm25",
+          "first": "2026-09-07T11:00:00Z",
+          "last": "2026-09-19T11:00:00Z",
+          "observed": 186,
+          "years": 0.03
+        },
+        {
+          "sensor_id": 17535354,
+          "parameter": "relativehumidity",
+          "first": "2026-09-07T11:00:00Z",
+          "last": "2026-09-19T11:00:00Z",
+          "observed": 186,
+          "years": 0.03
+        },
+        {
+          "sensor_id": 17535355,
+          "parameter": "temperature",
+          "first": "2026-09-07T11:00:00Z",
+          "last": "2026-09-19T11:00:00Z",
+          "observed": 186,
+          "years": 0.03
+        },
+        {
+          "sensor_id": 17535356,
+          "parameter": "um003",
+          "first": "2026-09-07T11:00:00Z",
+          "last": "2026-09-19T11:00:00Z",
+          "observed": 186,
+          "years": 0.03
+        }
+      ],
+      "parameters": [
+        "pm1",
+        "pm25",
+        "relativehumidity",
+        "temperature",
+        "um003"
+      ]
+    }
+  ],
+  "radius_km": 25.0,
+  "centre": [
+    23.8103,
+    90.4125
+  ]
+}

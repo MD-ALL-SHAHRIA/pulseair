@@ -1,0 +1,176 @@
+{
+  "calibration": {
+    "n_calibration": 61466,
+    "alpha": 0.09999999999999998,
+    "q": 0.8910581761431593,
+    "rank": 55321,
+    "score_mean": 0.5853487435717363,
+    "score_median": 0.577787142450327,
+    "prob_floor": 0.1089418238568407
+  },
+  "test": {
+    "n": 61530,
+    "coverage": 0.8908174874045182,
+    "mean_set_size": 2.4870794734275963,
+    "median_set_size": 2.0,
+    "singleton_rate": 0.07167235494880546,
+    "empty_rate": 0.0,
+    "size_histogram": {
+      "1": 4410,
+      "2": 29132,
+      "3": 21625,
+      "4": 6334,
+      "5": 29
+    },
+    "per_class": {
+      "Good": {
+        "n": 11006,
+        "coverage": 0.8330910412502271,
+        "mean_set_size": 2.357259676540069,
+        "median_set_size": 2.0
+      },
+      "Moderate": {
+        "n": 14020,
+        "coverage": 0.8911554921540656,
+        "mean_set_size": 2.697860199714693,
+        "median_set_size": 3.0
+      },
+      "Unhealthy (sensitive)": {
+        "n": 6439,
+        "coverage": 0.7776052182015841,
+        "mean_set_size": 2.8442304705699644,
+        "median_set_size": 3.0
+      },
+      "Unhealthy": {
+        "n": 18824,
+        "coverage": 0.9667977050573736,
+        "mean_set_size": 2.36554398640034,
+        "median_set_size": 2.0
+      },
+      "Very unhealthy": {
+        "n": 7554,
+        "coverage": 0.9046862589356632,
+        "mean_set_size": 2.4123643102991794,
+        "median_set_size": 2.0
+      },
+      "Hazardous": {
+        "n": 3687,
+        "coverage": 0.8432329807431516,
+        "mean_set_size": 2.222945484133442,
+        "median_set_size": 2.0
+      }
+    }
+  },
+  "mondrian": {
+    "calibration": {
+      "thresholds": {
+        "0": 0.9288521871512596,
+        "1": 0.8884849221888393,
+        "2": 0.9256075401195919,
+        "3": 0.7541804478146376,
+        "4": 0.9288432956975303,
+        "5": 0.948065631916286
+      },
+      "detail": {
+        "0": {
+          "n": 11180,
+          "q": 0.9288521871512596,
+          "rank": 10063,
+          "note": ""
+        },
+        "1": {
+          "n": 14070,
+          "q": 0.8884849221888393,
+          "rank": 12664,
+          "note": ""
+        },
+        "2": {
+          "n": 8952,
+          "q": 0.9256075401195919,
+          "rank": 8058,
+          "note": ""
+        },
+        "3": {
+          "n": 20419,
+          "q": 0.7541804478146376,
+          "rank": 18378,
+          "note": ""
+        },
+        "4": {
+          "n": 4282,
+          "q": 0.9288432956975303,
+          "rank": 3855,
+          "note": ""
+        },
+        "5": {
+          "n": 2563,
+          "q": 0.948065631916286,
+          "rank": 2308,
+          "note": ""
+        }
+      },
+      "alpha": 0.09999999999999998
+    },
+    "test": {
+      "n": 61530,
+      "coverage": 0.8865431496830815,
+      "mean_set_size": 2.610157646676418,
+      "median_set_size": 3.0,
+      "singleton_rate": 0.021111652852267185,
+      "empty_rate": 0.0,
+      "size_histogram": {
+        "1": 1299,
+        "2": 27892,
+        "3": 26442,
+        "4": 5311,
+        "5": 566,
+        "6": 20
+      },
+      "per_class": {
+        "Good": {
+          "n": 11006,
+          "coverage": 0.867345084499364,
+          "mean_set_size": 2.446211157550427,
+          "median_set_size": 2.0
+        },
+        "Moderate": {
+          "n": 14020,
+          "coverage": 0.8877318116975749,
+          "mean_set_size": 2.7556348074179744,
+          "median_set_size": 3.0
+        },
+        "Unhealthy (sensitive)": {
+          "n": 6439,
+          "coverage": 0.863488119273179,
+          "mean_set_size": 2.9214163690013977,
+          "median_set_size": 3.0
+        },
+        "Unhealthy": {
+          "n": 18824,
+          "coverage": 0.880790480237994,
+          "mean_set_size": 2.694220144496388,
+          "median_set_size": 3.0
+        },
+        "Very unhealthy": {
+          "n": 7554,
+          "coverage": 0.9356632247815727,
+          "mean_set_size": 2.3665607625099283,
+          "median_set_size": 2.0
+        },
+        "Hazardous": {
+          "n": 3687,
+          "coverage": 0.9083265527529156,
+          "mean_set_size": 2.0726878220775697,
+          "median_set_size": 2.0
+        }
+      }
+    }
+  },
+  "calibration_selfcheck": 0.9000260306510917,
+  "model_name": "RandomForest",
+  "counts": {
+    "calibration_observed": 61466,
+    "test_observed": 61530,
+    "test_total": 62772
+  }
+}

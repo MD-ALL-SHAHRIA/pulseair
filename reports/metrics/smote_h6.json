@@ -1,0 +1,119 @@
+{
+  "val_macro_f1": 0.5186929994790812,
+  "scores": {
+    "macro_f1": 0.5207008563001355,
+    "accuracy": 0.5656752803510483,
+    "per_class": {
+      "Good": 0.6167931907062342,
+      "Moderate": 0.5121809520120841,
+      "Unhealthy (sensitive)": 0.25895537322393436,
+      "Unhealthy": 0.6740934906072521,
+      "Very unhealthy": 0.47567494417754924,
+      "Hazardous": 0.5865071870737593
+    }
+  },
+  "tests": {
+    "Persistence": {
+      "macro_f1": {
+        "observed_diff": 0.008892329883686267,
+        "ci_low": 0.004713615081281303,
+        "ci_high": 0.013360063572306206,
+        "mean_diff": 0.008867567220671757,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": -0.0346899806519097,
+        "ci_low": -0.04475145186099292,
+        "ci_high": -0.02461115452194569,
+        "mean_diff": -0.03476367495238699,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": -0.0031773939469528223,
+        "ci_low": -0.013757612055920344,
+        "ci_high": 0.007658460156801563,
+        "mean_diff": -0.0030127409315645207,
+        "p_two_sided": 0.588,
+        "significant": false,
+        "n_boot": 1000
+      }
+    },
+    "RandomForest (unweighted)": {
+      "macro_f1": {
+        "observed_diff": 0.0034171218237977197,
+        "ci_low": 3.901100707162671e-06,
+        "ci_high": 0.0063306250022684635,
+        "mean_diff": 0.0034048873709687177,
+        "p_two_sided": 0.05,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": -0.050871962010075544,
+        "ci_low": -0.058707198290696865,
+        "ci_high": -0.0434694771339511,
+        "mean_diff": -0.05092128881475542,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": -0.02333983696532027,
+        "ci_low": -0.03148351022706562,
+        "ci_high": -0.01516120271309134,
+        "mean_diff": -0.023171397772770826,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      }
+    },
+    "RandomForest (class_weight=balanced)": {
+      "macro_f1": {
+        "observed_diff": 0.005816648921325496,
+        "ci_low": 0.0030229596583176838,
+        "ci_high": 0.008466502157064903,
+        "mean_diff": 0.005790939914578844,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": 0.00242111112814547,
+        "ci_low": -0.004321106668618157,
+        "ci_high": 0.008697810825807952,
+        "mean_diff": 0.0023599256406854566,
+        "p_two_sided": 0.45,
+        "significant": false,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": 0.00216184571239586,
+        "ci_low": -0.0017249830834680207,
+        "ci_high": 0.005999242802559531,
+        "mean_diff": 0.0021618442412845175,
+        "p_two_sided": 0.256,
+        "significant": false,
+        "n_boot": 1000
+      }
+    }
+  },
+  "n_synthetic": 82958,
+  "target_n": 51361,
+  "minority_classes": [
+    "Good",
+    "Unhealthy (sensitive)",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "cost": {
+    "smote_seconds": 2.0,
+    "rf_fit_seconds": 25.3,
+    "ctgan_minutes": 22.1,
+    "ctgan_synthetic_rows": 82958
+  },
+  "n_test_observed": 61530
+}

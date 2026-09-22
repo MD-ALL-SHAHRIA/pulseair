@@ -149,8 +149,8 @@ pulseair-ml/
 
 **Data flows one way:** `data/raw → src/preprocessing → data/processed → src/models →
 reports/`. Everything under `data/` and all model binaries (`*.pkl`, `*.pt`, `*.onnx`) are
-gitignored; the reports and metrics JSON they produce are committed, so results are
-readable without re-running anything.
+gitignored. The markdown reports, the metrics JSON and the thesis figures **are** tracked,
+so every claim is checkable and every figure is rebuildable without re-running a phase.
 
 ---
 
@@ -267,6 +267,7 @@ python -m src.deployment.compress_export --class-weight # class-weighted variant
 python -m src.models.rolling_cv                         # -> reports/rolling_origin_cv_h6.md
 python -m src.models.hj633_sensitivity                  # EPA vs HJ 633-2012 breakpoints
 python -m src.reporting.compile_results                 # -> reports/final_results_summary.md
+python -m src.reporting.generate_figures                # -> reports/figures/ (21 thesis figures)
 
 # Phase 10 — Bangladesh external validation + deployment
 python -m src.preprocessing.bangladesh                  # -> data/processed/bd_h6/
@@ -336,6 +337,7 @@ is readable without running anything. Start with:
 | [`bangladesh_validation.md`](reports/bangladesh_validation.md) | the dataset integrity audit |
 | [`dhaka_ground_truth_model_h6.md`](reports/dhaka_ground_truth_model_h6.md) | the validated advisory-class result |
 | [`deployment_report_h6.md`](reports/deployment_report_h6.md) | compression sweep, ONNX, latency |
+| [`figures/`](reports/figures/README.md) | 21 publication figures, each with the JSON it was built from |
 
 ---
 

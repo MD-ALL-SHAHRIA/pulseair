@@ -1,0 +1,153 @@
+{
+  "audit": {
+    "files": 10,
+    "raw_rows": 77716,
+    "qc_counts": {
+      "Valid": 75374,
+      "Missing": 2138,
+      "Invalid": 197,
+      "Suspect": 7
+    },
+    "qc_valid_rows": 75374,
+    "reported_valid_rows": 75374,
+    "matches_reported": true,
+    "negative_sentinel_dropped": 24,
+    "duplicate_timestamps_dropped": 6,
+    "final_rows": 75344,
+    "start": "2016-03-01 02:00:00",
+    "end": "2025-03-24 18:00:00",
+    "years": 9.06,
+    "expected_hourly_slots": 79457,
+    "coverage_pct": 94.8,
+    "pm25": {
+      "min": 0.0,
+      "median": 65.0,
+      "p99": 361.0,
+      "max": 985.0
+    }
+  },
+  "distribution": {
+    "Good": {
+      "n": 2536,
+      "pct": 3.37
+    },
+    "Moderate": {
+      "n": 16702,
+      "pct": 22.17
+    },
+    "Unhealthy (sensitive)": {
+      "n": 13346,
+      "pct": 17.71
+    },
+    "Unhealthy": {
+      "n": 27688,
+      "pct": 36.75
+    },
+    "Very unhealthy": {
+      "n": 11284,
+      "pct": 14.98
+    },
+    "Hazardous": {
+      "n": 3788,
+      "pct": 5.03
+    }
+  },
+  "persistence": {
+    "n_pairs": 74535,
+    "macro_f1": 0.42250300441003574,
+    "accuracy": 0.4777889582075535,
+    "label_unchanged_pct": 47.77889582075535,
+    "per_class_f1": {
+      "Good": 0.3383564396222624,
+      "Moderate": 0.5586083366222411,
+      "Unhealthy (sensitive)": 0.3352693315112174,
+      "Unhealthy": 0.5515406621840777,
+      "Very unhealthy": 0.42912595368759204,
+      "Hazardous": 0.3221173028328235
+    },
+    "support": {
+      "Good": 2479,
+      "Moderate": 16456,
+      "Unhealthy (sensitive)": 13186,
+      "Unhealthy": 27459,
+      "Very unhealthy": 11200,
+      "Hazardous": 3755
+    }
+  },
+  "comparison": {
+    "n_overlap": 23010,
+    "overlap_start": "2022-08-05 06:00:00",
+    "overlap_end": "2025-03-24 18:00:00",
+    "best_hour_offset": 6,
+    "corr_by_offset": {
+      "-12": 0.5807,
+      "-11": 0.5624,
+      "-10": 0.5481,
+      "-9": 0.5391,
+      "-8": 0.5345,
+      "-7": 0.5319,
+      "-6": 0.5299,
+      "-5": 0.5283,
+      "-4": 0.528,
+      "-3": 0.5314,
+      "-2": 0.5404,
+      "-1": 0.5557,
+      "0": 0.5774,
+      "1": 0.6044,
+      "2": 0.6337,
+      "3": 0.6644,
+      "4": 0.6934,
+      "5": 0.7167,
+      "6": 0.7293,
+      "7": 0.7274,
+      "8": 0.712,
+      "9": 0.6872,
+      "10": 0.6586,
+      "11": 0.6292,
+      "12": 0.6015
+    },
+    "pearson_r": 0.7293,
+    "spearman_r": 0.8088,
+    "mae": 55.05,
+    "bias_reanalysis_minus_reference": -52.69,
+    "reference": {
+      "mean": 105.3,
+      "p95": 270.0,
+      "p99": 397.0,
+      "max": 970.0
+    },
+    "reanalysis": {
+      "mean": 52.6,
+      "p95": 124.3,
+      "p99": 177.4,
+      "max": 290.6
+    },
+    "high_range": {
+      "n_reference_ge_150": 5523,
+      "mae": 138.2,
+      "bias": -137.86
+    },
+    "class_agreement": 0.3078,
+    "hazardous_reference": 1602,
+    "hazardous_reanalysis": 17,
+    "very_unhealthy_reference": 3921,
+    "very_unhealthy_reanalysis": 436
+  },
+  "labels": [
+    "Good",
+    "Moderate",
+    "Unhealthy (sensitive)",
+    "Unhealthy",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "breakpoints": [
+    0,
+    12,
+    35.4,
+    55.4,
+    150.4,
+    250.4
+  ],
+  "horizon": 6
+}

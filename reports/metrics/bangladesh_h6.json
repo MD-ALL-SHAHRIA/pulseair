@@ -1,0 +1,1017 @@
+{
+  "support": {
+    "train": {
+      "Good": 16046,
+      "Moderate": 29388,
+      "Unhealthy (sensitive)": 16337,
+      "Unhealthy": 18836,
+      "Very unhealthy": 387,
+      "Hazardous": 26
+    },
+    "val": {
+      "Good": 755,
+      "Moderate": 5063,
+      "Unhealthy (sensitive)": 4201,
+      "Unhealthy": 6924,
+      "Very unhealthy": 435,
+      "Hazardous": 2
+    },
+    "test": {
+      "Good": 6176,
+      "Moderate": 7927,
+      "Unhealthy (sensitive)": 1757,
+      "Unhealthy": 1490,
+      "Very unhealthy": 6,
+      "Hazardous": 0
+    }
+  },
+  "rcv": {
+    "folds": [
+      {
+        "fold": 1,
+        "cutoff": "2023-08-02 16:00:00",
+        "eval_start": "2023-08-03 16:00:00",
+        "eval_end": "2024-01-18 10:00:00",
+        "n_train": 34700,
+        "n_eval": 16108,
+        "n_eval_observed": 16108,
+        "eval_months": [
+          1,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "support": {
+          "Good": 2877,
+          "Moderate": 6120,
+          "Unhealthy (sensitive)": 3449,
+          "Unhealthy": 3662,
+          "Very unhealthy": 0,
+          "Hazardous": 0
+        },
+        "scores": {
+          "Persistence": {
+            "macro_f1": 0.4213799615063463,
+            "accuracy": 0.6385646883536131,
+            "f1_Good": 0.6903729401561145,
+            "f1_Moderate": 0.6797257590597453,
+            "f1_Unhealthy (sensitive)": 0.4791062100986651,
+            "f1_Unhealthy": 0.6790748597235527,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.0
+          },
+          "RandomForest (unweighted)": {
+            "macro_f1": 0.46215486715681475,
+            "accuracy": 0.7020735038490191,
+            "f1_Good": 0.7103321033210332,
+            "f1_Moderate": 0.7420865633074936,
+            "f1_Unhealthy (sensitive)": 0.5548480463096961,
+            "f1_Unhealthy": 0.765662490002666,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.7
+          },
+          "RandomForest (class_weight=balanced)": {
+            "macro_f1": 0.4582101262898643,
+            "accuracy": 0.6839458654084927,
+            "f1_Good": 0.7267070574750286,
+            "f1_Moderate": 0.7003932785126922,
+            "f1_Unhealthy (sensitive)": 0.5762667019447016,
+            "f1_Unhealthy": 0.7458937198067633,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.9
+          }
+        }
+      },
+      {
+        "fold": 2,
+        "cutoff": "2024-01-18 11:00:00",
+        "eval_start": "2024-01-19 11:00:00",
+        "eval_end": "2024-07-05 06:00:00",
+        "n_train": 50904,
+        "n_eval": 16112,
+        "n_eval_observed": 16112,
+        "eval_months": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "support": {
+          "Good": 1509,
+          "Moderate": 6996,
+          "Unhealthy (sensitive)": 3522,
+          "Unhealthy": 4076,
+          "Very unhealthy": 9,
+          "Hazardous": 0
+        },
+        "scores": {
+          "Persistence": {
+            "macro_f1": 0.44576065687295263,
+            "accuracy": 0.6681976166832175,
+            "f1_Good": 0.6492985971943888,
+            "f1_Moderate": 0.7628644939965694,
+            "f1_Unhealthy (sensitive)": 0.4403799801502907,
+            "f1_Unhealthy": 0.7109097587853557,
+            "f1_Very unhealthy": 0.1111111111111111,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.0
+          },
+          "RandomForest (unweighted)": {
+            "macro_f1": 0.4602628527736863,
+            "accuracy": 0.7141881827209533,
+            "f1_Good": 0.6820809248554913,
+            "f1_Moderate": 0.7854761559646326,
+            "f1_Unhealthy (sensitive)": 0.5142143946748023,
+            "f1_Unhealthy": 0.7798056411471913,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 1.3
+          },
+          "RandomForest (class_weight=balanced)": {
+            "macro_f1": 0.4517424714902412,
+            "accuracy": 0.6674528301886793,
+            "f1_Good": 0.6874205844980941,
+            "f1_Moderate": 0.7345541401273885,
+            "f1_Unhealthy (sensitive)": 0.5303288672350792,
+            "f1_Unhealthy": 0.7351627313337588,
+            "f1_Very unhealthy": 0.022988505747126436,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 1.4
+          }
+        }
+      },
+      {
+        "fold": 3,
+        "cutoff": "2024-07-05 07:00:00",
+        "eval_start": "2024-07-06 07:00:00",
+        "eval_end": "2024-12-21 01:00:00",
+        "n_train": 67112,
+        "n_eval": 16108,
+        "n_eval_observed": 16108,
+        "eval_months": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "support": {
+          "Good": 5398,
+          "Moderate": 5485,
+          "Unhealthy (sensitive)": 1942,
+          "Unhealthy": 3210,
+          "Very unhealthy": 73,
+          "Hazardous": 0
+        },
+        "scores": {
+          "Persistence": {
+            "macro_f1": 0.4840836800206421,
+            "accuracy": 0.6777998510057115,
+            "f1_Good": 0.7797707100591716,
+            "f1_Moderate": 0.6402989155199125,
+            "f1_Unhealthy (sensitive)": 0.42444559051057246,
+            "f1_Unhealthy": 0.7312197407465251,
+            "f1_Very unhealthy": 0.3287671232876712,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.0
+          },
+          "RandomForest (unweighted)": {
+            "macro_f1": 0.4745329711233126,
+            "accuracy": 0.7392599950335237,
+            "f1_Good": 0.8203896943392742,
+            "f1_Moderate": 0.7100959829363669,
+            "f1_Unhealthy (sensitive)": 0.5104877432398282,
+            "f1_Unhealthy": 0.8062244062244063,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 1.8
+          },
+          "RandomForest (class_weight=balanced)": {
+            "macro_f1": 0.511966228462676,
+            "accuracy": 0.7105165135336479,
+            "f1_Good": 0.8161442395169961,
+            "f1_Moderate": 0.6374593858086155,
+            "f1_Unhealthy (sensitive)": 0.5416850463167181,
+            "f1_Unhealthy": 0.7607192254495159,
+            "f1_Very unhealthy": 0.3157894736842105,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 1.8
+          }
+        }
+      },
+      {
+        "fold": 4,
+        "cutoff": "2024-12-21 02:00:00",
+        "eval_start": "2024-12-22 02:00:00",
+        "eval_end": "2025-06-07 21:00:00",
+        "n_train": 83316,
+        "n_eval": 16112,
+        "n_eval_observed": 16112,
+        "eval_months": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          12
+        ],
+        "support": {
+          "Good": 1076,
+          "Moderate": 5124,
+          "Unhealthy (sensitive)": 3894,
+          "Unhealthy": 5622,
+          "Very unhealthy": 394,
+          "Hazardous": 2
+        },
+        "scores": {
+          "Persistence": {
+            "macro_f1": 0.4565588293491592,
+            "accuracy": 0.5880710029791459,
+            "f1_Good": 0.5577726218097447,
+            "f1_Moderate": 0.6382355811457012,
+            "f1_Unhealthy (sensitive)": 0.4115681233933162,
+            "f1_Unhealthy": 0.68,
+            "f1_Very unhealthy": 0.4517766497461929,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.0
+          },
+          "RandomForest (unweighted)": {
+            "macro_f1": 0.45047400458383274,
+            "accuracy": 0.6798038728897716,
+            "f1_Good": 0.5127900059488399,
+            "f1_Moderate": 0.7141831238779174,
+            "f1_Unhealthy (sensitive)": 0.5108388312912346,
+            "f1_Unhealthy": 0.7991334488734836,
+            "f1_Very unhealthy": 0.16589861751152074,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 2.2
+          },
+          "RandomForest (class_weight=balanced)": {
+            "macro_f1": 0.5232780024470385,
+            "accuracy": 0.6604394240317776,
+            "f1_Good": 0.6023419203747072,
+            "f1_Moderate": 0.6775527077304672,
+            "f1_Unhealthy (sensitive)": 0.5571526351813826,
+            "f1_Unhealthy": 0.7631855030996662,
+            "f1_Very unhealthy": 0.5394352482960078,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 2.3
+          }
+        }
+      },
+      {
+        "fold": 5,
+        "cutoff": "2025-06-07 22:00:00",
+        "eval_start": "2025-06-08 22:00:00",
+        "eval_end": "2025-11-23 17:00:00",
+        "n_train": 99524,
+        "n_eval": 16112,
+        "n_eval_observed": 16112,
+        "eval_months": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "support": {
+          "Good": 5762,
+          "Moderate": 7341,
+          "Unhealthy (sensitive)": 1550,
+          "Unhealthy": 1453,
+          "Very unhealthy": 6,
+          "Hazardous": 0
+        },
+        "scores": {
+          "Persistence": {
+            "macro_f1": 0.38056813894064784,
+            "accuracy": 0.6372889771598809,
+            "f1_Good": 0.7080874696286011,
+            "f1_Moderate": 0.6565904139433552,
+            "f1_Unhealthy (sensitive)": 0.3463147730930158,
+            "f1_Unhealthy": 0.5724161769789147,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 0.0
+          },
+          "RandomForest (unweighted)": {
+            "macro_f1": 0.4312139893755262,
+            "accuracy": 0.7194637537239325,
+            "f1_Good": 0.7818455366098295,
+            "f1_Moderate": 0.7325869812965073,
+            "f1_Unhealthy (sensitive)": 0.3657008613938919,
+            "f1_Unhealthy": 0.7071505569529285,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 2.6
+          },
+          "RandomForest (class_weight=balanced)": {
+            "macro_f1": 0.42034567685698027,
+            "accuracy": 0.6777557100297915,
+            "f1_Good": 0.7673755755316817,
+            "f1_Moderate": 0.6457938013915243,
+            "f1_Unhealthy (sensitive)": 0.4417141144740785,
+            "f1_Unhealthy": 0.6671905697445972,
+            "f1_Very unhealthy": 0.0,
+            "f1_Hazardous": 0.0,
+            "fit_seconds": 3.1
+          }
+        }
+      }
+    ],
+    "aggregate": {
+      "per_model": {
+        "Persistence": {
+          "mean": 0.4376702533379496,
+          "std": 0.03905913525067293,
+          "min": 0.38056813894064784,
+          "max": 0.4840836800206421,
+          "per_fold": [
+            0.4213799615063463,
+            0.44576065687295263,
+            0.4840836800206421,
+            0.4565588293491592,
+            0.38056813894064784
+          ],
+          "f1_Good": {
+            "mean": 0.6770604677696042,
+            "std": 0.08168476340199501,
+            "per_fold": [
+              0.6903729401561145,
+              0.6492985971943888,
+              0.7797707100591716,
+              0.5577726218097447,
+              0.7080874696286011
+            ]
+          },
+          "f1_Moderate": {
+            "mean": 0.6755430327330567,
+            "std": 0.05156483369939147,
+            "per_fold": [
+              0.6797257590597453,
+              0.7628644939965694,
+              0.6402989155199125,
+              0.6382355811457012,
+              0.6565904139433552
+            ]
+          },
+          "f1_Unhealthy (sensitive)": {
+            "mean": 0.42036293544917197,
+            "std": 0.04855049313571449,
+            "per_fold": [
+              0.4791062100986651,
+              0.4403799801502907,
+              0.42444559051057246,
+              0.4115681233933162,
+              0.3463147730930158
+            ]
+          },
+          "f1_Unhealthy": {
+            "mean": 0.6747241072468697,
+            "std": 0.06126751722764837,
+            "per_fold": [
+              0.6790748597235527,
+              0.7109097587853557,
+              0.7312197407465251,
+              0.68,
+              0.5724161769789147
+            ]
+          },
+          "f1_Very unhealthy": {
+            "mean": 0.17833097682899504,
+            "std": 0.2034244055780752,
+            "per_fold": [
+              0.0,
+              0.1111111111111111,
+              0.3287671232876712,
+              0.4517766497461929,
+              0.0
+            ]
+          },
+          "f1_Hazardous": {
+            "mean": 0.0,
+            "std": 0.0,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "RandomForest (unweighted)": {
+          "mean": 0.45572773700263447,
+          "std": 0.016155785608127037,
+          "min": 0.4312139893755262,
+          "max": 0.4745329711233126,
+          "per_fold": [
+            0.46215486715681475,
+            0.4602628527736863,
+            0.4745329711233126,
+            0.45047400458383274,
+            0.4312139893755262
+          ],
+          "f1_Good": {
+            "mean": 0.7014876530148937,
+            "std": 0.11901337350724249,
+            "per_fold": [
+              0.7103321033210332,
+              0.6820809248554913,
+              0.8203896943392742,
+              0.5127900059488399,
+              0.7818455366098295
+            ]
+          },
+          "f1_Moderate": {
+            "mean": 0.7368857614765835,
+            "std": 0.030164781929410103,
+            "per_fold": [
+              0.7420865633074936,
+              0.7854761559646326,
+              0.7100959829363669,
+              0.7141831238779174,
+              0.7325869812965073
+            ]
+          },
+          "f1_Unhealthy (sensitive)": {
+            "mean": 0.4912179753818906,
+            "std": 0.07260934697124617,
+            "per_fold": [
+              0.5548480463096961,
+              0.5142143946748023,
+              0.5104877432398282,
+              0.5108388312912346,
+              0.3657008613938919
+            ]
+          },
+          "f1_Unhealthy": {
+            "mean": 0.7715953086401351,
+            "std": 0.03941210944589171,
+            "per_fold": [
+              0.765662490002666,
+              0.7798056411471913,
+              0.8062244062244063,
+              0.7991334488734836,
+              0.7071505569529285
+            ]
+          },
+          "f1_Very unhealthy": {
+            "mean": 0.03317972350230415,
+            "std": 0.07419211722579948,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.16589861751152074,
+              0.0
+            ]
+          },
+          "f1_Hazardous": {
+            "mean": 0.0,
+            "std": 0.0,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "RandomForest (class_weight=balanced)": {
+          "mean": 0.4731085011093601,
+          "std": 0.04327033122293705,
+          "min": 0.42034567685698027,
+          "max": 0.5232780024470385,
+          "per_fold": [
+            0.4582101262898643,
+            0.4517424714902412,
+            0.511966228462676,
+            0.5232780024470385,
+            0.42034567685698027
+          ],
+          "f1_Good": {
+            "mean": 0.7199978754793015,
+            "std": 0.08129881081882832,
+            "per_fold": [
+              0.7267070574750286,
+              0.6874205844980941,
+              0.8161442395169961,
+              0.6023419203747072,
+              0.7673755755316817
+            ]
+          },
+          "f1_Moderate": {
+            "mean": 0.6791506627141375,
+            "std": 0.039919263090907674,
+            "per_fold": [
+              0.7003932785126922,
+              0.7345541401273885,
+              0.6374593858086155,
+              0.6775527077304672,
+              0.6457938013915243
+            ]
+          },
+          "f1_Unhealthy (sensitive)": {
+            "mean": 0.5294294730303919,
+            "std": 0.05197906272047462,
+            "per_fold": [
+              0.5762667019447016,
+              0.5303288672350792,
+              0.5416850463167181,
+              0.5571526351813826,
+              0.4417141144740785
+            ]
+          },
+          "f1_Unhealthy": {
+            "mean": 0.7344303498868602,
+            "std": 0.03927816531078336,
+            "per_fold": [
+              0.7458937198067633,
+              0.7351627313337588,
+              0.7607192254495159,
+              0.7631855030996662,
+              0.6671905697445972
+            ]
+          },
+          "f1_Very unhealthy": {
+            "mean": 0.17564264554546893,
+            "std": 0.2434081734039326,
+            "per_fold": [
+              0.0,
+              0.022988505747126436,
+              0.3157894736842105,
+              0.5394352482960078,
+              0.0
+            ]
+          },
+          "f1_Hazardous": {
+            "mean": 0.0,
+            "std": 0.0,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "tests": {
+        "RandomForest (unweighted)": {
+          "deltas": [
+            0.04077490565046843,
+            0.01450219590073365,
+            -0.009550708897329507,
+            -0.0060848247653264576,
+            0.05064585043487835
+          ],
+          "mean_delta": 0.018057483664684893,
+          "std_delta": 0.02709144853262915,
+          "wins": 3,
+          "n_folds": 5,
+          "p_two_sided": 0.3125,
+          "p_one_sided": 0.15625,
+          "significant_two_sided": false,
+          "significant_one_sided": false,
+          "delta_Very unhealthy": {
+            "mean": -0.1451512533266909,
+            "wins": 0,
+            "per_fold": [
+              0.0,
+              -0.1111111111111111,
+              -0.3287671232876712,
+              -0.2858780322346722,
+              0.0
+            ]
+          },
+          "delta_Hazardous": {
+            "mean": 0.0,
+            "wins": 0,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "RandomForest (class_weight=balanced)": {
+          "deltas": [
+            0.03683016478351797,
+            0.005981814617288583,
+            0.027882548442033916,
+            0.06671917309787928,
+            0.03977753791633243
+          ],
+          "mean_delta": 0.035438247771410435,
+          "std_delta": 0.021931901466412582,
+          "wins": 5,
+          "n_folds": 5,
+          "p_two_sided": 0.0625,
+          "p_one_sided": 0.03125,
+          "significant_two_sided": false,
+          "significant_one_sided": true,
+          "delta_Very unhealthy": {
+            "mean": -0.0026883312835261075,
+            "wins": 1,
+            "per_fold": [
+              0.0,
+              -0.08812260536398467,
+              -0.012977649603460706,
+              0.08765859854981484,
+              0.0
+            ]
+          },
+          "delta_Hazardous": {
+            "mean": 0.0,
+            "wins": 0,
+            "per_fold": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "_resolution": {
+          "n_pairs": 5,
+          "min_p_two_sided": 0.0625,
+          "min_p_one_sided": 0.03125
+        }
+      }
+    },
+    "n_folds": 5,
+    "embargo_hours": 24,
+    "initial_train_fraction": 0.3,
+    "dataset": "bangladesh"
+  },
+  "meta": {
+    "feature_columns": [
+      "PM2.5",
+      "PM10",
+      "CO",
+      "hour_sin",
+      "hour_cos",
+      "month_sin",
+      "month_cos"
+    ],
+    "scaled_columns": [
+      "PM2.5",
+      "PM10",
+      "CO"
+    ],
+    "class_labels": [
+      "Good",
+      "Moderate",
+      "Unhealthy (sensitive)",
+      "Unhealthy",
+      "Very unhealthy",
+      "Hazardous"
+    ],
+    "window": 24,
+    "horizon": 6,
+    "cities": [
+      "Baris\u0101l",
+      "Chittagong",
+      "Comilla",
+      "Dhaka"
+    ],
+    "clean_start": "2022-08-05 00:00:00",
+    "source": "Mendeley 9j447cynb9 v2",
+    "stats": {
+      "rows_in": 115872,
+      "cities": [
+        "Baris\u0101l",
+        "Chittagong",
+        "Comilla",
+        "Dhaka"
+      ],
+      "nulls_before_ffill": {
+        "PM2.5": 0,
+        "PM10": 0,
+        "CO": 0
+      },
+      "imputed_per_channel": {
+        "PM2.5": 0,
+        "PM10": 0,
+        "CO": 0
+      },
+      "rows_dropped": 0,
+      "rows_out": 115872,
+      "split_boundaries": {
+        "val_start": "2024-11-26 22:00:00",
+        "test_start": "2025-05-26 23:00:00",
+        "n_timestamps": 28968
+      },
+      "samples": {
+        "train": 81020,
+        "val": 17380,
+        "test": 17356
+      }
+    }
+  },
+  "audit": {
+    "file_rows": 1048551,
+    "stated_cities": 103,
+    "actual_cities": 30,
+    "stated_range": "2000-2025",
+    "actual_range": [
+      "2000-01-01 00:00:00",
+      "2025-11-23 23:00:00"
+    ],
+    "clean_start": "2022-08-05 00:00:00",
+    "clean_rows": 849831,
+    "clean_pct": 81.0,
+    "clean_cities": 30,
+    "clean_range": [
+      "2022-08-05 00:00:00",
+      "2025-11-23 23:00:00"
+    ],
+    "dhaka_pm25_linear_trend_r2": 0.991957,
+    "dhaka_pm25_trend_slope": 5.629,
+    "pre_clip_at_250_pct": 4.9,
+    "co_median_pre": 1.56,
+    "co_median_post": 424.0,
+    "pm25_lag1_pre": 0.9053,
+    "pm25_lag1_post": 0.9833,
+    "co2_present_pct_clean": 32.27,
+    "has_temperature": false,
+    "has_dewpoint": false,
+    "channels_present": [
+      "city_id",
+      "city_name",
+      "lat",
+      "lon",
+      "datetime",
+      "pm10",
+      "pm2_5",
+      "carbon_monoxide",
+      "carbon_dioxide",
+      "nitrogen_dioxide",
+      "sulphur_dioxide",
+      "ozone",
+      "aqi"
+    ]
+  },
+  "results": {
+    "Persistence": {
+      "macro_f1": 0.38074055810497187,
+      "accuracy": 0.6371859875547361,
+      "f1_Good": 0.711244232170323,
+      "f1_Moderate": 0.6566280241935484,
+      "f1_Unhealthy (sensitive)": 0.35411329348135495,
+      "f1_Unhealthy": 0.562457798784605,
+      "f1_Very unhealthy": 0.0,
+      "f1_Hazardous": 0.0
+    },
+    "Beijing model (transfer)": {
+      "macro_f1": 0.32578014538605476,
+      "accuracy": 0.5921871398939847,
+      "f1_Good": 0.6477766633233032,
+      "f1_Moderate": 0.6266379575515226,
+      "f1_Unhealthy (sensitive)": 0.12171628721541156,
+      "f1_Unhealthy": 0.5585499642260912,
+      "f1_Very unhealthy": 0.0,
+      "f1_Hazardous": 0.0
+    },
+    "Bangladesh-native RandomForest (class_weight=balanced)": {
+      "macro_f1": 0.4075240216873608,
+      "accuracy": 0.6703157409541369,
+      "f1_Good": 0.7640756159148298,
+      "f1_Moderate": 0.6466962878027805,
+      "f1_Unhealthy (sensitive)": 0.4097616345062429,
+      "f1_Unhealthy": 0.6246105919003115,
+      "f1_Very unhealthy": 0.0,
+      "f1_Hazardous": 0.0
+    }
+  },
+  "tests": {
+    "Beijing model (transfer)": {
+      "macro_f1": {
+        "observed_diff": -0.05496041271891711,
+        "ci_low": -0.060631105569746754,
+        "ci_high": -0.04917779144247835,
+        "mean_diff": -0.0549274917414896,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "mean_diff": 0.0,
+        "p_two_sided": 2.0,
+        "significant": false,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "mean_diff": 0.0,
+        "p_two_sided": 2.0,
+        "significant": false,
+        "n_boot": 1000
+      }
+    },
+    "Bangladesh-native RandomForest (class_weight=balanced)": {
+      "macro_f1": {
+        "observed_diff": 0.026783463582388922,
+        "ci_low": 0.020790590682713276,
+        "ci_high": 0.03258116431237598,
+        "mean_diff": 0.026911594997823727,
+        "p_two_sided": 0.0,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "Very unhealthy": {
+        "observed_diff": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "mean_diff": 0.0,
+        "p_two_sided": 2.0,
+        "significant": false,
+        "n_boot": 1000
+      },
+      "Hazardous": {
+        "observed_diff": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "mean_diff": 0.0,
+        "p_two_sided": 2.0,
+        "significant": false,
+        "n_boot": 1000
+      }
+    }
+  },
+  "conformal": {
+    "Beijing model (transfer)": {
+      "thresholds": {
+        "0": 0.8659104906754523,
+        "1": 0.8244217311532505,
+        "2": 0.9149558378062485,
+        "3": 0.6934102058154148,
+        "4": 0.9169375482572519,
+        "5": 1.0
+      },
+      "test": {
+        "n": 17356,
+        "coverage": 0.9473957132979949,
+        "mean_set_size": 3.3409195667204425,
+        "median_set_size": 3.0,
+        "singleton_rate": 0.0,
+        "empty_rate": 0.0,
+        "size_histogram": {
+          "2": 421,
+          "3": 10601,
+          "4": 6330,
+          "5": 4
+        },
+        "per_class": {
+          "Good": {
+            "n": 6176,
+            "coverage": 0.9729598445595855,
+            "mean_set_size": 3.202396373056995,
+            "median_set_size": 3.0
+          },
+          "Moderate": {
+            "n": 7927,
+            "coverage": 0.9629115680585342,
+            "mean_set_size": 3.4233631891005425,
+            "median_set_size": 3.0
+          },
+          "Unhealthy (sensitive)": {
+            "n": 1757,
+            "coverage": 0.9237336368810473,
+            "mean_set_size": 3.4803642572566877,
+            "median_set_size": 3.0
+          },
+          "Unhealthy": {
+            "n": 1490,
+            "coverage": 0.7906040268456376,
+            "mean_set_size": 3.3100671140939597,
+            "median_set_size": 3.0
+          },
+          "Very unhealthy": {
+            "n": 6,
+            "coverage": 0.0,
+            "mean_set_size": 3.8333333333333335,
+            "median_set_size": 4.0
+          },
+          "Hazardous": {
+            "n": 0,
+            "coverage": null,
+            "mean_set_size": null,
+            "median_set_size": null
+          }
+        }
+      }
+    },
+    "Bangladesh-native RandomForest (class_weight=balanced)": {
+      "thresholds": {
+        "0": 0.9135768327767105,
+        "1": 0.8180017961684845,
+        "2": 0.7787399992330634,
+        "3": 0.7527515629464953,
+        "4": 0.8767449802378497,
+        "5": 1.0
+      },
+      "test": {
+        "n": 17356,
+        "coverage": 0.9168587232081125,
+        "mean_set_size": 2.768149343166628,
+        "median_set_size": 3.0,
+        "singleton_rate": 0.0,
+        "empty_rate": 0.0,
+        "size_histogram": {
+          "2": 4448,
+          "3": 12484,
+          "4": 424
+        },
+        "per_class": {
+          "Good": {
+            "n": 6176,
+            "coverage": 0.9922279792746114,
+            "mean_set_size": 2.4512629533678756,
+            "median_set_size": 2.0
+          },
+          "Moderate": {
+            "n": 7927,
+            "coverage": 0.9178756149867542,
+            "mean_set_size": 2.9177494638577017,
+            "median_set_size": 3.0
+          },
+          "Unhealthy (sensitive)": {
+            "n": 1757,
+            "coverage": 0.7677859988616961,
+            "mean_set_size": 3.010244735344337,
+            "median_set_size": 3.0
+          },
+          "Unhealthy": {
+            "n": 1490,
+            "coverage": 0.7785234899328859,
+            "mean_set_size": 2.9966442953020134,
+            "median_set_size": 3.0
+          },
+          "Very unhealthy": {
+            "n": 6,
+            "coverage": 0.0,
+            "mean_set_size": 3.6666666666666665,
+            "median_set_size": 4.0
+          },
+          "Hazardous": {
+            "n": 0,
+            "coverage": null,
+            "mean_set_size": null,
+            "median_set_size": null
+          }
+        }
+      }
+    }
+  },
+  "selected_native": "RandomForest (class_weight=balanced)",
+  "native_val": {
+    "RandomForest": 0.4191761621614476,
+    "RandomForest (class_weight=balanced)": 0.49827704013458146
+  },
+  "label_unchanged_pct": 63.71859875547361,
+  "n_test_observed": 17356,
+  "n_test": 17356,
+  "n_train": 81020,
+  "labels": [
+    "Good",
+    "Moderate",
+    "Unhealthy (sensitive)",
+    "Unhealthy",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "split_note": "2025-05-26 to 2025-11-23",
+  "features": [
+    "PM2.5",
+    "PM10",
+    "CO",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "n_boot": 1000
+}

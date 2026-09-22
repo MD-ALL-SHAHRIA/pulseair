@@ -1,0 +1,966 @@
+{
+  "cases": [
+    {
+      "row": 19523,
+      "reason": "Hazardous, confident (singleton set)",
+      "station": "Dongsi",
+      "datetime": "2017-01-01 09:00:00",
+      "hour": 9,
+      "true_label": "Hazardous",
+      "predicted": "Hazardous",
+      "probabilities": {
+        "Good": 0.0576606340363784,
+        "Moderate": 0.049604038666334754,
+        "Unhealthy (sensitive)": 0.012528858804989112,
+        "Unhealthy": 0.06092069705684811,
+        "Very unhealthy": 0.05921326368405897,
+        "Hazardous": 0.7600725077513908
+      },
+      "conformal_set": [
+        "Hazardous"
+      ],
+      "set_size": 1,
+      "raw_features": {
+        "PM2.5": 470.0,
+        "PM10": 607.0,
+        "CO": 8500.0,
+        "TEMP": -4.800000000000001,
+        "DEWP": -5.6
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.3763814758912727,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.22808064142474796,
+          "kind": "actionable"
+        },
+        {
+          "feature": "CO",
+          "value": 0.06778413256547786,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.025843923314763463,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.0196956393326678,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.017537027106940606,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.016412470664223865,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": 0.006863768724685881,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": -0.006563342642807545,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.043110825583292524,
+      "plot": "reports/shap_examples/01_Hazardous_row19523.png"
+    },
+    {
+      "row": 40389,
+      "reason": "Hazardous, confident (singleton set)",
+      "station": "Nongzhanguan",
+      "datetime": "2016-12-29 23:00:00",
+      "hour": 23,
+      "true_label": "Hazardous",
+      "predicted": "Hazardous",
+      "probabilities": {
+        "Good": 0.06034308069054126,
+        "Moderate": 0.04356213737082671,
+        "Unhealthy (sensitive)": 0.015297758067111351,
+        "Unhealthy": 0.09529384368814142,
+        "Very unhealthy": 0.09069591735624788,
+        "Hazardous": 0.6948072628271319
+      },
+      "conformal_set": [
+        "Hazardous"
+      ],
+      "set_size": 1,
+      "raw_features": {
+        "PM2.5": 420.0,
+        "PM10": 514.0,
+        "CO": 4200.0,
+        "TEMP": -2.1000000000000014,
+        "DEWP": -7.0
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.3689707019945798,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.22175195702553413,
+          "kind": "actionable"
+        },
+        {
+          "feature": "CO",
+          "value": 0.04839294555587134,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.03660169146766843,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": -0.02949616392728001,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.013772422966242278,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.011228709442707735,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.01076004240420579,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.007828450800285044,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.043110825583292524,
+      "plot": "reports/shap_examples/02_Hazardous_row40389.png"
+    },
+    {
+      "row": 45407,
+      "reason": "Hazardous, ambiguous (set > 1)",
+      "station": "Shunyi",
+      "datetime": "2016-12-21 02:00:00",
+      "hour": 2,
+      "true_label": "Hazardous",
+      "predicted": "Very unhealthy",
+      "probabilities": {
+        "Good": 0.013306960292845662,
+        "Moderate": 0.033767974433320386,
+        "Unhealthy (sensitive)": 0.022740460058823603,
+        "Unhealthy": 0.1892897995650681,
+        "Very unhealthy": 0.4403591588477066,
+        "Hazardous": 0.30053564680223566
+      },
+      "conformal_set": [
+        "Unhealthy",
+        "Very unhealthy",
+        "Hazardous"
+      ],
+      "set_size": 3,
+      "raw_features": {
+        "PM2.5": 276.0,
+        "PM10": 325.00000000000006,
+        "CO": 6400.0,
+        "TEMP": -2.0,
+        "DEWP": -2.9999999999999996
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.1857754782341874,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.06392879970026198,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.03993172533822262,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": 0.02951440906520603,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.01089295183599309,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.0032940426445403764,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": -0.002725719637432987,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.0023573716372784783,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": 0.0017133038805547418,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.11226488143797252,
+      "plot": "reports/shap_examples/03_Hazardous_row45407.png"
+    },
+    {
+      "row": 29121,
+      "reason": "Hazardous, ambiguous (set > 1)",
+      "station": "Gucheng",
+      "datetime": "2016-11-26 09:00:00",
+      "hour": 9,
+      "true_label": "Hazardous",
+      "predicted": "Hazardous",
+      "probabilities": {
+        "Good": 0.02630028163698224,
+        "Moderate": 0.08463638512811586,
+        "Unhealthy (sensitive)": 0.029665846805006228,
+        "Unhealthy": 0.09927726345384259,
+        "Very unhealthy": 0.2968846521926784,
+        "Hazardous": 0.46323557078337435
+      },
+      "conformal_set": [
+        "Very unhealthy",
+        "Hazardous"
+      ],
+      "set_size": 2,
+      "raw_features": {
+        "PM2.5": 224.0,
+        "PM10": 343.0,
+        "CO": 4000.0,
+        "TEMP": 0.29999999999999716,
+        "DEWP": -4.699999999999999
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.13472535751080048,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.12978905434179058,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.061902139372462306,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": 0.03926370920176855,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.023173826889227422,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": 0.020021002505181542,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.01605577790104456,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.011989945692029678,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.007183823169835311,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.043110825583292524,
+      "plot": "reports/shap_examples/04_Hazardous_row29121.png"
+    },
+    {
+      "row": 23850,
+      "reason": "Very unhealthy, ambiguous",
+      "station": "Guanyuan",
+      "datetime": "2016-11-24 17:00:00",
+      "hour": 17,
+      "true_label": "Very unhealthy",
+      "predicted": "Unhealthy",
+      "probabilities": {
+        "Good": 0.06792091380662652,
+        "Moderate": 0.1091822549091432,
+        "Unhealthy (sensitive)": 0.07315931696891999,
+        "Unhealthy": 0.5555920842469387,
+        "Very unhealthy": 0.16661974334433907,
+        "Hazardous": 0.027525686724032248
+      },
+      "conformal_set": [
+        "Moderate",
+        "Unhealthy",
+        "Very unhealthy"
+      ],
+      "set_size": 3,
+      "raw_features": {
+        "PM2.5": 103.0,
+        "PM10": 121.0,
+        "CO": 500.0,
+        "TEMP": 3.1999999999999993,
+        "DEWP": -10.8
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.20065842544679593,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.05483815447643586,
+          "kind": "actionable"
+        },
+        {
+          "feature": "DEWP",
+          "value": -0.0476889598572316,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": 0.03335043593720299,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.023899895108907224,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": -0.01607687414449295,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": -0.015103077935213743,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.009890748205924314,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.0030343858602437514,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.3565887413661826,
+      "plot": "reports/shap_examples/05_Very_unhealthy_row23850.png"
+    },
+    {
+      "row": 3970,
+      "reason": "Very unhealthy, ambiguous",
+      "station": "Aotizhongxin",
+      "datetime": "2017-01-07 05:00:00",
+      "hour": 5,
+      "true_label": "Very unhealthy",
+      "predicted": "Very unhealthy",
+      "probabilities": {
+        "Good": 0.04108199194410295,
+        "Moderate": 0.09885835073000748,
+        "Unhealthy (sensitive)": 0.034096953676700736,
+        "Unhealthy": 0.16609261976193262,
+        "Very unhealthy": 0.5539179325779535,
+        "Hazardous": 0.10595215130930241
+      },
+      "conformal_set": [
+        "Unhealthy",
+        "Very unhealthy"
+      ],
+      "set_size": 2,
+      "raw_features": {
+        "PM2.5": 200.0,
+        "PM10": 200.0,
+        "CO": 3900.0,
+        "TEMP": 1.0,
+        "DEWP": -3.5000000000000004
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.253907787429693,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.10613023708038324,
+          "kind": "actionable"
+        },
+        {
+          "feature": "CO",
+          "value": 0.03074893646508028,
+          "kind": "actionable"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.02684054802511402,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.020754464164526278,
+          "kind": "context"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.019074514955470627,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.014918622946694606,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.014272287158134129,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.003485418756068154,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.11226488143797252,
+      "plot": "reports/shap_examples/06_Very_unhealthy_row3970.png"
+    },
+    {
+      "row": 35504,
+      "reason": "highly ambiguous (set >= 4)",
+      "station": "Huairou",
+      "datetime": "2017-01-13 09:00:00",
+      "hour": 9,
+      "true_label": "Moderate",
+      "predicted": "Moderate",
+      "probabilities": {
+        "Good": 0.21661729984212452,
+        "Moderate": 0.4364510539483381,
+        "Unhealthy (sensitive)": 0.1747009309535256,
+        "Unhealthy": 0.16931119533461714,
+        "Very unhealthy": 0.0026836598288574993,
+        "Hazardous": 0.00023586009253737897
+      },
+      "conformal_set": [
+        "Good",
+        "Moderate",
+        "Unhealthy (sensitive)",
+        "Unhealthy"
+      ],
+      "set_size": 4,
+      "raw_features": {
+        "PM2.5": 21.0,
+        "PM10": 37.0,
+        "CO": 500.0,
+        "TEMP": -5.199999999999999,
+        "DEWP": -18.1
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.16614178897434342,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_sin",
+          "value": 0.05928721587885515,
+          "kind": "context"
+        },
+        {
+          "feature": "month_cos",
+          "value": -0.038604208650552856,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": 0.032261743085896945,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.02493066587662794,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_cos",
+          "value": -0.019400040269976427,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": -0.004024490646947745,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.0018461380601166155,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.00021306659906404168,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.21749145116114652,
+      "plot": "reports/shap_examples/07_highly_ambiguous_(set_ge_4)_row35504.png"
+    },
+    {
+      "row": 35631,
+      "reason": "highly ambiguous (set >= 4)",
+      "station": "Huairou",
+      "datetime": "2017-01-18 16:00:00",
+      "hour": 16,
+      "true_label": "Unhealthy (sensitive)",
+      "predicted": "Good",
+      "probabilities": {
+        "Good": 0.40167121595343547,
+        "Moderate": 0.30225218116649005,
+        "Unhealthy (sensitive)": 0.12834582812705247,
+        "Unhealthy": 0.14941853558987797,
+        "Very unhealthy": 0.008923947864388103,
+        "Hazardous": 0.009388291298756266
+      },
+      "conformal_set": [
+        "Good",
+        "Moderate",
+        "Unhealthy (sensitive)",
+        "Unhealthy"
+      ],
+      "set_size": 4,
+      "raw_features": {
+        "PM2.5": 12.0,
+        "PM10": 17.0,
+        "CO": 300.0,
+        "TEMP": 0.533333333333335,
+        "DEWP": -17.1
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.15023787764976868,
+          "kind": "actionable"
+        },
+        {
+          "feature": "CO",
+          "value": 0.07801608562547899,
+          "kind": "actionable"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.05486111020864865,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.05363697539517067,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.03083641221287785,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": -0.028488510689281567,
+          "kind": "context"
+        },
+        {
+          "feature": "PM10",
+          "value": -0.009272063467248962,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.005543342823719343,
+          "kind": "context"
+        },
+        {
+          "feature": "month_cos",
+          "value": -0.0007170102316474804,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.13977650649915696,
+      "plot": "reports/shap_examples/08_highly_ambiguous_(set_ge_4)_row35631.png"
+    },
+    {
+      "row": 53737,
+      "reason": "confident, any class",
+      "station": "Wanliu",
+      "datetime": "2016-09-23 06:00:00",
+      "hour": 6,
+      "true_label": "Unhealthy",
+      "predicted": "Unhealthy",
+      "probabilities": {
+        "Good": 0.036569992484598635,
+        "Moderate": 0.07633155171732361,
+        "Unhealthy (sensitive)": 0.05958976965578007,
+        "Unhealthy": 0.7199745269505953,
+        "Very unhealthy": 0.104137209727373,
+        "Hazardous": 0.0033969494643292164
+      },
+      "conformal_set": [
+        "Unhealthy"
+      ],
+      "set_size": 1,
+      "raw_features": {
+        "PM2.5": 105.0,
+        "PM10": 105.0,
+        "CO": 1000.0,
+        "TEMP": 17.4,
+        "DEWP": 16.8
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.21925784758472913,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.08646519736047817,
+          "kind": "actionable"
+        },
+        {
+          "feature": "CO",
+          "value": 0.02944209634948377,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.029325294923546442,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.026301228628295474,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.021424504387893596,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": -0.010580656010740234,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": 0.005969286207214724,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": -0.0013700050706986799,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.3565887413661826,
+      "plot": "reports/shap_examples/09_confident_row53737.png"
+    },
+    {
+      "row": 4720,
+      "reason": "confident, any class",
+      "station": "Aotizhongxin",
+      "datetime": "2017-02-07 11:00:00",
+      "hour": 11,
+      "true_label": "Unhealthy",
+      "predicted": "Unhealthy",
+      "probabilities": {
+        "Good": 0.0388041712616096,
+        "Moderate": 0.06084253917676116,
+        "Unhealthy (sensitive)": 0.04212186166639247,
+        "Unhealthy": 0.784994561309323,
+        "Very unhealthy": 0.0697204900586016,
+        "Hazardous": 0.0035163765273119674
+      },
+      "conformal_set": [
+        "Unhealthy"
+      ],
+      "set_size": 1,
+      "raw_features": {
+        "PM2.5": 73.0,
+        "PM10": 78.0,
+        "CO": 1200.0,
+        "TEMP": 0.9000000000000004,
+        "DEWP": -6.9
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.23781000481450545,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.07525261808534227,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_sin",
+          "value": 0.043692165348377436,
+          "kind": "context"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.03987091255695469,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": 0.037605826825644575,
+          "kind": "actionable"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.017628660665045526,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.014071421689312847,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_cos",
+          "value": -0.006331078704450651,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": -0.0030518679589684387,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.3565887413661826,
+      "plot": "reports/shap_examples/10_confident_row4720.png"
+    },
+    {
+      "row": 45393,
+      "reason": "random",
+      "station": "Shunyi",
+      "datetime": "2016-12-20 12:00:00",
+      "hour": 12,
+      "true_label": "Hazardous",
+      "predicted": "Hazardous",
+      "probabilities": {
+        "Good": 0.02500947744650971,
+        "Moderate": 0.1064816149233266,
+        "Unhealthy (sensitive)": 0.039086129385517185,
+        "Unhealthy": 0.09511909577680056,
+        "Very unhealthy": 0.2577914745782495,
+        "Hazardous": 0.4765122078895962
+      },
+      "conformal_set": [
+        "Very unhealthy",
+        "Hazardous"
+      ],
+      "set_size": 2,
+      "raw_features": {
+        "PM2.5": 244.0,
+        "PM10": 244.0,
+        "CO": 6400.0,
+        "TEMP": -0.8000000000000007,
+        "DEWP": -3.7999999999999994
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.1874834100702107,
+          "kind": "actionable"
+        },
+        {
+          "feature": "PM10",
+          "value": 0.09586008513547623,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.05699969406758766,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": 0.03177683544591639,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_cos",
+          "value": 0.023061730900903226,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.017333391240349643,
+          "kind": "context"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.016450103271300164,
+          "kind": "context"
+        },
+        {
+          "feature": "month_sin",
+          "value": 0.012770559812835498,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.00833442763827443,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.043110825583292524,
+      "plot": "reports/shap_examples/11_random_row45393.png"
+    },
+    {
+      "row": 20808,
+      "reason": "random",
+      "station": "Dongsi",
+      "datetime": "2017-02-23 22:00:00",
+      "hour": 22,
+      "true_label": "Unhealthy",
+      "predicted": "Moderate",
+      "probabilities": {
+        "Good": 0.12663699128946615,
+        "Moderate": 0.3225419512595623,
+        "Unhealthy (sensitive)": 0.23962173565615605,
+        "Unhealthy": 0.2969127690789007,
+        "Very unhealthy": 0.010586191090594041,
+        "Hazardous": 0.0037003616253207918
+      },
+      "conformal_set": [
+        "Good",
+        "Moderate",
+        "Unhealthy (sensitive)",
+        "Unhealthy"
+      ],
+      "set_size": 4,
+      "raw_features": {
+        "PM2.5": 35.00000000000001,
+        "PM10": 70.0,
+        "CO": 800.0,
+        "TEMP": 4.699999999999999,
+        "DEWP": -10.999999999999998
+      },
+      "shap": [
+        {
+          "feature": "PM2.5",
+          "value": 0.1192651767603864,
+          "kind": "actionable"
+        },
+        {
+          "feature": "hour_cos",
+          "value": 0.04798524891423263,
+          "kind": "context"
+        },
+        {
+          "feature": "month_cos",
+          "value": -0.032144268826570475,
+          "kind": "context"
+        },
+        {
+          "feature": "hour_sin",
+          "value": -0.02722184703774101,
+          "kind": "context"
+        },
+        {
+          "feature": "PM10",
+          "value": -0.012517129635664035,
+          "kind": "actionable"
+        },
+        {
+          "feature": "TEMP",
+          "value": 0.008953609214378511,
+          "kind": "context"
+        },
+        {
+          "feature": "DEWP",
+          "value": 0.008486421398842871,
+          "kind": "context"
+        },
+        {
+          "feature": "CO",
+          "value": -0.007074991363489812,
+          "kind": "actionable"
+        },
+        {
+          "feature": "month_sin",
+          "value": -0.0006817193259549897,
+          "kind": "context"
+        }
+      ],
+      "base_value": 0.21749145116114652,
+      "plot": "reports/shap_examples/12_random_row20808.png"
+    }
+  ],
+  "features": [
+    "PM2.5",
+    "PM10",
+    "CO",
+    "TEMP",
+    "DEWP",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "global_mean_abs": {
+    "PM2.5": 0.08843321701894916,
+    "PM10": 0.03465552456978928,
+    "CO": 0.01693238220699695,
+    "TEMP": 0.007299332104255658,
+    "DEWP": 0.012293456534378184,
+    "hour_sin": 0.01077332340379963,
+    "hour_cos": 0.012307358732861174,
+    "month_sin": 0.00719841806475813,
+    "month_cos": 0.01066934184006641
+  }
+}

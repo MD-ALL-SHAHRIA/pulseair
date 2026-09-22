@@ -1,0 +1,319 @@
+{
+  "results": {
+    "EPA": {
+      "breakpoints": [
+        0,
+        12,
+        35.4,
+        55.4,
+        150.4,
+        250.4
+      ],
+      "labels": [
+        "Good",
+        "Moderate",
+        "Unhealthy (sensitive)",
+        "Unhealthy",
+        "Very unhealthy",
+        "Hazardous"
+      ],
+      "advisory": [
+        "Very unhealthy",
+        "Hazardous"
+      ],
+      "distribution": {
+        "train": {
+          "Good": {
+            "n": 40266,
+            "pct": 13.98
+          },
+          "Moderate": {
+            "n": 62824,
+            "pct": 21.81
+          },
+          "Unhealthy (sensitive)": {
+            "n": 37697,
+            "pct": 13.09
+          },
+          "Unhealthy": {
+            "n": 102722,
+            "pct": 35.66
+          },
+          "Very unhealthy": {
+            "n": 32338,
+            "pct": 11.23
+          },
+          "Hazardous": {
+            "n": 12185,
+            "pct": 4.23
+          }
+        },
+        "val": {
+          "Good": {
+            "n": 11180,
+            "pct": 18.19
+          },
+          "Moderate": {
+            "n": 14070,
+            "pct": 22.89
+          },
+          "Unhealthy (sensitive)": {
+            "n": 8952,
+            "pct": 14.56
+          },
+          "Unhealthy": {
+            "n": 20419,
+            "pct": 33.22
+          },
+          "Very unhealthy": {
+            "n": 4282,
+            "pct": 6.97
+          },
+          "Hazardous": {
+            "n": 2563,
+            "pct": 4.17
+          }
+        },
+        "test": {
+          "Good": {
+            "n": 11006,
+            "pct": 17.89
+          },
+          "Moderate": {
+            "n": 14020,
+            "pct": 22.79
+          },
+          "Unhealthy (sensitive)": {
+            "n": 6439,
+            "pct": 10.46
+          },
+          "Unhealthy": {
+            "n": 18824,
+            "pct": 30.59
+          },
+          "Very unhealthy": {
+            "n": 7554,
+            "pct": 12.28
+          },
+          "Hazardous": {
+            "n": 3687,
+            "pct": 5.99
+          }
+        }
+      },
+      "rf": {
+        "macro_f1": 0.5172837344763378,
+        "accuracy": 0.5793434097188364,
+        "per_class": {
+          "Good": 0.5981400383801604,
+          "Moderate": 0.5439672801635992,
+          "Unhealthy (sensitive)": 0.1431749770972386,
+          "Unhealthy": 0.6820261809903244,
+          "Very unhealthy": 0.5265469061876248,
+          "Hazardous": 0.6098470240390795
+        }
+      },
+      "persistence": {
+        "macro_f1": 0.5118085264164492,
+        "accuracy": 0.5355598894848042,
+        "per_class": {
+          "Good": 0.5888181818181818,
+          "Moderate": 0.49632064013717225,
+          "Unhealthy (sensitive)": 0.2570853337463218,
+          "Unhealthy": 0.6285774969468486,
+          "Very unhealthy": 0.5103649248294589,
+          "Hazardous": 0.5896845810207121
+        }
+      },
+      "val_macro_f1": 0.48953720887593305,
+      "vs_persistence": {
+        "observed_diff": 0.005475208059888548,
+        "ci_low": 0.0015744622286595483,
+        "ci_high": 0.009336604207357612,
+        "mean_diff": 0.00546267984970304,
+        "p_two_sided": 0.002,
+        "significant": true,
+        "n_boot": 1000
+      },
+      "advisory_tests": {
+        "Very unhealthy": {
+          "observed_diff": 0.016181981358165842,
+          "ci_low": 0.007851225608417485,
+          "ci_high": 0.024473015707028704,
+          "mean_diff": 0.016157613862368435,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Hazardous": {
+          "observed_diff": 0.02016244301836745,
+          "ci_low": 0.011246602421031145,
+          "ci_high": 0.02912323725364435,
+          "mean_diff": 0.02015865684120631,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        }
+      },
+      "label_unchanged_pct": 53.55598894848042
+    },
+    "HJ 633-2012": {
+      "breakpoints": [
+        0,
+        35,
+        75,
+        115,
+        150,
+        250
+      ],
+      "labels": [
+        "Excellent",
+        "Good",
+        "Lightly polluted",
+        "Moderately polluted",
+        "Heavily polluted",
+        "Severely polluted"
+      ],
+      "advisory": [
+        "Heavily polluted",
+        "Severely polluted"
+      ],
+      "distribution": {
+        "train": {
+          "Excellent": {
+            "n": 103090,
+            "pct": 35.79
+          },
+          "Good": {
+            "n": 68961,
+            "pct": 23.94
+          },
+          "Lightly polluted": {
+            "n": 46174,
+            "pct": 16.03
+          },
+          "Moderately polluted": {
+            "n": 25284,
+            "pct": 8.78
+          },
+          "Heavily polluted": {
+            "n": 32338,
+            "pct": 11.23
+          },
+          "Severely polluted": {
+            "n": 12185,
+            "pct": 4.23
+          }
+        },
+        "val": {
+          "Excellent": {
+            "n": 25250,
+            "pct": 41.08
+          },
+          "Good": {
+            "n": 15872,
+            "pct": 25.82
+          },
+          "Lightly polluted": {
+            "n": 9174,
+            "pct": 14.93
+          },
+          "Moderately polluted": {
+            "n": 4325,
+            "pct": 7.04
+          },
+          "Heavily polluted": {
+            "n": 4282,
+            "pct": 6.97
+          },
+          "Severely polluted": {
+            "n": 2563,
+            "pct": 4.17
+          }
+        },
+        "test": {
+          "Excellent": {
+            "n": 25026,
+            "pct": 40.67
+          },
+          "Good": {
+            "n": 12077,
+            "pct": 19.63
+          },
+          "Lightly polluted": {
+            "n": 8333,
+            "pct": 13.54
+          },
+          "Moderately polluted": {
+            "n": 4853,
+            "pct": 7.89
+          },
+          "Heavily polluted": {
+            "n": 7554,
+            "pct": 12.28
+          },
+          "Severely polluted": {
+            "n": 3687,
+            "pct": 5.99
+          }
+        }
+      },
+      "rf": {
+        "macro_f1": 0.49193926736976606,
+        "accuracy": 0.5918738826588656,
+        "per_class": {
+          "Excellent": 0.799047056667549,
+          "Good": 0.4576864016379457,
+          "Lightly polluted": 0.4118998140654052,
+          "Moderately polluted": 0.13117811625738265,
+          "Heavily polluted": 0.5406844528260025,
+          "Severely polluted": 0.6111397627643115
+        }
+      },
+      "persistence": {
+        "macro_f1": 0.4904764939881421,
+        "accuracy": 0.573703884284089,
+        "per_class": {
+          "Excellent": 0.7943179528510981,
+          "Good": 0.4342126689464257,
+          "Lightly polluted": 0.357177148343735,
+          "Moderately polluted": 0.25710168793742283,
+          "Heavily polluted": 0.5103649248294589,
+          "Severely polluted": 0.5896845810207121
+        }
+      },
+      "val_macro_f1": 0.494077568442097,
+      "vs_persistence": {
+        "observed_diff": 0.001462773381623983,
+        "ci_low": -0.0026465779030326294,
+        "ci_high": 0.005456467695379361,
+        "mean_diff": 0.0014740401221735838,
+        "p_two_sided": 0.492,
+        "significant": false,
+        "n_boot": 1000
+      },
+      "advisory_tests": {
+        "Heavily polluted": {
+          "observed_diff": 0.030319527996543583,
+          "ci_low": 0.02165148275209831,
+          "ci_high": 0.03892707990269415,
+          "mean_diff": 0.03028150267751678,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Severely polluted": {
+          "observed_diff": 0.021455181743599394,
+          "ci_low": 0.012140110337529769,
+          "ci_high": 0.030386654124405794,
+          "mean_diff": 0.02143859474442122,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        }
+      },
+      "label_unchanged_pct": 57.3703884284089
+    }
+  },
+  "n_test_observed": 61530
+}

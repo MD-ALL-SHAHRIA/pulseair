@@ -1,0 +1,790 @@
+{
+  "balance": {
+    "variant": "broad",
+    "features": [
+      "PM2.5",
+      "PM10",
+      "CO",
+      "TEMP",
+      "DEWP",
+      "hour_sin",
+      "hour_cos",
+      "month_sin",
+      "month_cos"
+    ],
+    "scaled_columns": [
+      "PM2.5",
+      "PM10",
+      "CO",
+      "TEMP",
+      "DEWP"
+    ],
+    "modelled_columns": [
+      "PM2.5",
+      "PM10",
+      "CO",
+      "TEMP",
+      "DEWP",
+      "hour",
+      "month"
+    ],
+    "sidecars": [
+      "is_imputed",
+      "is_imputed_pm25",
+      "is_imputed_input"
+    ],
+    "n_train_all": 294192,
+    "n_train_observed": 288032,
+    "majority_label": "Unhealthy",
+    "majority_n": 102722,
+    "target_n": 51361,
+    "plan": {
+      "Good": {
+        "n_all": 41104,
+        "n_observed": 40266,
+        "pct_observed": 13.98,
+        "ratio_to_majority": 0.392,
+        "is_minority": true,
+        "n_synthetic": 11095
+      },
+      "Moderate": {
+        "n_all": 63989,
+        "n_observed": 62824,
+        "pct_observed": 21.81,
+        "ratio_to_majority": 0.6116,
+        "is_minority": false,
+        "n_synthetic": 0
+      },
+      "Unhealthy (sensitive)": {
+        "n_all": 38480,
+        "n_observed": 37697,
+        "pct_observed": 13.09,
+        "ratio_to_majority": 0.367,
+        "is_minority": true,
+        "n_synthetic": 13664
+      },
+      "Unhealthy": {
+        "n_all": 104898,
+        "n_observed": 102722,
+        "pct_observed": 35.66,
+        "ratio_to_majority": 1.0,
+        "is_minority": false,
+        "n_synthetic": 0
+      },
+      "Very unhealthy": {
+        "n_all": 33032,
+        "n_observed": 32338,
+        "pct_observed": 11.23,
+        "ratio_to_majority": 0.3148,
+        "is_minority": true,
+        "n_synthetic": 19023
+      },
+      "Hazardous": {
+        "n_all": 12689,
+        "n_observed": 12185,
+        "pct_observed": 4.23,
+        "ratio_to_majority": 0.1186,
+        "is_minority": true,
+        "n_synthetic": 39176
+      }
+    },
+    "minority_classes": [
+      "Good",
+      "Unhealthy (sensitive)",
+      "Very unhealthy",
+      "Hazardous"
+    ],
+    "total_synthetic": 82958
+  },
+  "quality": {
+    "Good": {
+      "overall": 0.8642864934927803,
+      "column_shapes": 0.8935325389705743,
+      "column_pair_trends": 0.8350404480149864,
+      "per_column": {
+        "PM2.5": 0.9117844611835128,
+        "PM10": 0.8806540628300844,
+        "CO": 0.8584966462434456,
+        "TEMP": 0.9680334831504788,
+        "DEWP": 0.9386544150171078,
+        "hour": 0.8368104471197139,
+        "month": 0.8602942572496772
+      },
+      "poor_columns": {
+        "PM10": 0.8806540628300844,
+        "CO": 0.8584966462434456,
+        "hour": 0.8368104471197139,
+        "month": 0.8602942572496772
+      },
+      "pairs": [
+        {
+          "a": "PM2.5",
+          "b": "PM10",
+          "score": 0.914112119936668
+        },
+        {
+          "a": "PM2.5",
+          "b": "CO",
+          "score": 0.9168665117987884
+        },
+        {
+          "a": "PM2.5",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "CO",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "DEWP",
+          "score": 0.9798741348617621
+        },
+        {
+          "a": "TEMP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.7197044856749931
+        },
+        {
+          "a": "DEWP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.6446449878027207
+        },
+        {
+          "a": "hour",
+          "b": "month",
+          "score": null
+        }
+      ],
+      "poor_pairs": [
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.7197044856749931
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.6446449878027207
+        }
+      ],
+      "n_real": 40266,
+      "n_synthetic": 11095,
+      "fit_minutes": 7.35,
+      "n_dewp_clipped": 23
+    },
+    "Unhealthy (sensitive)": {
+      "overall": 0.8494338113422466,
+      "column_shapes": 0.8815167583817269,
+      "column_pair_trends": 0.8173508643027663,
+      "per_column": {
+        "PM2.5": 0.9746951421133841,
+        "PM10": 0.845878973870227,
+        "CO": 0.8116055167392606,
+        "TEMP": 0.8692370098807706,
+        "DEWP": 0.9389842441446865,
+        "hour": 0.9103415482779333,
+        "month": 0.8198748736458259
+      },
+      "poor_columns": {
+        "PM10": 0.845878973870227,
+        "CO": 0.8116055167392606,
+        "TEMP": 0.8692370098807706,
+        "month": 0.8198748736458259
+      },
+      "pairs": [
+        {
+          "a": "PM2.5",
+          "b": "PM10",
+          "score": 0.9061499389168757
+        },
+        {
+          "a": "PM2.5",
+          "b": "CO",
+          "score": 0.9569417577505764
+        },
+        {
+          "a": "PM2.5",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "CO",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "DEWP",
+          "score": 0.9545813584636686
+        },
+        {
+          "a": "TEMP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.6587666465081892
+        },
+        {
+          "a": "DEWP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.6103146198745215
+        },
+        {
+          "a": "hour",
+          "b": "month",
+          "score": null
+        }
+      ],
+      "poor_pairs": [
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.6587666465081892
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.6103146198745215
+        }
+      ],
+      "n_real": 37697,
+      "n_synthetic": 13664,
+      "fit_minutes": 6.72,
+      "n_dewp_clipped": 65
+    },
+    "Very unhealthy": {
+      "overall": 0.865283709389098,
+      "column_shapes": 0.8917672818105402,
+      "column_pair_trends": 0.8388001369676559,
+      "per_column": {
+        "PM2.5": 0.9013857165597123,
+        "PM10": 0.9089592003211804,
+        "CO": 0.9416987103056875,
+        "TEMP": 0.9459544509704794,
+        "DEWP": 0.9260862162334799,
+        "hour": 0.8218304225748424,
+        "month": 0.7964562557084003
+      },
+      "poor_columns": {
+        "hour": 0.8218304225748424,
+        "month": 0.7964562557084003
+      },
+      "pairs": [
+        {
+          "a": "PM2.5",
+          "b": "PM10",
+          "score": 0.9235290099369116
+        },
+        {
+          "a": "PM2.5",
+          "b": "CO",
+          "score": 0.9173482735550388
+        },
+        {
+          "a": "PM2.5",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "CO",
+          "score": 0.9296277196567064
+        },
+        {
+          "a": "PM10",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "TEMP",
+          "score": 0.9904834196958981
+        },
+        {
+          "a": "CO",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "DEWP",
+          "score": 0.9761285000860405
+        },
+        {
+          "a": "TEMP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.6139595243476599
+        },
+        {
+          "a": "DEWP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.5205245114953356
+        },
+        {
+          "a": "hour",
+          "b": "month",
+          "score": null
+        }
+      ],
+      "poor_pairs": [
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.6139595243476599
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.5205245114953356
+        }
+      ],
+      "n_real": 32338,
+      "n_synthetic": 19023,
+      "fit_minutes": 5.81,
+      "n_dewp_clipped": 124
+    },
+    "Hazardous": {
+      "overall": 0.7890800671575843,
+      "column_shapes": 0.9057375854915618,
+      "column_pair_trends": 0.6724225488236067,
+      "per_column": {
+        "PM2.5": 0.954987104479483,
+        "PM10": 0.860415247575643,
+        "CO": 0.9629790550334846,
+        "TEMP": 0.9199510385839973,
+        "DEWP": 0.8682060876711049,
+        "hour": 0.8875127105446469,
+        "month": 0.8861118545525725
+      },
+      "poor_columns": {
+        "PM10": 0.860415247575643,
+        "DEWP": 0.8682060876711049,
+        "hour": 0.8875127105446469,
+        "month": 0.8861118545525725
+      },
+      "pairs": [
+        {
+          "a": "PM2.5",
+          "b": "PM10",
+          "score": 0.5528654450717865
+        },
+        {
+          "a": "PM2.5",
+          "b": "CO",
+          "score": 0.7041110208289972
+        },
+        {
+          "a": "PM2.5",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM2.5",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "CO",
+          "score": 0.6973182789463152
+        },
+        {
+          "a": "PM10",
+          "b": "TEMP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "PM10",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "TEMP",
+          "score": 0.7311910204034289
+        },
+        {
+          "a": "CO",
+          "b": "DEWP",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "CO",
+          "b": "month",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "DEWP",
+          "score": 0.9925677910323043
+        },
+        {
+          "a": "TEMP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.5299893878735769
+        },
+        {
+          "a": "DEWP",
+          "b": "hour",
+          "score": null
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.4989148976088381
+        },
+        {
+          "a": "hour",
+          "b": "month",
+          "score": null
+        }
+      ],
+      "poor_pairs": [
+        {
+          "a": "PM2.5",
+          "b": "PM10",
+          "score": 0.5528654450717865
+        },
+        {
+          "a": "PM2.5",
+          "b": "CO",
+          "score": 0.7041110208289972
+        },
+        {
+          "a": "PM10",
+          "b": "CO",
+          "score": 0.6973182789463152
+        },
+        {
+          "a": "CO",
+          "b": "TEMP",
+          "score": 0.7311910204034289
+        },
+        {
+          "a": "TEMP",
+          "b": "month",
+          "score": 0.5299893878735769
+        },
+        {
+          "a": "DEWP",
+          "b": "month",
+          "score": 0.4989148976088381
+        }
+      ],
+      "n_real": 12185,
+      "n_synthetic": 39176,
+      "fit_minutes": 2.24,
+      "n_dewp_clipped": 72
+    }
+  },
+  "final_counts": {
+    "Good": {
+      "real": 41104,
+      "synthetic": 11095,
+      "total": 52199,
+      "ratio_to_majority": 0.4976
+    },
+    "Moderate": {
+      "real": 63989,
+      "synthetic": 0,
+      "total": 63989,
+      "ratio_to_majority": 0.61
+    },
+    "Unhealthy (sensitive)": {
+      "real": 38480,
+      "synthetic": 13664,
+      "total": 52144,
+      "ratio_to_majority": 0.4971
+    },
+    "Unhealthy": {
+      "real": 104898,
+      "synthetic": 0,
+      "total": 104898,
+      "ratio_to_majority": 1.0
+    },
+    "Very unhealthy": {
+      "real": 33032,
+      "synthetic": 19023,
+      "total": 52055,
+      "ratio_to_majority": 0.4962
+    },
+    "Hazardous": {
+      "real": 12689,
+      "synthetic": 39176,
+      "total": 51865,
+      "ratio_to_majority": 0.4944
+    }
+  },
+  "epochs": 300,
+  "fit_minutes": {
+    "Good": 7.35,
+    "Unhealthy (sensitive)": 6.72,
+    "Very unhealthy": 5.81,
+    "Hazardous": 2.24
+  },
+  "validity": {
+    "real": {
+      "n": 294192,
+      "hour": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 21,
+        "expected_distinct": 24
+      },
+      "month": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 11,
+        "expected_distinct": 12
+      },
+      "dewp_above_temp_pct": 0.0014,
+      "dewp_above_temp_n": 4,
+      "dewp_excess_max_degc": 0.5,
+      "dewp_within_float_noise_n": 532,
+      "negative_concentration_pct": {
+        "PM2.5": 0.0,
+        "PM10": 0.0,
+        "CO": 0.0
+      }
+    },
+    "synthetic": {
+      "n": 82958,
+      "hour": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 21,
+        "expected_distinct": 24
+      },
+      "month": {
+        "on_unit_circle_pct": 100.0,
+        "radius_min": 1.0,
+        "radius_max": 1.0,
+        "distinct_sin": 11,
+        "expected_distinct": 12
+      },
+      "dewp_above_temp_pct": 0.0,
+      "dewp_above_temp_n": 0,
+      "dewp_excess_max_degc": 4.88e-15,
+      "dewp_within_float_noise_n": 51,
+      "negative_concentration_pct": {
+        "PM2.5": 0.0,
+        "PM10": 0.0,
+        "CO": 0.0
+      }
+    }
+  }
+}

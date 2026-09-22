@@ -1,0 +1,203 @@
+{
+  "n_test_observed": 61530,
+  "n_boot": 1000,
+  "labels": [
+    "Good",
+    "Moderate",
+    "Unhealthy (sensitive)",
+    "Unhealthy",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "class_weighted_val_macro_f1": 0.5195723880750326,
+  "persistence_val_macro_f1": 0.5047942076302153,
+  "class_weighted_vs_persistence_val": {
+    "observed_diff": 0.014778180444817268,
+    "ci_low": 0.010657520411654648,
+    "ci_high": 0.018715751509515,
+    "mean_diff": 0.014764254294565201,
+    "p_two_sided": 0.0,
+    "significant": true,
+    "n_boot": 1000
+  },
+  "compressed_name": "Compressed RF (100 trees x depth 16)",
+  "cw_compressed_name": "Compressed RF, class-weighted (10 trees x depth 10)",
+  "compressed_config": {
+    "n_estimators": 100,
+    "max_depth": 16
+  },
+  "variants": {
+    "XGBoost": {
+      "scores": {
+        "macro_f1": 0.4990853629481172,
+        "accuracy": 0.5599057370388428,
+        "per_class": {
+          "Good": 0.5729871704212547,
+          "Moderate": 0.5285764998225062,
+          "Unhealthy (sensitive)": 0.15364174417200144,
+          "Unhealthy": 0.6664704950315761,
+          "Very unhealthy": 0.5121566565908792,
+          "Hazardous": 0.5606796116504854
+        }
+      },
+      "vs_persistence": {
+        "macro_f1": {
+          "observed_diff": -0.012723163468332077,
+          "ci_low": -0.017378037351219802,
+          "ci_high": -0.008246689111010825,
+          "mean_diff": -0.012777958289169384,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Very unhealthy": {
+          "observed_diff": 0.0017917317614202233,
+          "ci_low": -0.008033147656082665,
+          "ci_high": 0.011187074926110745,
+          "mean_diff": 0.0017173887734656963,
+          "p_two_sided": 0.708,
+          "significant": false,
+          "n_boot": 1000
+        },
+        "Hazardous": {
+          "observed_diff": -0.029004969370226674,
+          "ci_low": -0.0416629153811901,
+          "ci_high": -0.016459232038803038,
+          "mean_diff": -0.028911371622313695,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        }
+      }
+    },
+    "Compressed RF (100 trees x depth 16)": {
+      "scores": {
+        "macro_f1": 0.5151853860128393,
+        "accuracy": 0.5783357711685356,
+        "per_class": {
+          "Good": 0.5963582677165354,
+          "Moderate": 0.5439177290976966,
+          "Unhealthy (sensitive)": 0.1355976829910479,
+          "Unhealthy": 0.6816598757141882,
+          "Very unhealthy": 0.5250615722558744,
+          "Hazardous": 0.6085171883016932
+        }
+      },
+      "vs_persistence": {
+        "macro_f1": {
+          "observed_diff": 0.0033768595963900028,
+          "ci_low": -0.0003438953471680772,
+          "ci_high": 0.007300069532797578,
+          "mean_diff": 0.00339210063133456,
+          "p_two_sided": 0.08,
+          "significant": false,
+          "n_boot": 1000
+        },
+        "Very unhealthy": {
+          "observed_diff": 0.01469664742641541,
+          "ci_low": 0.006015363142231972,
+          "ci_high": 0.02323410711732169,
+          "mean_diff": 0.014638995621347278,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Hazardous": {
+          "observed_diff": 0.01883260728098113,
+          "ci_low": 0.009488303521956159,
+          "ci_high": 0.02771617734473837,
+          "mean_diff": 0.0188094491794499,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        }
+      }
+    },
+    "Compressed RF, class-weighted (10 trees x depth 10)": {
+      "scores": {
+        "macro_f1": 0.501991191323185,
+        "accuracy": 0.5115553388590931,
+        "per_class": {
+          "Good": 0.6199958255061574,
+          "Moderate": 0.4331654739818005,
+          "Unhealthy (sensitive)": 0.3336687209156081,
+          "Unhealthy": 0.5761621556014079,
+          "Very unhealthy": 0.4662241311987505,
+          "Hazardous": 0.5827308407353853
+        }
+      },
+      "vs_persistence": {
+        "macro_f1": {
+          "observed_diff": -0.009817335093264212,
+          "ci_low": -0.013529938748566414,
+          "ci_high": -0.005770399597569708,
+          "mean_diff": -0.009838600883518086,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Very unhealthy": {
+          "observed_diff": -0.04414079363070844,
+          "ci_low": -0.053912119265344394,
+          "ci_high": -0.03361915501707348,
+          "mean_diff": -0.04420733242531813,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Hazardous": {
+          "observed_diff": -0.006953740285326804,
+          "ci_low": -0.017331059716307808,
+          "ci_high": 0.0034625874021999565,
+          "mean_diff": -0.006916068466715866,
+          "p_two_sided": 0.196,
+          "significant": false,
+          "n_boot": 1000
+        }
+      }
+    },
+    "RandomForest (class_weight=balanced)": {
+      "scores": {
+        "macro_f1": 0.51488420737881,
+        "accuracy": 0.5275475377864456,
+        "per_class": {
+          "Good": 0.6241037310549139,
+          "Moderate": 0.46578366445916114,
+          "Unhealthy (sensitive)": 0.34444222710037914,
+          "Unhealthy": 0.5973764472476385,
+          "Very unhealthy": 0.47325383304940377,
+          "Hazardous": 0.5843453413613634
+        }
+      },
+      "vs_persistence": {
+        "macro_f1": {
+          "observed_diff": 0.0030756809623607717,
+          "ci_low": -0.0007589320649378894,
+          "ci_high": 0.0071455682840670404,
+          "mean_diff": 0.003076627306092914,
+          "p_two_sided": 0.118,
+          "significant": false,
+          "n_boot": 1000
+        },
+        "Very unhealthy": {
+          "observed_diff": -0.03711109178005517,
+          "ci_low": -0.047280242806227356,
+          "ci_high": -0.02690480502506781,
+          "mean_diff": -0.03712360059307244,
+          "p_two_sided": 0.0,
+          "significant": true,
+          "n_boot": 1000
+        },
+        "Hazardous": {
+          "observed_diff": -0.005339239659348682,
+          "ci_low": -0.015443972268608774,
+          "ci_high": 0.005688155291063286,
+          "mean_diff": -0.005174585172849038,
+          "p_two_sided": 0.32,
+          "significant": false,
+          "n_boot": 1000
+        }
+      }
+    }
+  }
+}
