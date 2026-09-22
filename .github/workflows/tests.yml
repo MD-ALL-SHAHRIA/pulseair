@@ -27,17 +27,29 @@ jobs:
       # The full requirements.txt pulls torch, tensorflow and sdv — hundreds of
       # megabytes that no test in this job touches. The suites that run here
       # (pulsebench, and the preprocessing pipeline on synthetic frames) need
-      # only the numeric stack, so CI installs that directly.
-      - name: Install test dependencies
+      # only the numeric stack.
+      #
+      # pulsebench is installed editable rather than added to PYTHONPATH, so that
+      # every run also exercises pyproject.toml: if the packaging breaks, the
+      # tests go red here instead of at the first person who tries
+      # `pip install git+https://...`.
+      - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install "numpy<2.0" pandas scikit-learn scipy pyyaml joblib pytest
+          pip install -e ".[test]"
+          pip install pyyaml joblib      # needed by src/preprocessing only
 
       - name: pulsebench unit tests + Phase 9 regression pin
-        run: pytest pulsebench/tests/ -q
+        run: python -m pytest pulsebench/tests/ -q
 
       - name: pulsebench doctests
-        run: python -m doctest pulsebench/persistence.py pulsebench/cv.py pulsebench/disqualification.py pulsebench/multiplicity.py
+        run: |
+          python -m doctest pulsebench/persistence.py pulsebench/cv.py \
+                            pulsebench/disqualification.py pulsebench/multiplicity.py
 
       - name: Preprocessing pipeline tests
-        run: pytest src/preprocessing/test_pipeline.py -q
+        run: python -m pytest src/preprocessing/test_pipeline.py -q
+
+      - name: Import pulsebench from outside the repo
+        working-directory: /tmp
+        run: python -c "import pulsebench; print(pulsebench.__version__, pulsebench.__all__)"

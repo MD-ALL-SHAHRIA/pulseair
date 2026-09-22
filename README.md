@@ -237,7 +237,7 @@ earlier phases' artifacts.
 ```bash
 # Phase 2 — preprocessing (all four horizons; h6 is primary)
 python -m src.preprocessing.pipeline --all-horizons     # -> data/processed/h{1,6,12,24}/
-pytest src/preprocessing/test_pipeline.py -q            # 33 tests: shapes, leakage, scaler fit
+python -m pytest src/preprocessing/test_pipeline.py -q  # 33 tests: shapes, leakage, scaler fit
 
 # Phase 3 — tabular baselines + horizon sweep
 python -m src.models.baseline                           # -> src/models/artifacts/baseline_h6.pkl
@@ -312,8 +312,8 @@ result = rolling_origin_cv(df, model_fn, n_folds=5, embargo_hours=24, ...)
 ```
 
 ```bash
-pytest pulsebench/tests/ -q     # 25 synthetic tests + a Phase 9 regression pin
-python -m doctest pulsebench/*.py -v | tail -1   # 28 doctests
+python -m pytest pulsebench/tests/ -q   # 25 synthetic tests + a Phase 9 regression pin
+python -m doctest pulsebench/*.py -v | tail -1         # 28 doctests
 ```
 
 The retrofit is load-bearing, not decorative: Phase 9's Beijing rolling-origin CV calls

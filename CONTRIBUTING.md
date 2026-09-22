@@ -35,8 +35,8 @@ that it disagrees with.
 2. Keep the change focused — one concern per PR.
 3. Run the tests:
    ```bash
-   pytest pulsebench/tests/ -q
-   pytest src/preprocessing/test_pipeline.py -q
+   python -m pytest pulsebench/tests/ -q
+   python -m pytest src/preprocessing/test_pipeline.py -q
    ```
    `pulsebench/tests/test_retrofit_phase9.py` pins Phase 9's pre-extraction numbers. If it
    fails, the change altered evaluation behaviour — that may be correct, but say so
