@@ -1,0 +1,32 @@
+name: Methodology question or challenge
+description: Question an evaluation choice, a reported number, or a conclusion
+labels: ["methodology"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        These are good issues to open. Every claim in `reports/` is meant to be checkable
+        from the committed metrics JSON, and several of this project's findings are
+        negative results that would be easy to get wrong. If you think one is wrong, say so.
+
+  - type: input
+    id: claim
+    attributes:
+      label: Which claim?
+      description: Quote it, and name the report and section.
+      placeholder: "reports/final_results_summary.md §2.3 — 'CTGAN significant on aggregate, harmful where it mattered'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: concern
+    attributes:
+      label: What's the problem with it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: A counter-analysis, a citation, or a re-run — whatever you have.

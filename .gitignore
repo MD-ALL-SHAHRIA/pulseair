@@ -54,3 +54,8 @@ reports/tables/*
 
 # local archives
 *.zip
+
+# packaging build artifacts
+build/
+dist/
+*.egg-info/

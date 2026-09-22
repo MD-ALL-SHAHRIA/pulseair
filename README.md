@@ -1,7 +1,9 @@
 # pulseair-ml
 
+[![tests](https://github.com/MD-ALL-SHAHRIA/pulseair/actions/workflows/tests.yml/badge.svg)](https://github.com/MD-ALL-SHAHRIA/pulseair/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 Research code for an undergraduate thesis on **wearable air-quality forecasting**: a
 GAN-augmented deep-learning pipeline with uncertainty quantification and an LLM-based
@@ -289,8 +291,13 @@ agree requires looking, which is the thing being avoided.
 ## `pulsebench` — the evaluation protocol, extracted
 
 The methodology outlasts the model it produced, so it is packaged separately in
-**[`pulsebench/`](pulsebench/README.md)**. It depends on nothing in `src/` and works on any
-dataframe with a datetime axis and a categorical target:
+**[`pulsebench/`](pulsebench/README.md)**. It depends on nothing in `src/`, needs only the
+numeric stack, and works on any dataframe with a datetime axis and a categorical target.
+**You can install it on its own, without the rest of this repository:**
+
+```bash
+pip install "git+https://github.com/MD-ALL-SHAHRIA/pulseair.git"
+```
 
 ```python
 from pulsebench import (
@@ -341,10 +348,32 @@ repository"*.
 
 ---
 
+## Contributing
+
+This repository has two halves with different expectations. **`src/` is thesis code** —
+it reproduces a fixed set of published results, so changes that alter those numbers need
+discussion before they need a patch. **`pulsebench/` is built for reuse, and that's where
+contributions are most welcome.**
+
+Good places to start:
+
+- **[Open issues tagged `good first issue`](https://github.com/MD-ALL-SHAHRIA/pulseair/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** — scoped, self-contained, and each one says what "done" looks like.
+- **Run `pulsebench` on your own data and tell us what broke.** It has been exercised on
+  two air-quality datasets. Any seasonal, imbalanced, categorical time series is fair
+  game, and the failure modes we haven't seen yet are the most useful thing you can bring.
+- **Challenge a result.** Every claim in `reports/` is checkable from the committed
+  metrics JSON, and several are negative findings that would be easy to get wrong. There's
+  a [dedicated issue template](.github/ISSUE_TEMPLATE/methodology.yml) for exactly this.
+- **Questions and open-ended ideas** belong in
+  [Discussions](https://github.com/MD-ALL-SHAHRIA/pulseair/discussions).
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first — particularly the evaluation conventions,
+which are the house rules the whole codebase rests on. Also:
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md), [`SECURITY.md`](SECURITY.md).
+
+---
+
 ## License
 
 MIT — see [`LICENSE`](LICENSE). © 2026 Md All Shahria, Sanjeda Dewan Mithila,
 Anik Sarker Rudro, Irfanul Islam Payel.
-
-Contributions: see [`CONTRIBUTING.md`](CONTRIBUTING.md). This is a thesis repository, but
-`pulsebench` is built for reuse and issues or pull requests against it are welcome.

@@ -1,0 +1,69 @@
+# This project ships two things: the thesis pipeline in src/, which is run as modules
+# from the repo root and is not packaged, and pulsebench/, which is built for reuse
+# elsewhere. This file packages pulsebench so it can be installed on its own:
+#
+#     pip install "git+https://github.com/MD-ALL-SHAHRIA/pulseair.git"
+#
+# It is deliberately not published to PyPI.
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pulsebench"
+version = "0.1.0"
+description = "An evaluation protocol for seasonal, imbalanced time-series classification: persistence floors, rolling-origin CV, protected-class disqualification, and multiplicity correction."
+readme = "pulsebench/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Md All Shahria" },
+    { name = "Sanjeda Dewan Mithila" },
+    { name = "Anik Sarker Rudro" },
+    { name = "Irfanul Islam Payel" },
+]
+keywords = [
+    "time-series classification",
+    "model evaluation",
+    "rolling-origin cross-validation",
+    "walk-forward validation",
+    "persistence baseline",
+    "class imbalance",
+    "benchmark",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.24,<2.0",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.4"]
+
+[project.urls]
+Homepage = "https://github.com/MD-ALL-SHAHRIA/pulseair"
+Documentation = "https://github.com/MD-ALL-SHAHRIA/pulseair/blob/main/pulsebench/README.md"
+Results = "https://github.com/MD-ALL-SHAHRIA/pulseair/blob/main/reports/final_results_summary.md"
+Issues = "https://github.com/MD-ALL-SHAHRIA/pulseair/issues"
+
+[tool.setuptools]
+packages = ["pulsebench"]
+
+[tool.setuptools.package-data]
+pulsebench = ["README.md", "CITATION.cff"]
+
+[tool.pytest.ini_options]
+testpaths = ["pulsebench/tests", "src/preprocessing"]
+python_files = ["test_*.py"]

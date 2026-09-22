@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and general discussion
+    url: https://github.com/MD-ALL-SHAHRIA/pulseair/discussions
+    about: For "how do I use pulsebench on my data?" and anything open-ended.
+  - name: Read the results first
+    url: https://github.com/MD-ALL-SHAHRIA/pulseair/blob/main/reports/final_results_summary.md
+    about: Master comparison table, every negative result, and what is and isn't deployed.
+  - name: Contributing guide
+    url: https://github.com/MD-ALL-SHAHRIA/pulseair/blob/main/CONTRIBUTING.md
+    about: Where contributions are most welcome, and the evaluation conventions to follow.

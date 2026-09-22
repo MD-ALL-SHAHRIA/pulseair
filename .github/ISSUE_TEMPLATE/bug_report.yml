@@ -1,0 +1,74 @@
+name: Bug report
+description: Something in the pipeline or in pulsebench doesn't work
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - pulsebench (the standalone evaluation toolkit)
+        - src/preprocessing
+        - src/models
+        - src/gan
+        - src/explainability
+        - src/deployment
+        - docs / reports
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: What did you run?
+      description: The exact command or code, please.
+      render: shell
+      placeholder: python -m src.models.baseline --horizon-sweep
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Full traceback if there is one — trimmed tracebacks hide the useful frame.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Python version and OS
+      placeholder: "3.11.9, macOS 15.6 (Apple Silicon)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install dependencies?
+      options:
+        - requirements.txt
+        - requirements.lock.txt
+        - pip install -e . (pulsebench only)
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: numbers
+    attributes:
+      label: Numerical discrepancy? (optional)
+      description: >-
+        If a metric disagrees with a committed result, paste what you got and name the
+        file in reports/metrics/ it disagrees with. That comparison is usually the whole
+        diagnosis.

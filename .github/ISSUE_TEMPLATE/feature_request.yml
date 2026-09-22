@@ -1,0 +1,41 @@
+name: Feature request
+description: Propose something new, especially for pulsebench
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        `pulsebench` is the part of this project built for reuse, and proposals there are
+        the most welcome. `src/` reproduces a fixed set of thesis results, so changes that
+        alter published numbers need discussion first.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation you hit, not the solution you have in mind — yet.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you add or change?
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Sketch the API (optional)
+      render: python
+
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Evaluation conventions
+      description: >-
+        See CONTRIBUTING.md. These are the house rules this codebase is built on; a
+        proposal that breaks one is still welcome, it just needs to say why.
+      options:
+        - label: This does not weaken persistence-floor reporting, chronological splitting, or the protected-class disqualification rule — or, if it does, I've explained why in the proposal.
