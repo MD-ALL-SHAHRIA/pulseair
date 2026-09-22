@@ -146,8 +146,13 @@ def rolling_origin_cv(df: pd.DataFrame, model_fn, n_folds: int = 5,
                      else f"the block is empty after a {embargo_hours}h embargo")
             raise ValueError(f"fold {meta['fold']} has no evaluable rows: {cause}")
 
-        Xtr = tr[feature_cols].to_numpy(dtype=float)
-        Xev = ev[feature_cols].to_numpy(dtype=float)
+        # copy=True is load-bearing. Under pandas 3's copy-on-write, to_numpy can
+        # hand back a read-only view of the frame's own block, and the in-place
+        # scaling below then fails with "assignment destination is read-only".
+        # pandas 2 happened to return a writable copy here, so this was invisible
+        # until the CI matrix ran both.
+        Xtr = tr[feature_cols].to_numpy(dtype=float, copy=True)
+        Xev = ev[feature_cols].to_numpy(dtype=float, copy=True)
         if scale_cols:
             pos = [feature_cols.index(c) for c in scale_cols]
             sc = StandardScaler().fit(Xtr[:, pos])

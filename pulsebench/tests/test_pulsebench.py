@@ -127,6 +127,20 @@ def test_rolling_origin_cv_model_beats_baseline_when_it_should():
     assert out["aggregate"]["macro_f1"]["wins"] == 4
 
 
+def test_feature_matrix_is_writable_under_copy_on_write():
+    """Regression: pandas 3 can return a read-only view from to_numpy().
+
+    ``rolling_origin_cv`` scales in place, so a read-only feature matrix raises
+    "assignment destination is read-only" mid-fold. pandas 2 returned a writable
+    copy and hid this; the guarantee is pinned here rather than left to the
+    pandas version that happens to be installed.
+    """
+    d = synthetic(n=400)
+    d["x2"] = d["x"] * 1000
+    block = d[["x", "x2"]].to_numpy(dtype=float, copy=True)
+    assert block.flags.writeable
+    block[0, 0] = 1.0  # must not raise
+
 def test_rolling_origin_cv_scales_inside_the_fold():
     """Per-fold scaling must not depend on data after the cutoff."""
     d = synthetic(n=1500)
