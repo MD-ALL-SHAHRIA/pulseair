@@ -1,0 +1,56 @@
+# --- environments ---
+.venv/
+venv/
+env/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- data: regenerable or too large / not for version control ---
+data/raw/*
+data/interim/*
+data/processed/*
+data/external/*
+!data/**/.gitkeep
+
+# --- model + deployment artifacts ---
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.h5
+*.keras
+models/
+checkpoints/
+
+# --- generated reports ---
+reports/figures/*
+reports/metrics/*
+reports/tables/*
+!reports/**/.gitkeep
+
+# --- secrets (LLM API keys for the advisory module) ---
+.env
+.env.*
+!.env.example
+
+# --- macOS ---
+.DS_Store
+
+# --- model artifacts and exports: regenerable, and large ---
+*.pkl
+*.pt
+*.onnx
+*.npz
+!requirements.lock.txt
+
+# --- local tooling ---
+.DS_Store
+.ipynb_checkpoints/
+
+# local archives
+*.zip

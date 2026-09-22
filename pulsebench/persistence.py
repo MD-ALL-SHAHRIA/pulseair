@@ -1,0 +1,90 @@
+"""The persistence floor: what a model must beat to have demonstrated anything."""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+from sklearn.metrics import f1_score
+
+__all__ = ["persistence_floor"]
+
+
+def persistence_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
+                      time_col: str | None = None, freq: str = "h",
+                      group_col: str | None = None,
+                      labels: list | None = None) -> dict:
+    """Score the zero-parameter rule "the value at *t+h* equals the value at *t*".
+
+    This is the baseline most seasonal forecasting papers omit, and omitting it is how
+    a model that has learned to echo its input gets reported as a forecaster. On the
+    air-quality data this package was extracted from, a 1-hour-ahead AQI classifier
+    scored 0.7994 macro-F1 against a persistence floor of 0.7933 — a gain of +0.006
+    that vanished entirely once the floor was reported alongside it.
+
+    Pairs are formed by an explicit time join, not a positional shift, so gaps in the
+    series do not silently create pairs that span them.
+
+    Args:
+        df: Rows indexed by time, or carrying a datetime column named by ``time_col``.
+        target_col: Categorical column to forecast.
+        horizon: How far ahead, in units of ``freq``.
+        time_col: Datetime column. Defaults to the index.
+        freq: Pandas offset alias for one step. Default hourly.
+        group_col: Optional grouping (station, city, sensor). Pairs never cross groups.
+        labels: Class labels in order. Inferred from the data when omitted.
+
+    Returns:
+        ``macro_f1``, ``accuracy``, ``label_unchanged_pct``, ``n_pairs``,
+        ``per_class_f1`` and ``support``.
+
+    Example:
+        >>> import pandas as pd, numpy as np
+        >>> idx = pd.date_range("2024-01-01", periods=200, freq="h")
+        >>> rng = np.random.default_rng(0)
+        >>> y = pd.Series(rng.integers(0, 3, len(idx)), index=idx)
+        >>> out = persistence_floor(y.to_frame("risk"), "risk", horizon=6)
+        >>> out["n_pairs"]
+        194
+        >>> 0.0 <= out["macro_f1"] <= 1.0
+        True
+        >>> sorted(out["support"])
+        [0, 1, 2]
+    """
+    d = df.copy()
+    if time_col is None:
+        if not isinstance(d.index, pd.DatetimeIndex):
+            raise TypeError("index must be a DatetimeIndex, or pass time_col=")
+        d = d.reset_index(names="__t")
+        time_col = "__t"
+    d[time_col] = pd.to_datetime(d[time_col])
+
+    step = pd.tseries.frequencies.to_offset(freq) * horizon
+    keys = [time_col] + ([group_col] if group_col else [])
+    left = d[keys + [target_col]].copy()
+    left["__join"] = left[time_col] + step
+    right = d[keys + [target_col]].rename(columns={target_col: "__future"})
+
+    merged = left.merge(right, left_on=["__join"] + ([group_col] if group_col else []),
+                        right_on=keys, how="inner", suffixes=("", "__r"))
+    if merged.empty:
+        raise ValueError("no (t, t+horizon) pairs — check horizon, freq and gaps")
+
+    now = merged[target_col].to_numpy()
+    future = merged["__future"].to_numpy()
+    classes = list(labels) if labels is not None else sorted(
+        set(np.unique(now)) | set(np.unique(future)))
+    idx = list(range(len(classes)))
+    code = {c: i for i, c in enumerate(classes)}
+    a = np.array([code[v] for v in now])
+    b = np.array([code[v] for v in future])
+
+    return {
+        "n_pairs": int(len(merged)),
+        "macro_f1": float(f1_score(b, a, labels=idx, average="macro", zero_division=0)),
+        "accuracy": float((a == b).mean()),
+        "label_unchanged_pct": float((a == b).mean() * 100),
+        "per_class_f1": {classes[i]: float(f1_score(b == i, a == i, zero_division=0))
+                         for i in idx},
+        "support": {classes[i]: int((b == i).sum()) for i in idx},
+        "labels": classes,
+    }

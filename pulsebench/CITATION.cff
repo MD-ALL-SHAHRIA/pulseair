@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "pulsebench: an evaluation protocol for seasonal, imbalanced time-series classification"
+message: "If you use this software, please cite it using these metadata."
+type: software
+abstract: >-
+  pulsebench packages four evaluation practices for seasonal, imbalanced,
+  categorical time-series classification: a zero-parameter persistence floor
+  reported alongside every headline metric; expanding-window rolling-origin
+  cross-validation with embargo, per-fold scaling and sparse-class handling; a
+  disqualification rule that rejects interventions which improve an aggregate
+  metric while significantly degrading a named safety-critical class; and
+  Bonferroni correction over a family of baseline comparisons with the
+  resampling resolution floor made explicit. It was extracted from a thesis on
+  wearable air-quality forecasting, in which each of the four caught a result
+  that the conventional reporting would have presented as a finding.
+authors:
+  - name: "Md All Shahria"
+  - name: "Sanjeda Dewan Mithila"
+  - name: "Anik Sarker Rudro"
+  - name: "Irfanul Islam Payel"
+keywords:
+  - time-series classification
+  - model evaluation
+  - rolling-origin cross-validation
+  - walk-forward validation
+  - persistence baseline
+  - class imbalance
+  - conformal prediction
+  - air quality
+license: MIT
+version: 0.1.0
+date-released: "2026-09-21"
+repository-code: "https://github.com/MD-ALL-SHAHRIA/pulseair"
+references:
+  - type: generic
+    title: "Beijing Multi-Site Air-Quality Data"
+    notes: "UCI Machine Learning Repository, id=501. Dataset on which the protocol was developed."
+    url: "https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data"

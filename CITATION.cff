@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+title: "PulseAir: rigor-first evaluation of wearable air-quality forecasting"
+message: "If you use this software or its results, please cite it using these metadata."
+type: software
+abstract: >-
+  Research code for a thesis on wearable air-quality forecasting for an ESP32
+  neckband. The pipeline covers preprocessing with imputation provenance, CTGAN
+  and SMOTE augmentation with a paired-bootstrap ablation, LSTM/Transformer
+  sequence models with MC-dropout uncertainty, Mondrian conformal prediction,
+  SHAP attribution, an LLM risk advisory with validated output, and compression
+  and ONNX export for edge deployment. Its central contribution is evaluation
+  discipline: every headline metric is reported against a zero-parameter
+  persistence floor, single-split results are re-tested with rolling-origin
+  cross-validation, and interventions that raise an aggregate metric while
+  degrading a safety-critical class are disqualified. Applied to the UCI Beijing
+  multi-site data, that discipline shows no model reliably beats persistence at
+  a six-hour horizon; the deployable result and the validated advisory-class
+  result both come from Bangladesh data, the wearable's target population.
+authors:
+  - name: "Md All Shahria"
+  - name: "Sanjeda Dewan Mithila"
+  - name: "Anik Sarker Rudro"
+  - name: "Irfanul Islam Payel"
+keywords:
+  - air quality
+  - wearable sensing
+  - time-series classification
+  - persistence baseline
+  - rolling-origin cross-validation
+  - class imbalance
+  - conformal prediction
+  - uncertainty quantification
+  - CTGAN
+  - edge deployment
+license: MIT
+version: 1.0.0
+date-released: "2026-09-22"
+repository-code: "https://github.com/MD-ALL-SHAHRIA/pulseair"
+references:
+  - type: generic
+    title: "Beijing Multi-Site Air-Quality Data"
+    notes: "UCI Machine Learning Repository, id=501."
+    url: "https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data"
+  - type: generic
+    title: "Air Quality Index (AQI) dataset of Bangladesh"
+    notes: >-
+      Mendeley Data 9j447cynb9 v2. Used with the integrity limitations documented
+      in reports/bangladesh_validation.md; only data from 2022-08-05 onward.
+    url: "https://data.mendeley.com/datasets/9j447cynb9"
+  - type: generic
+    title: "US Embassy Dhaka PM2.5 reference monitor, historical hourly files"
+    notes: "AirNow Embassy archive, 2016-2025."
+    url: "https://files.airnowtech.org"

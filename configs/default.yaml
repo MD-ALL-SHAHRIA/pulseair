@@ -1,0 +1,198 @@
+# Default experiment configuration for pulseair-ml.
+project: pulseair-ml
+seed: 42
+
+data:
+  # UCI Beijing Multi-Site Air Quality
+  # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
+  # 420,768 hourly rows = 12 stations x 35,064 hours, 2013-03-01 .. 2017-02-28.
+  # NOTE: ucimlrepo cannot serve id=501 (nested zip of 12 CSVs) -- the archive is
+  # fetched directly by src/preprocessing/download.py.
+  uci_id: 501
+  raw_file: data/raw/beijing_multisite.csv
+  expected_rows: 420768
+  raw_dir: data/raw
+  # Each horizon writes to its own subdirectory: data/processed/h1, h6, h12, h24.
+  # Nothing is written to the root, so an unsuffixed path is always a stale reference.
+  processed_dir: data/processed
+
+  pollutants: [PM2.5, PM10, SO2, NO2, CO, O3]
+  meteorology: [TEMP, PRES, DEWP, RAIN, WSPM]
+  categorical: [wd, station]
+  time_cols: [year, month, day, hour]
+
+  target: pm25_category        # AQI bin derived from PM2.5
+  # PM2.5 (ug/m3) AQI breakpoints -> Good / Moderate / Unhealthy (sensitive) /
+  # Unhealthy / Very unhealthy / Hazardous
+  pm25_breakpoints: [0, 12, 35.4, 55.4, 150.4, 250.4]
+
+  # Chronological, not random: the data has strong seasonal and diurnal structure,
+  # so a random split leaks future information into training.
+  # 70 / 15 / 15 train / val / test, cut on the shared hourly time axis so every
+  # station is split at the same two timestamps.
+  split: chronological
+  test_size: 0.15
+  val_size: 0.15
+  group_key: station
+
+  # Human-readable names for the six pm25_breakpoints bins above, in order.
+  pm25_labels:
+    - Good
+    - Moderate
+    - Unhealthy (sensitive)
+    - Unhealthy
+    - Very unhealthy
+    - Hazardous
+
+preprocessing:
+  # Wearable sensor set: what a low-cost ESP32 neckband can actually measure.
+  # DEWP stands in for humidity (the neckband carries a DHT-class T/RH sensor;
+  # dew point and RH are interconvertible given TEMP).
+  features: [PM2.5, PM10, CO, TEMP, DEWP]
+  # Scaled by StandardScaler; the cyclical encodings below are left untouched.
+  cyclical: [hour, month]
+  window: 24        # hours of history per sequence sample
+
+  # PRIMARY FORECASTING HORIZON.
+  # Was 1. At h=1 the task is near-trivial: the AQI category is unchanged from t to t+1
+  # in 80.5% of samples, so a zero-parameter persistence rule scores 0.7933 macro-F1 and
+  # RandomForest clears it by only +0.006 (reports/horizon_comparison.md). h=6 is the
+  # dataset every later phase -- CTGAN, LSTM/Transformer, SHAP, LLM advisory -- trains
+  # and reports on.
+  horizon: 6
+
+  # Also generated, for the multi-horizon comparison figure in Phase 9. These are NOT
+  # training sets; do not select models or report headline results on them.
+  horizons: [1, 6, 12, 24]
+
+  fill: ffill       # forward-fill within station, then drop what remains
+
+gan:
+  model: ctgan
+  epochs: 300
+  batch_size: 500
+  synthetic_rows: 10000      # legacy cap; the per-class target below is what is used
+
+  # CTGAN is fit on the PRIMARY horizon's training split, restricted to observed
+  # labels (is_imputed_pm25 == False). Forward-fill roughly doubles Hazardous
+  # prevalence, so fitting on unfiltered rows would teach the generator an imputation
+  # artifact and then amplify it. See reports/preprocessing_summary_h6.md.
+  fit_on: observed_only
+
+  # A class is a minority if it holds less than `minority_threshold` of the majority
+  # class count; it is then topped up to `target_ratio` of that count. Partial
+  # rebalancing, not full: full balance would misrepresent the base rate a wearable
+  # actually encounters.
+  minority_threshold: 0.5
+  target_ratio: 0.5
+
+  # Column quality below this in SDV's report is flagged in the write-up rather than
+  # passed over.
+  quality_floor: 0.90
+
+# Tabular baselines. These are the reference the GAN-augmented sequence model has to
+# beat, so they stay deliberately plain -- no tuning, no resampling, no class weighting
+# by default. Flip class_weight on to measure the cheap alternative to CTGAN.
+baseline:
+  artifacts_dir: src/models/artifacts
+  report: reports/baseline_metrics.md
+  # Model selection is on macro-F1 over observed-label rows only (is_imputed_pm25 ==
+  # False), never overall -- the overall figure is inflated by the forward-fill artifact
+  # documented in the preprocessing summary.
+  # Selection reads the VALIDATION split. Test is touched only for final reporting,
+  # even when the two splits would pick the same model.
+  select_on: val_observed_macro_f1
+
+  # Depth and leaf size are capped deliberately. An unbounded forest
+  # (max_depth: null, min_samples_leaf: 2) pickles to 2.4 GB here and scores *worse*
+  # (0.7970 vs 0.7994 observed macro-F1) -- it was memorising. These settings are
+  # 24x smaller, fit in half the time, and are the ones that matter for a project
+  # whose endpoint is an ESP32.
+  random_forest:
+    n_estimators: 200
+    max_depth: 16
+    min_samples_leaf: 50
+    max_features: sqrt
+    class_weight: null       # or balanced / balanced_subsample
+    n_jobs: -1
+
+  xgboost:
+    n_estimators: 400
+    max_depth: 8
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 5
+    reg_lambda: 1.0
+    tree_method: hist
+    n_jobs: -1
+
+# Sequence models (src/models/dl_forecast.py). Trained on the UNAUGMENTED h6
+# sequences: Phase 4 showed both CTGAN variants significantly degrade the advisory
+# classes (reports/gan_ablation_h6.md).
+model:
+  # NOTE: the tabular baselines read `baseline:` above, not this block.
+  architecture: [lstm, transformer]   # both are trained; validation picks one
+  num_layers: 2
+  dropout: 0.2
+  # 3e-4, not 1e-3. At 1e-3 both architectures peak at epoch 2-4 and then decline
+  # while training loss keeps falling; at 3e-4 they peak around epoch 6-8 and reach a
+  # materially higher validation macro-F1 (LSTM 0.4948 -> 0.5151, Transformer
+  # 0.5026 -> 0.5148). Chosen on validation only -- see `--lr-sweep`.
+  lr: 3.0e-4
+  # 512, not 64: at 294k training sequences a batch of 64 costs 163 min per model on
+  # MPS against 30 min at 512, and nothing about this dataset needs the smaller batch.
+  batch_size: 512
+  epochs: 100          # a ceiling; early stopping almost always ends it sooner
+  patience: 8          # epochs without val macro-F1 improvement before stopping
+  # No class weighting, matching the tabular baselines. The comparison is only
+  # meaningful if both sides face the imbalance on the same terms.
+  class_weight: null
+
+  lstm:
+    hidden_size: 64
+
+  transformer:
+    d_model: 64        # must be divisible by nhead
+    nhead: 4
+    dim_feedforward: 128
+
+uncertainty:
+  method: mc_dropout
+  n_samples: 50
+
+# Split conformal prediction on top of the RandomForest. Phase 5 showed the sequence
+# models do not beat the forest, so uncertainty is added to the winner rather than
+# keeping an LSTM around for it (reports/dl_metrics_h6.md).
+conformal:
+  target_coverage: 0.90
+  calibration_split: val      # observed rows only
+  score: inverse_probability  # 1 - P(true class)
+
+explainability:
+  shap_background_size: 200
+  shap_n_examples: 12
+  # Gemini free tier: no billing required, so another researcher can reproduce the
+  # advisory layer without paid API access. See reports/llm_advisory_examples.md.
+  # gemini-2.0-flash was requested but Google has retired it (404: "no longer
+  # available... use models/gemini-3.6-flash"). 3.6-flash works but its free tier is
+  # 5 requests/min and only 20/day, which is too thin to regenerate this project's
+  # examples more than once; 3.1-flash-lite is the same family with real headroom.
+  # Pinned rather than `gemini-flash-latest` so the thesis result is reproducible.
+  llm_provider: gemini
+  llm_model: gemini-3.1-flash-lite
+  # 4096, not 1024: Gemini 3.x reasons internally and those tokens count against
+  # max_output_tokens, so a ~120-token advisory still hit the cap at 1024
+  # (finish_reason=MAX_TOKENS, truncated mid-sentence).
+  llm_max_tokens: 4096
+  llm_temperature: 0.3
+
+deployment:
+  # Phase 7 targets the FINAL predictor: baseline_h6.pkl + Mondrian conformal_h6.pkl.
+  # The sequence models were disqualified in Phase 5 and are not deployed.
+  # Same practical-significance threshold used in Phases 4 and 5: a compressed model
+  # may give up at most this much macro-F1 (measured on validation).
+  macro_f1_tolerance: 0.01
+  onnx_opset: 17
+  tflite_quantization: int8   # required for TFLite Micro on ESP32
+  artifacts_dir: reports/deployment

@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# pulseair-ml -- GAN-augmented DL + UQ + LLM explainability for a wearable
+# air-quality neckband (ESP32). Python 3.11.
+# ---------------------------------------------------------------------------
+
+# --- core data stack -------------------------------------------------------
+numpy>=1.26,<2.0          # <2.0: tensorflow / sdv / shap wheels still pin numpy 1.x
+pandas>=2.2,<3.0
+scipy>=1.11,<2.0
+
+# --- classical ML / baselines ---------------------------------------------
+scikit-learn>=1.5,<2.0
+imbalanced-learn>=0.12,<1.0   # SMOTE control for the augmentation ablation
+
+# --- plotting --------------------------------------------------------------
+matplotlib>=3.8,<4.0
+seaborn>=0.13,<0.14
+
+# --- deep learning (primary training framework) ----------------------------
+torch>=2.2,<3.0
+
+# --- dataset access (UCI air-quality benchmarks) ---------------------------
+ucimlrepo>=0.0.7
+
+# --- synthetic data augmentation (CTGAN via SDV) ---------------------------
+sdv>=1.17,<2.0            # pulls in ctgan, copulas, rdt
+
+# --- gradient boosting (tabular baseline) ----------------------------------
+xgboost>=2.0,<4.0         # macOS: also needs `brew install libomp` (see README)
+
+# --- explainability --------------------------------------------------------
+shap>=0.45,<1.0
+# LLM risk advisory (src/explainability/llm_advisory.py). Gemini free tier: no
+# billing needed to reproduce the advisory layer.
+# google-genai, not google-generativeai: the latter is end-of-life upstream
+# ("no longer receiving updates or bug fixes"), which is a poor foundation for a
+# project whose stated reason for using a free tier is reproducibility.
+google-genai>=1.0,<2.0
+
+# --- edge deployment: ONNX export path -------------------------------------
+onnx>=1.16,<2.0
+onnxruntime>=1.18,<2.0
+onnxscript>=0.2,<1.0       # required by torch>=2.9 torch.onnx.export (dynamo exporter)
+skl2onnx>=1.17,<2.0        # scikit-learn -> ONNX for the deployed RandomForest
+
+# --- edge deployment: TFLite / TFLite Micro conversion path ----------------
+tensorflow>=2.16,<2.20    # provides the TFLiteConverter used for the ESP32 build
+
+# --- notebooks / EDA -------------------------------------------------------
+jupyterlab>=4.2,<5.0
+ipykernel>=6.29,<7.0
+
+# --- testing ---------------------------------------------------------------
+pytest>=8.0,<9.0
+
+# --- utilities -------------------------------------------------------------
+pyyaml>=6.0,<7.0
+tqdm>=4.66,<5.0
+python-dotenv>=1.0,<2.0

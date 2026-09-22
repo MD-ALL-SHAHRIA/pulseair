@@ -1,0 +1,52 @@
+{
+  "schema": "pulseair-conformal/1",
+  "method": "mondrian",
+  "target_coverage": 0.9,
+  "class_labels": [
+    "Good",
+    "Moderate",
+    "Unhealthy (sensitive)",
+    "Unhealthy",
+    "Very unhealthy",
+    "Hazardous"
+  ],
+  "feature_columns": [
+    "PM2.5",
+    "PM10",
+    "CO",
+    "TEMP",
+    "DEWP",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "thresholds": {
+    "Good": 0.9299165639528234,
+    "Moderate": 0.8889568308100118,
+    "Unhealthy (sensitive)": 0.9260122590854936,
+    "Unhealthy": 0.7535187770040853,
+    "Very unhealthy": 0.9292092710182681,
+    "Hazardous": 0.9458147570035349
+  },
+  "thresholds_by_index": {
+    "0": 0.9299165639528234,
+    "1": 0.8889568308100118,
+    "2": 0.9260122590854936,
+    "3": 0.7535187770040853,
+    "4": 0.9292092710182681,
+    "5": 0.9458147570035349
+  },
+  "rule": "class c is in the prediction set when (1 - P[c]) <= thresholds[c]",
+  "calibrated_on": "h6 val split, observed rows",
+  "model": "pulseair_rf_h6.onnx",
+  "empirical_test_coverage": 0.8864456362749878,
+  "empirical_per_class_coverage": {
+    "Good": 0.8697982918408141,
+    "Moderate": 0.8880171184022825,
+    "Unhealthy (sensitive)": 0.8628669047988818,
+    "Unhealthy": 0.8796217594560136,
+    "Very unhealthy": 0.9356632247815727,
+    "Hazardous": 0.9053430973691348
+  }
+}
