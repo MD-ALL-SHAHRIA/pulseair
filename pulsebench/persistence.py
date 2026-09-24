@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
 
-__all__ = ["persistence_floor"]
+__all__ = ["persistence_floor", "seasonal_naive_floor"]
 
 
 def persistence_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
@@ -71,6 +71,56 @@ def persistence_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
 
     now = merged[target_col].to_numpy()
     future = merged["__future"].to_numpy()
+    return _score_pairs(now, future, labels)
+
+
+def seasonal_naive_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
+                         season_length: int, time_col: str | None = None,
+                         freq: str = "h", group_col: str | None = None,
+                         labels: list | None = None) -> dict:
+    """Predict t+h from the latest matching seasonal time at or before t.
+
+    ``horizon`` and ``season_length`` are positive integer counts of ``freq``.
+    The prediction is y[t+h-k*season_length], where k=ceil(h/season_length),
+    including horizons longer than one season without using future observations.
+    Both the origin-to-target and seasonal-source matches are time joins within
+    ``group_col`` (when given); missing timestamps are never replaced by row shifts.
+    Other arguments and returned metrics match :func:`persistence_floor`.
+    ``label_unchanged_pct`` here compares the seasonal source with the target.
+    Pair counts can differ between baselines when seasonal history is unavailable.
+
+    >>> idx = pd.date_range("2024-01-01", periods=12, freq="h")
+    >>> df = pd.DataFrame({"y": [0, 1, 2] * 4}, index=idx)
+    >>> out = seasonal_naive_floor(df, "y", 1, season_length=3)
+    >>> out["n_pairs"], out["macro_f1"]
+    (9, 1.0)
+    """
+    for name, value in (("horizon", horizon), ("season_length", season_length)):
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)) or value < 1:
+            raise ValueError(f"{name} must be a positive integer")
+    d = df.copy()
+    if time_col is None:
+        if not isinstance(d.index, pd.DatetimeIndex):
+            raise TypeError("index must be a DatetimeIndex, or pass time_col=")
+        d = d.reset_index(names="__t")
+        time_col = "__t"
+    d[time_col] = pd.to_datetime(d[time_col])
+    offset = pd.tseries.frequencies.to_offset(freq)
+    groups = [group_col] if group_col else []
+    keys = [time_col] + groups
+    origins = d[keys].copy()
+    origins[time_col] = origins[time_col] + offset * horizon
+    targets = origins.merge(d[keys + [target_col]], on=keys, how="inner")
+    lag = ((int(horizon) - 1) // int(season_length) + 1) * int(season_length)
+    sources = d[keys + [target_col]].rename(columns={target_col: "__seasonal"})
+    sources[time_col] = sources[time_col] + offset * lag
+    pairs = targets.merge(sources, on=keys, how="inner")
+    if pairs.empty:
+        raise ValueError("no seasonal pairs — check horizon, season_length, freq and gaps")
+    return _score_pairs(pairs["__seasonal"].to_numpy(), pairs[target_col].to_numpy(), labels)
+
+
+def _score_pairs(now: np.ndarray, future: np.ndarray, labels: list | None) -> dict:
     # .tolist() matters: np.unique hands back numpy scalars, which become numpy
     # scalars in the returned dicts' KEYS. That makes the result unserializable by
     # json.dump and, since numpy 2 changed scalar repr, makes it print differently
@@ -83,7 +133,7 @@ def persistence_floor(df: pd.DataFrame, target_col: str, horizon: int, *,
     b = np.array([code[v] for v in future])
 
     return {
-        "n_pairs": int(len(merged)),
+        "n_pairs": int(len(now)),
         "macro_f1": float(f1_score(b, a, labels=idx, average="macro", zero_division=0)),
         "accuracy": float((a == b).mean()),
         "label_unchanged_pct": float((a == b).mean() * 100),

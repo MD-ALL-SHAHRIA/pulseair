@@ -42,6 +42,67 @@ def synthetic(n=2000, seed=0, n_classes=4, sticky=0.8, freq="h", start="2021-01-
 # ------------------------------------------------------------ persistence_floor
 
 
+def test_seasonal_naive_periodic_series():
+    from pulsebench import seasonal_naive_floor
+    d = pd.DataFrame({"y": [0, 1, 2] * 4},
+                     index=pd.date_range("2020-01-01", periods=12, freq="h"))
+    out = seasonal_naive_floor(d, "y", 1, season_length=3)
+    assert out["macro_f1"] == 1.0
+    assert out["n_pairs"] == 9
+    json.dumps(out)
+
+
+def test_seasonal_naive_matches_persistence_at_season_horizon():
+    from pulsebench import seasonal_naive_floor
+    d = synthetic(n=100).drop(pd.Timestamp("2021-01-02"))
+    assert seasonal_naive_floor(d, "y", 3, season_length=3) == persistence_floor(d, "y", 3)
+
+
+def test_seasonal_naive_requires_origin_target_and_seasonal_source():
+    from pulsebench import seasonal_naive_floor
+    idx = pd.to_datetime(["2020-01-01 00:00", "2020-01-01 02:00",
+                          "2020-01-01 03:00", "2020-01-01 04:00",
+                          "2020-01-01 06:00"])
+    d = pd.DataFrame({"y": [0, 2, 0, 1, 0]}, index=idx)
+    out = seasonal_naive_floor(d, "y", 1, season_length=3)
+    # Target 3 has origin 2/source 0; target 4 lacks source 1; 6 lacks origin 5.
+    assert out["n_pairs"] == 1
+    assert out["accuracy"] == 1.0
+
+
+def test_seasonal_naive_groups_time_column_and_explicit_labels():
+    from pulsebench import seasonal_naive_floor
+    idx = pd.date_range("2020-01-01", periods=8, freq="h")
+    d = pd.concat([pd.DataFrame({"time": idx, "y": value, "site": site})
+                   for value, site in [(0, "a"), (1, "b")]])
+    out = seasonal_naive_floor(d, "y", 1, season_length=3, time_col="time",
+                               group_col="site", labels=[0, 1, 2])
+    assert out["n_pairs"] == 10
+    assert out["accuracy"] == 1.0
+    assert out["support"] == {0: 5, 1: 5, 2: 0}
+
+
+def test_seasonal_naive_long_horizon_uses_completed_seasons():
+    from pulsebench import seasonal_naive_floor
+    d = pd.DataFrame({"y": [0] * 3 + [1] * 3 + [2] * 3},
+                     index=pd.date_range("2020-01-01", periods=9, freq="h"))
+    out = seasonal_naive_floor(d, "y", 4, season_length=3)
+    assert out == persistence_floor(d, "y", 6)
+
+
+@pytest.mark.parametrize("horizon,season", [(0, 3), (1, 0), (-1, 3), (1, 1.5), (True, 3)])
+def test_seasonal_naive_rejects_invalid_steps(horizon, season):
+    from pulsebench import seasonal_naive_floor
+    with pytest.raises(ValueError, match="positive integer"):
+        seasonal_naive_floor(synthetic(n=10), "y", horizon, season_length=season)
+
+
+def test_seasonal_naive_no_pairs():
+    from pulsebench import seasonal_naive_floor
+    with pytest.raises(ValueError, match="no seasonal pairs"):
+        seasonal_naive_floor(synthetic(n=3), "y", 1, season_length=24)
+
+
 def test_persistence_floor_perfect_on_constant_series():
     idx = pd.date_range("2020-01-01", periods=100, freq="h")
     d = pd.DataFrame({"y": np.ones(100, dtype=int)}, index=idx)
