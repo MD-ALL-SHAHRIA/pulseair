@@ -70,16 +70,29 @@ class CVConfig:
     dataset: str = "beijing"
     n_folds: int = N_FOLDS
     initial_fraction: float = INITIAL_TRAIN_FRACTION
+    run_label: str = ""
 
     @property
     def tag(self) -> str:
-        return "" if self.dataset == "beijing" else f"_{self.dataset}"
+        """Distinguishes an exploratory run from the published one.
+
+        The 5-fold Beijing result is quoted throughout the thesis, so a run at a
+        different fold count, or one covering only the sequence models, writes beside
+        it rather than over it.
+        """
+        parts = [] if self.dataset == "beijing" else [self.dataset]
+        if self.n_folds != N_FOLDS:
+            parts.append(f"f{self.n_folds}")
+        if self.run_label:
+            parts.append(self.run_label)
+        return ("_" + "_".join(parts)) if parts else ""
 
     @property
     def report_path(self) -> Path:
         if self.dataset == "beijing":
-            return self.reports_dir / f"rolling_origin_cv_h{self.horizon}.md"
-        return self.reports_dir / f"{self.dataset}_rolling_cv.md"
+            return (self.reports_dir /
+                    f"rolling_origin_cv_h{self.horizon}{self.tag}.md")
+        return self.reports_dir / f"{self.dataset}_rolling_cv{self.tag.replace('_' + self.dataset, '')}.md"
 
     @property
     def metrics_path(self) -> Path:
@@ -89,13 +102,15 @@ class CVConfig:
 
 def load_config(path: Path | str = DEFAULT_CONFIG, dataset: str = "beijing",
                 n_folds: int = N_FOLDS,
-                initial_fraction: float = INITIAL_TRAIN_FRACTION) -> CVConfig:
+                initial_fraction: float = INITIAL_TRAIN_FRACTION,
+                run_label: str = "") -> CVConfig:
     raw = yaml.safe_load(Path(path).read_text())
     data, prep = raw["data"], raw["preprocessing"]
     h = int(prep["horizon"])
     sub = f"h{h}" if dataset == "beijing" else f"bd_h{h}"
     return CVConfig(
         dataset=dataset, n_folds=n_folds, initial_fraction=initial_fraction,
+        run_label=run_label,
         processed_dir=REPO_ROOT / data["processed_dir"] / sub,
         reports_dir=REPO_ROOT / "reports",
         horizon=h,
@@ -269,7 +284,9 @@ def fit_predict_sequence(cfg: CVConfig, arch: str, tr_idx, ev_idx, ytr,
     obs = np.asarray(tr_observed)
     obs_val = obs[-n_val:]
 
-    Xf, Xv, Xe = (X[fit_idx].copy(), X[val_idx].copy(), X[ev_idx].copy())
+    # Slice once. Fancy indexing already copies, so an explicit .copy() here would
+    # double peak memory on arrays of this size for no benefit.
+    Xf, Xv, Xe = X[fit_idx], X[val_idx], X[ev_idx]
     flat = Xf[:, :, idx].reshape(-1, len(idx))
     mu, sd = flat.mean(axis=0), flat.std(axis=0)
     sd[sd == 0] = 1.0
@@ -308,7 +325,8 @@ SEQ_MODELS = {
 
 
 def run(cfg: CVConfig | None = None, *, write: bool = True,
-        verbose: bool = True, with_sequence_models: bool = False) -> dict:
+        verbose: bool = True, with_sequence_models: bool = False,
+        only_sequence_models: bool = False) -> dict:
     cfg = cfg or load_config()
     say = print if verbose else (lambda *a, **k: None)
     labels = cfg.labels
@@ -327,9 +345,15 @@ def run(cfg: CVConfig | None = None, *, write: bool = True,
     folds = [{"fold": f["fold"], "cutoff": f["cutoff"], "eval_end": f["eval_end"],
               "eval_start_embargoed": f["cutoff"] + pd.Timedelta(hours=EMBARGO_HOURS)}
              for f in pb_folds]
-    active_models = dict(MODELS)
+    # The windowed array is ~360 MB resident. Holding it alongside XGBoost's working
+    # set exhausted a 16 GB machine, so the two model families can be run separately
+    # and their results merged: the folds are deterministic, so the same boundaries
+    # and the same Persistence column come out of either pass.
+    active_models = {} if only_sequence_models else dict(MODELS)
+    if only_sequence_models:
+        active_models["Persistence"] = MODELS["Persistence"]
     seq_cache: dict = {}
-    if with_sequence_models:
+    if with_sequence_models or only_sequence_models:
         from src.models import dl_forecast as dl
         active_models.update(SEQ_MODELS)
         say("loading windowed sequences for the sequence models ...")
@@ -416,6 +440,7 @@ def run(cfg: CVConfig | None = None, *, write: bool = True,
             f"one-sided p={t['p_one_sided']:.4f}")
 
     payload = {"config": cfg, "folds": results, "aggregate": agg,
+               "models_run": list(active_models),
                "n_folds": len(results), "embargo_hours": EMBARGO_HOURS,
                "initial_train_fraction": cfg.initial_fraction,
                "dataset": cfg.dataset}
@@ -745,12 +770,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--with-sequence-models", action="store_true",
                     help="also run the LSTM and Transformer in every fold "
                          "(minutes per fold rather than seconds)")
+    ap.add_argument("--only-sequence-models", action="store_true",
+                    help="run Persistence plus the sequence models only; the windowed "
+                         "array does not fit in memory beside the tabular models")
     ap.add_argument("--no-write", action="store_true")
     args = ap.parse_args(argv)
     run(load_config(dataset=args.dataset, n_folds=args.folds,
-                    initial_fraction=args.initial_fraction),
+                    initial_fraction=args.initial_fraction,
+                    run_label="seq" if args.only_sequence_models else ""),
         write=not args.no_write,
-        with_sequence_models=args.with_sequence_models)
+        with_sequence_models=args.with_sequence_models,
+        only_sequence_models=args.only_sequence_models)
     return 0
 
 
