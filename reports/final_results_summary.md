@@ -903,8 +903,10 @@ Correction is applied here to the *persistence* comparisons only. The GAN-ablati
 | 2 | `preprocessing_summary_h6.md` | row counts, feature rationale, imputation bias, split class distributions |
 | 2 | `preprocessing_summary_h{1,12,24}.md` | secondary horizons, comparison figure only |
 | 3 | `baseline_metrics_h6.md` | RF vs XGBoost vs persistence |
+| 3 | `baseline_metrics_h1.md` | the h=1 run, where persistence is hardest to beat |
 | 3 | `horizon_comparison.md` | persistence degradation h=1/6/12/24 |
 | 4 | `gan_quality_report_h6.md` | CTGAN validity, the quality-score methodological note |
+| 4 | `gan_quality_report_h6_targeted.md` | the targeted CTGAN's validity, including the before-fix numbers |
 | 4 | `gan_ablation_h6.md` | broad vs targeted vs unaugmented, bootstrap CIs |
 | 5 | `dl_metrics_h6.md` | LSTM/Transformer, MC dropout, calibration, LR sweep |
 | 5 | `capacity_sweep_h6.md` | hidden-size sweep; both architectures decline with size |

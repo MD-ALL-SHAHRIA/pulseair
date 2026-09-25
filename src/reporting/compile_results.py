@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -1480,6 +1481,25 @@ def reviewer_section(d: dict) -> str:
             + table(["Question", "Where this project stands"], rows))
 
 
+def check_index_is_complete(text: str) -> list[str]:
+    """Name every report on disk that section 6 does not mention.
+
+    The index is written by hand, so it drifts silently: two reports sat on disk
+    unlisted until this check was added. Brace patterns such as
+    ``preprocessing_summary_h{1,12,24}.md`` count as covering each expansion,
+    because collapsing a family of secondary-horizon runs into one row is
+    deliberate and a per-file check would otherwise force them apart.
+    """
+    covered = set(re.findall(r"`([^`]+\.md)`", text))
+    for entry in list(covered):
+        m = re.search(r"\{([^}]*)\}", entry)
+        if m:
+            for opt in m.group(1).split(","):
+                covered.add(entry[:m.start()] + opt.strip() + entry[m.end():])
+    return sorted(f.name for f in (REPO_ROOT / "reports").glob("*.md")
+                  if f != OUT and f.name not in covered)
+
+
 def build(d: dict) -> str:
     n = d["n_test"]
     v = {x["name"]: x for x in d["variants"]}
@@ -1556,8 +1576,10 @@ finding rather than a disappointment.
 | 2 | `preprocessing_summary_h6.md` | row counts, feature rationale, imputation bias, split class distributions |
 | 2 | `preprocessing_summary_h{{1,12,24}}.md` | secondary horizons, comparison figure only |
 | 3 | `baseline_metrics_h6.md` | RF vs XGBoost vs persistence |
+| 3 | `baseline_metrics_h1.md` | the h=1 run, where persistence is hardest to beat |
 | 3 | `horizon_comparison.md` | persistence degradation h=1/6/12/24 |
 | 4 | `gan_quality_report_h6.md` | CTGAN validity, the quality-score methodological note |
+| 4 | `gan_quality_report_h6_targeted.md` | the targeted CTGAN's validity, including the before-fix numbers |
 | 4 | `gan_ablation_h6.md` | broad vs targeted vs unaugmented, bootstrap CIs |
 | 5 | `dl_metrics_h6.md` | LSTM/Transformer, MC dropout, calibration, LR sweep |
 | 5 | `capacity_sweep_h6.md` | hidden-size sweep; both architectures decline with size |
@@ -1592,6 +1614,13 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     d = collect()
     text = build(d)
+    unlisted = check_index_is_complete(text)
+    if unlisted:
+        raise SystemExit("section 6 does not list these reports: "
+                         + ", ".join(unlisted)
+                         + "\n  Add a row for each, or fold it into an existing "
+                           "brace pattern. A report nobody can find from the "
+                           "summary is a report nobody reads.")
     if not args.no_write:
         OUT.write_text(text)
         print(f"wrote {OUT.relative_to(REPO_ROOT)} ({len(text):,} chars)")
