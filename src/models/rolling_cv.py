@@ -65,6 +65,7 @@ class CVConfig:
     labels: list[str]
     breakpoints: list[float]
     rf: dict
+    xgb: dict
     seed: int
     dataset: str = "beijing"
     n_folds: int = N_FOLDS
@@ -101,7 +102,7 @@ def load_config(path: Path | str = DEFAULT_CONFIG, dataset: str = "beijing",
         window=int(prep["window"]),
         labels=list(data["pm25_labels"]),
         breakpoints=list(data["pm25_breakpoints"]),
-        rf=dict(raw["baseline"]["random_forest"]),
+        xgb=dict(raw["baseline"]["xgboost"]), rf=dict(raw["baseline"]["random_forest"]),
         seed=int(raw["seed"]),
     )
 
@@ -201,18 +202,113 @@ def build_rf(cfg: CVConfig, class_weight) -> RandomForestClassifier:
     )
 
 
+def build_xgb(cfg: CVConfig):
+    """XGBoost with the project's configured parameters, per Appendix A."""
+    from xgboost import XGBClassifier
+    return XGBClassifier(random_state=cfg.seed, objective="multi:softprob",
+                         num_class=len(cfg.labels), eval_metric="mlogloss",
+                         verbosity=0, **cfg.xgb)
+
+
+def load_sequences(cfg: CVConfig) -> dict:
+    """The windowed arrays in RAW units, aligned to load_unscaled's row order.
+
+    The committed .npz files are standardised with the global training scaler, which
+    is exactly the leak the tabular path inverts away. The same inversion is applied
+    here, and the arrays are then re-ordered to match the frame the folds index into,
+    so a fold mask selects the same samples in both representations.
+    """
+    import joblib
+    meta = json.loads((cfg.processed_dir / "metadata.json").read_text())
+    scaler = joblib.load(cfg.processed_dir / "scaler.pkl")
+    features = list(meta["feature_columns"])
+    scaled_cols = list(meta["scaled_columns"])
+    idx = [features.index(c) for c in scaled_cols]
+
+    Xs, ts, sts = [], [], []
+    for split in ("train", "val", "test"):
+        z = np.load(cfg.processed_dir / f"sequences_{split}.npz", allow_pickle=True)
+        Xs.append(z["X"].astype(np.float32))
+        ts.append(pd.to_datetime(z["target_time"]))
+        sts.append(z["station"])
+    X = np.concatenate(Xs)
+    target_time = np.concatenate([t.to_numpy() for t in ts])
+    station = np.concatenate(sts)
+
+    # invert the global standardisation on the physical channels only
+    flat = X[:, :, idx].reshape(-1, len(idx)).astype(np.float64)
+    X[:, :, idx] = scaler.inverse_transform(flat).reshape(
+        X.shape[0], X.shape[1], len(idx)).astype(np.float32)
+
+    order = np.lexsort((station, target_time))
+    return {"X": X[order], "idx": idx, "n": len(order)}
+
+
+def fit_predict_sequence(cfg: CVConfig, arch: str, tr_idx, ev_idx, ytr,
+                         tr_observed, cache) -> np.ndarray:
+    """Train one sequence model inside a fold and predict its evaluation block.
+
+    Three things are kept consistent with the tabular path. Scaling is fitted on the
+    fold's training windows alone. Early stopping uses a validation slice carved from
+    the *end* of the training block, never from the evaluation block, so the stopping
+    decision cannot see what it is scored on. And the stopping metric is observed-only
+    macro-F1, as everywhere else in this project.
+    """
+    import torch
+    from src.models import dl_forecast as dl
+
+    seq = cache["seq"]
+    X, idx = seq["X"], seq["idx"]
+    tr_idx, ev_idx = np.asarray(tr_idx), np.asarray(ev_idx)
+
+    # last 15% of the training block becomes the early-stopping set
+    n_val = max(1, int(0.15 * len(tr_idx)))
+    fit_idx, val_idx = tr_idx[:-n_val], tr_idx[-n_val:]
+    ytr = np.asarray(ytr)
+    y_fit, y_val = ytr[:-n_val], ytr[-n_val:]
+    obs = np.asarray(tr_observed)
+    obs_val = obs[-n_val:]
+
+    Xf, Xv, Xe = (X[fit_idx].copy(), X[val_idx].copy(), X[ev_idx].copy())
+    flat = Xf[:, :, idx].reshape(-1, len(idx))
+    mu, sd = flat.mean(axis=0), flat.std(axis=0)
+    sd[sd == 0] = 1.0
+    for A in (Xf, Xv, Xe):
+        A[:, :, idx] = (A[:, :, idx] - mu) / sd
+
+    mk = lambda name, A, y, o: dl.SeqSplit(
+        name, torch.from_numpy(A), torch.from_numpy(np.asarray(y, dtype=np.int64)), o)
+    device = dl.pick_device()
+    out = dl.train_model(arch, cache["dlcfg"],
+                         mk("fold-train", Xf, y_fit, np.ones(len(Xf), bool)),
+                         mk("fold-val", Xv, y_val, obs_val),
+                         device, verbose=False)
+    model = out["model"] if isinstance(out, dict) else out
+    logits = dl._predict_logits(model, torch.from_numpy(Xe), device,
+                                cache["dlcfg"].batch_size)
+    return logits.argmax(dim=1).cpu().numpy()
+
+
 # ------------------------------------------------------------------ the run
 
 
+# name -> (kind, class_weight). "seq" entries are trained on the windowed arrays
+# rather than the tabular rows, and are only run when --with-sequence-models is given,
+# because each one costs minutes per fold rather than seconds.
 MODELS = {
-    "Persistence": None,
-    "RandomForest (unweighted)": None,
-    "RandomForest (class_weight=balanced)": "balanced",
+    "Persistence": ("persistence", None),
+    "RandomForest (unweighted)": ("rf", None),
+    "RandomForest (class_weight=balanced)": ("rf", "balanced"),
+    "XGBoost": ("xgb", None),
+}
+SEQ_MODELS = {
+    "LSTM": ("seq", "lstm"),
+    "Transformer": ("seq", "transformer"),
 }
 
 
 def run(cfg: CVConfig | None = None, *, write: bool = True,
-        verbose: bool = True) -> dict:
+        verbose: bool = True, with_sequence_models: bool = False) -> dict:
     cfg = cfg or load_config()
     say = print if verbose else (lambda *a, **k: None)
     labels = cfg.labels
@@ -231,6 +327,21 @@ def run(cfg: CVConfig | None = None, *, write: bool = True,
     folds = [{"fold": f["fold"], "cutoff": f["cutoff"], "eval_end": f["eval_end"],
               "eval_start_embargoed": f["cutoff"] + pd.Timedelta(hours=EMBARGO_HOURS)}
              for f in pb_folds]
+    active_models = dict(MODELS)
+    seq_cache: dict = {}
+    if with_sequence_models:
+        from src.models import dl_forecast as dl
+        active_models.update(SEQ_MODELS)
+        say("loading windowed sequences for the sequence models ...")
+        seq_cache["seq"] = load_sequences(cfg)
+        seq_cache["dlcfg"] = dl.load_config(horizon=cfg.horizon)
+        if seq_cache["seq"]["n"] != len(df):
+            raise ValueError(
+                f"sequence array has {seq_cache['seq']['n']:,} rows but the tabular "
+                f"frame has {len(df):,}; a fold mask would select different samples "
+                f"in the two representations")
+    active = list(active_models)
+
     results = []
     for fold in folds:
         tr, ev = split_fold(df, fold)
@@ -269,13 +380,20 @@ def run(cfg: CVConfig | None = None, *, write: bool = True,
             "scores": {},
         }
 
-        for name, cw in MODELS.items():
+        for name, (kind, arg) in active_models.items():
             t0 = time.perf_counter()
-            if name == "Persistence":
+            if kind == "persistence":
                 pred = persistence(cfg, ev)[obs]
+            elif kind == "rf":
+                pred = build_rf(cfg, arg).fit(Xtr, ytr).predict(Xev)[obs]
+            elif kind == "xgb":
+                pred = build_xgb(cfg).fit(Xtr, ytr).predict(Xev)[obs]
+            elif kind == "seq":
+                pred = fit_predict_sequence(cfg, arg, tr.index, ev.index, ytr,
+                                            tr["is_imputed_pm25"].to_numpy() == False,
+                                            seq_cache)[obs]
             else:
-                model = build_rf(cfg, cw).fit(Xtr, ytr)
-                pred = model.predict(Xev)[obs]
+                raise ValueError(f"unknown model kind {kind!r}")
             sc = score(y, pred, labels)
             sc["fit_seconds"] = round(time.perf_counter() - t0, 1)
             entry["scores"][name] = sc
@@ -286,7 +404,7 @@ def run(cfg: CVConfig | None = None, *, write: bool = True,
 
     agg = aggregate(results, labels)
     say("\n" + "=" * 72)
-    for name in MODELS:
+    for name in active:
         a = agg["per_model"][name]
         say(f"{name:38s} macro-F1 {a['mean']:.4f} +/- {a['std']:.4f}")
     for name, t in agg["tests"].items():
@@ -322,8 +440,13 @@ def aggregate(results: list[dict], labels: list[str]) -> dict:
     """
     from pulsebench import aggregate_folds as pb_aggregate
 
+    # Derived from the results rather than from a module-level constant, so the
+    # aggregation follows whichever models were actually run -- the sequence models
+    # are optional, and an earlier version read a name that only existed inside run().
+    names = list(results[0]["scores"]) if results else []
+
     per_model = {}
-    for name in MODELS:
+    for name in names:
         vals = np.array([r["scores"][name]["macro_f1"] for r in results])
         per_model[name] = {
             "mean": float(vals.mean()), "std": float(vals.std(ddof=1)),
@@ -336,7 +459,7 @@ def aggregate(results: list[dict], labels: list[str]) -> dict:
                 "per_fold": [float(v) for v in lv]}
 
     tests = {}
-    for name in MODELS:
+    for name in names:
         if name == "Persistence":
             continue
         shaped = [{"fold": r["fold"], "support": r.get("support", {}),
@@ -619,11 +742,15 @@ def main(argv: list[str] | None = None) -> int:
                     choices=("beijing", "bangladesh"))
     ap.add_argument("--folds", type=int, default=N_FOLDS)
     ap.add_argument("--initial-fraction", type=float, default=INITIAL_TRAIN_FRACTION)
+    ap.add_argument("--with-sequence-models", action="store_true",
+                    help="also run the LSTM and Transformer in every fold "
+                         "(minutes per fold rather than seconds)")
     ap.add_argument("--no-write", action="store_true")
     args = ap.parse_args(argv)
     run(load_config(dataset=args.dataset, n_folds=args.folds,
                     initial_fraction=args.initial_fraction),
-        write=not args.no_write)
+        write=not args.no_write,
+        with_sequence_models=args.with_sequence_models)
     return 0
 
 

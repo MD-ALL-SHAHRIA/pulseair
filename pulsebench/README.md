@@ -154,6 +154,42 @@ test over five folds produce a p below `2 ** (1 - 5)`. `format_markdown` names t
 method it rendered and, for Holm, shows the per-rank threshold, since that differs by
 position rather than being one number.
 
+### `dataset_audit(df, time_col, value_col, group_col=None, period="YS")`
+
+Structural checks for a fabricated or spliced segment in a published series. Four
+tests, none conclusive alone:
+
+| Check | What it looks for |
+| --- | --- |
+| `trend_linearity` | the longest leading segment a straight line explains too well |
+| `hard_clip` | one exact value carrying far more mass than its neighbours |
+| `scale_discontinuity` | a step in level between windows, as a unit change produces |
+| `autocorrelation_break` | a regime change in lag-1 persistence |
+
+```python
+from pulsebench import dataset_audit
+out = dataset_audit(df, time_col="datetime", value_col="pm2_5", group_col="city")
+out["verdict"]              # 'fabrication suspected' | 'inconclusive' | 'no structural anomaly'
+out["suspected_boundary"]   # where the series changes character, or None
+out["boundary_candidates"]  # what each locating check proposed
+out["boundary_agreement"]   # False when they disagree, rather than averaging them
+```
+
+Two design points earn their place. The trend test fits **period medians, not raw
+observations** — hourly noise swamps a linear signal, and on this project's real
+dataset annual medians give a prefix R² of 0.96 where the raw hours give 0.14. And
+disagreeing boundary estimates are reported as disagreeing: an earlier version took
+their median and turned a correct 2023 estimate plus a meaningless 2004 one into 2013.
+
+It has a stated resolution limit: a fabricated segment shorter than `MIN_PERIODS`
+aggregation units cannot be found, because a line through fewer points than that says
+nothing. Pass a finer `period` when the suspected segment is short.
+
+**Validated against a real case.** Run on the unfiltered 1,048,551-row Mendeley
+Bangladesh file with no boundary supplied, it returns *fabrication suspected* on 3 of
+4 checks and dates the boundary to 2023-01-01, 149 days from the 2022-08-05 date that
+manual inspection had found. It identifies Dhaka as the affected city unprompted.
+
 ## Tests
 
 ```bash
