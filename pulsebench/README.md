@@ -124,7 +124,7 @@ regardless of the aggregate. Only then is the aggregate gain checked against
 `practical_threshold`, because a large test set lets a bootstrap resolve differences
 far below anything that changes a decision.
 
-### `bonferroni_report(comparisons, alpha=0.05, n_resamples=None)`
+### `bonferroni_report(comparisons, alpha=0.05, n_resamples=None, method="bonferroni")`
 
 Family-wise correction over a set of baseline comparisons, with the resampling
 resolution floor made explicit.
@@ -141,6 +141,18 @@ below 0.002, so values at that floor are shown as `<0.0020` rather than as an ex
 figure the procedure could not have produced. The report separates claims that survive
 correction from those that were significant at `alpha` and are not — the second group
 is what a reader needs flagged.
+
+`method` selects the correction. The default, `"bonferroni"`, compares every p against
+`alpha / k`. `"holm"` applies the step-down procedure — sort ascending, compare the
+i-th against `alpha / (k - i)`, stop at the first failure — which controls the same
+family-wise error rate and is uniformly at least as powerful, so it never rejects
+fewer hypotheses on the same input. Bonferroni remains the default because it is the
+more conservative and the less arguable of the two.
+
+The resolution floor is independent of the choice: Holm does not let a signed-rank
+test over five folds produce a p below `2 ** (1 - 5)`. `format_markdown` names the
+method it rendered and, for Holm, shows the per-rank threshold, since that differs by
+position rather than being one number.
 
 ## Tests
 

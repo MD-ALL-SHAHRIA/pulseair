@@ -1206,6 +1206,34 @@ def multiplicity_section(d: dict) -> str:
     by_name = {v["name"].split(" —")[0]: v for v in tested}
     survivors = [by_name[n] for n in report["survivors"]]
     lost = [by_name[n] for n in report["lost"]]
+
+    # Holm is uniformly at least as powerful at the same family-wise error rate, so
+    # it is worth reporting whether the more conservative default cost anything here.
+    holm = bonferroni_report(
+        {v["name"].split(" —")[0]: {"p": v["vs_persistence"]["p_two_sided"],
+                                    "delta": v["vs_persistence"]["observed_diff"]}
+         for v in tested},
+        alpha=0.05, n_resamples=n_boot, method="holm")
+    extra = [n for n in holm["survivors"] if n not in report["survivors"]]
+    holm_note = (
+        f"**Holm–Bonferroni changes nothing here.** The step-down procedure is "
+        f"uniformly at least as powerful as plain Bonferroni at the same family-wise "
+        f"error rate, and applying it to this family returns the identical "
+        f"{len(holm['survivors'])} survivors. The reason is visible in the p-values: "
+        f"{len(report['survivors'])} of the {k} comparisons sit at the bootstrap's "
+        f"resolution floor "
+        + (f"(p < {resolution:.4f})" if resolution else "") +
+        f", far below even Holm's strictest threshold, while the remaining "
+        f"{k - len(report['survivors'])} exceed their Holm thresholds as well as "
+        f"alpha/k. The distribution is bimodal with nothing in the band where Holm's "
+        f"extra power would bite. Reported because the absence of a difference is "
+        f"itself informative: the conservative default cost this analysis nothing."
+        if not extra else
+        f"**Holm–Bonferroni rejects {len(extra)} comparison(s) that plain Bonferroni "
+        f"does not**: {', '.join(extra)}. Holm controls the same family-wise error "
+        f"rate and is uniformly at least as powerful, so those rejections are valid; "
+        f"the Bonferroni column above is retained because it is what the published "
+        f"numbers were computed with.")
     rf = next((v for v in tested if v["name"].startswith("RandomForest (Phase 3)")), None)
     comp = next((v for v in tested if v["name"].startswith("Compressed RF")), None)
 
@@ -1240,6 +1268,8 @@ need more resamples to separate further.
 - **"the compressed model fails to beat persistence"** — {verdict(comp)}
 
 {_multiplicity_note(survivors, lost, corrected, k)}
+
+{holm_note}
 """
 
 

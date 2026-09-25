@@ -842,6 +842,8 @@ need more resamples to separate further.
 
 Correction is applied here to the *persistence* comparisons only. The GAN-ablation and sequence-model comparisons in sections 2.3 and 2.5 are separate families with their own multiplicity; their significant effects have p at the bootstrap floor and are unaffected, but the count should be stated in the paper alongside this one.
 
+**Holm–Bonferroni changes nothing here.** The step-down procedure is uniformly at least as powerful as plain Bonferroni at the same family-wise error rate, and applying it to this family returns the identical 6 survivors. The reason is visible in the p-values: 6 of the 9 comparisons sit at the bootstrap's resolution floor (p < 0.0020), far below even Holm's strictest threshold, while the remaining 3 exceed their Holm thresholds as well as alpha/k. The distribution is bimodal with nothing in the band where Holm's extra power would bite. Reported because the absence of a difference is itself informative: the conservative default cost this analysis nothing.
+
 
 ---
 
