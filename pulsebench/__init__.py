@@ -22,9 +22,9 @@ See ``pulsebench/README.md`` for the reasoning behind each.
 from pulsebench.cv import aggregate_folds, make_folds, rolling_origin_cv
 from pulsebench.disqualification import advisory_disqualification
 from pulsebench.multiplicity import bonferroni_report, format_markdown
-from pulsebench.persistence import persistence_floor
+from pulsebench.persistence import persistence_floor, seasonal_naive_floor
 
 __version__ = "0.1.0"
-__all__ = ["persistence_floor", "rolling_origin_cv", "make_folds", "aggregate_folds",
+__all__ = ["persistence_floor", "seasonal_naive_floor", "rolling_origin_cv", "make_folds", "aggregate_folds",
            "advisory_disqualification", "bonferroni_report", "format_markdown",
            "__version__"]

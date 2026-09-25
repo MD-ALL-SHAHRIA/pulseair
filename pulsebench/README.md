@@ -45,6 +45,23 @@ from pulsebench import (persistence_floor, rolling_origin_cv,
 
 ## The four pieces
 
+### Seasonal baseline: `seasonal_naive_floor`
+
+```python
+from pulsebench import seasonal_naive_floor
+seasonal = seasonal_naive_floor(df, "risk", horizon=6, season_length=24,
+                               group_col="station")
+```
+
+Predict the target from the latest matching seasonal timestamp available at the
+forecast origin. For horizons longer than a season, repeat the last available
+season (no future observations). Origin, target and seasonal source must all exist;
+time joins preserve gaps and group boundaries. The returned metrics have the same
+shape as `persistence_floor`, but pair counts can differ because seasonal history
+may be missing. `label_unchanged_pct` compares the seasonal source and target here.
+When `season_length=horizon`, the result agrees with persistence. Step counts must
+be positive integers; `freq` defaults to hours.
+
 ### `persistence_floor(df, target_col, horizon)`
 
 The zero-parameter rule: the class at *t+h* equals the class at *t*. Report it beside
