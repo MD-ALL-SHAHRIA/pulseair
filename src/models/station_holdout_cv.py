@@ -411,7 +411,31 @@ reported alongside the results rather than left implicit.
 
 {profile}
 
-## 4. What this adds to the thesis
+## 4. Why this is an easier test than rolling-origin CV
+
+**These two results are not in conflict, and the difference between them is
+instructive.** Rolling-origin CV found that no Beijing-trained model beats persistence
+in a majority of chronological folds. This section may find the opposite. The reason is
+that holding out a *station* leaves the *time axis intact*: the model trains on eleven
+stations across the whole 2013–2017 record and is evaluated on a twelfth over the same
+period. It has therefore already seen every pollution episode, every winter and every
+synoptic event in the evaluation window — just measured somewhere else in the same
+city.
+
+That is a genuinely easier problem than forecasting a period it has never seen. Beijing
+stations are tens of kilometres apart in one airshed, and a haze episode arrives at all
+of them; a model that has learned what such an episode looks like at eleven sites is
+not being asked to extrapolate when it meets the twelfth.
+
+**So this section bounds spatial transfer within a shared period, not deployment.** A
+device carried somewhere new, forecasting a time nobody has seen, faces both problems
+at once. The rolling-origin result is the binding one for that case, and nothing here
+softens it.
+
+A stricter version of this test would hold out a station *and* the later part of the
+record simultaneously. That was not run, and the claim below is limited accordingly.
+
+## 5. What this adds to the thesis
 
 This is a different axis of generalisation from the rolling-origin result, and it is
 worth stating which is which. Rolling-origin CV showed that no Beijing-trained model

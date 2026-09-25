@@ -382,6 +382,39 @@ committed metrics found it. **The recurring lesson is not about any one metric: 
 average over a distribution says nothing about its tail, and in a safety-critical
 advisory the tail is the product.**
 
+### 2.13 What the extension analyses added
+
+Six follow-up analyses were run after the main results were compiled. None overturned
+a headline claim; two qualified one and one sharpened it.
+
+| Phase | Analysis | Finding | Effect on existing claims |
+| --- | --- | --- | --- |
+| B | Rolling-origin CV at 8 folds, 5 model families | best 4/8 folds; XGBoost significantly worse | **claim holds**, sharpened |
+| C | Leave-one-station-out across 12 Beijing stations | beats each station's own floor at 12/12 (mean +0.0431, p = 0.0005) | **additive** — a different axis; see the caveat above |
+| D | Phase 11b detector on low-cost-sensor noise | Hazardous F1 0.4451 -> 0.3193 (28% loss); still beats the noisy floor 7/7 folds | **claim holds**, qualified |
+| E | Selective prediction on the Mondrian sets | 47% confident; accuracy 0.5793 -> 0.6289 but macro-F1 0.5173 -> 0.5160 | **additive** — a fourth instance of the tail pattern |
+| F | `pulsebench.dataset_audit` on the unfiltered Mendeley file | fabrication suspected (3/4 checks), boundary dated 2023-01-01 against 2022-08-05 found by hand | **additive** — reproduces the audit independently |
+| A | Holm-Bonferroni over the persistence family | identical survivors to plain Bonferroni; the p-values are bimodal with nothing in the band where the extra power would bite | **no change** |
+
+**The fold-count result is the load-bearing one.** The published rolling-origin
+conclusion rests on five folds, whose two-sided Wilcoxon floor (0.0625) is *above*
+alpha — that design could not have produced a two-sided significant result whatever
+the data showed. Re-running at eight folds, where the floor is 0.0078, leaves the
+conclusion intact across five model families: the best any model reaches is 4 of 8,
+exactly half, and XGBoost turns out to be *significantly worse* than persistence, a
+fact only the higher fold count can detect. Both fold counts are reported side by
+side in `fold_count_comparison_h6.md`; the five-fold numbers quoted throughout this
+document are unchanged.
+
+**The station result needs its caveat carried with it.** A class-weighted forest beats
+each held-out station's own persistence floor at all twelve stations. That is not in
+conflict with the temporal result, because holding out a *station* leaves the *time
+axis intact*: the model trains on eleven stations across the whole record and is
+evaluated on a twelfth over the same period, so it has already seen every pollution
+episode in the evaluation window, measured elsewhere in the same airshed. Spatial
+transfer within a shared period is an easier problem than forecasting an unseen one,
+and the rolling-origin result remains the binding one for deployment.
+
 ### What did work
 
 - **Moving the horizon to 6 h**, which turned a persistence-echo task into a
@@ -888,5 +921,12 @@ Correction is applied here to the *persistence* comparisons only. The GAN-ablati
 | 11 | `dhaka_ground_truth_validation.md` | US Embassy reference monitor vs the reanalysis |
 | 11b | `dhaka_ground_truth_model_h6.md` | PM2.5-only model; the validated Hazardous result |
 | 11c | `openaq_multichannel_validation.md` | station survey; no multi-pollutant Dhaka source qualifies |
+| 8 | `fold_count_comparison_h6.md` | 5-fold against 8-fold; the conclusion at higher power |
+| 8 | `rolling_origin_cv_h6_f8.md` | the 8-fold run, tabular models |
+| 8 | `rolling_origin_cv_h6_f8_seq.md` | the 8-fold run, sequence models |
+| 8 | `station_holdout_h6.md` | leave-one-station-out; generalisation across place |
+| 8 | `selective_prediction_h6.md` | accuracy when the conformal set is small |
+| 10 | `selective_prediction_h6_bangladesh.md` | the same, for the deployed model |
+| 11b | `sensor_noise_robustness_h6.md` | the Hazardous detector on low-cost-sensor input |
 | — | `figures/README.md` | all 23 figures with the JSON each was generated from |
 | — | `reference_list_expanded.md` | 61 references, 22 registry-verified additions |

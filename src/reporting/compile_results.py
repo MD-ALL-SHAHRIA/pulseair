@@ -233,6 +233,70 @@ def per_class_table(d: dict) -> str:
 # ----------------------------------------------------------------- narrative
 
 
+def _extension_table() -> str:
+    """Summarise the six follow-up analyses from whatever metrics they wrote."""
+    rows = []
+
+    def add(phase, what, finding, effect):
+        rows.append(f"| {phase} | {what} | {finding} | {effect} |")
+
+    fc = load("rolling_cv_h6_f8.json")
+    fs = load("rolling_cv_h6_f8_seq.json")
+    if fc:
+        tests = {**{k: v for k, v in fc["aggregate"]["tests"].items()
+                    if not k.startswith("_")},
+                 **({k: v for k, v in fs["aggregate"]["tests"].items()
+                     if not k.startswith("_")} if fs else {})}
+        best = max(tests.values(), key=lambda t: t["wins"])
+        worse = [k for k, t in tests.items()
+                 if t["p_two_sided"] < 0.05 and t["mean_delta"] < 0]
+        add("B", "Rolling-origin CV at 8 folds, 5 model families",
+            f"best {best['wins']}/{best['n_folds']} folds; "
+            + (f"{', '.join(worse)} significantly worse" if worse else "none significant"),
+            "**claim holds**, sharpened")
+
+    st = load("station_holdout_h6.json")
+    if st:
+        a = st["aggregate"]
+        add("C", "Leave-one-station-out across 12 Beijing stations",
+            f"beats each station's own floor at {a['wins_macro']}/{st['n_stations']} "
+            f"(mean {a['mean_delta_macro']:+.4f}, p = {a['p_two_sided']:.4f})",
+            "**additive** — a different axis; see the caveat above")
+
+    sn = load("sensor_noise_robustness_h6.json")
+    if sn:
+        h = sn["summary"]["f1_Hazardous"]
+        add("D", "Phase 11b detector on low-cost-sensor noise",
+            f"Hazardous F1 {h['clean']['mean']:.4f} -> {h['noisy']['mean']:.4f} "
+            f"({h['relative_drop_pct']:.0f}% loss); still beats the noisy floor "
+            f"{h['folds_won_noisy']}/{sn['n_folds']} folds",
+            "**claim holds**, qualified")
+
+    sp = load("selective_prediction_h6.json")
+    if sp:
+        add("E", "Selective prediction on the Mondrian sets",
+            f"{sp['confident_fraction']:.0%} confident; accuracy "
+            f"{sp['full']['accuracy']:.4f} -> {sp['confident']['accuracy']:.4f} but "
+            f"macro-F1 {sp['full']['macro_f1']:.4f} -> {sp['confident']['macro_f1']:.4f}",
+            "**additive** — a fourth instance of the tail pattern")
+
+    ia = load("integrity_audit_bangladesh.json")
+    if ia:
+        add("F", "`pulsebench.dataset_audit` on the unfiltered Mendeley file",
+            f"{ia['verdict']} ({ia['n_flagged']}/4 checks), boundary dated "
+            f"{str(ia['suspected_boundary'])[:10]} against 2022-08-05 found by hand",
+            "**additive** — reproduces the audit independently")
+
+    add("A", "Holm-Bonferroni over the persistence family",
+        "identical survivors to plain Bonferroni; the p-values are bimodal with "
+        "nothing in the band where the extra power would bite",
+        "**no change**")
+
+    head = ("| Phase | Analysis | Finding | Effect on existing claims |\n"
+            "| --- | --- | --- | --- |")
+    return head + "\n" + "\n".join(rows)
+
+
 def _mce_bits(d: dict) -> dict:
     """ECE/MCE per architecture, read from dl_h6.json.
 
@@ -343,6 +407,7 @@ selection is allowed to use, and on validation the verdict is unambiguous."""
     comp_vs_persist = (
         f"**{cv['observed_diff']:+.4f}** [{cv['ci_low']:+.4f}, {cv['ci_high']:+.4f}]"
         if cv != "untested" else "not tested")
+    extension_table = _extension_table()
     mce = _mce_bits(d)
     mce_table, mce_ratio = mce["mce_table"], mce["mce_ratio"]
     t_ece, t_mce, l_ece, l_mce = mce["t_ece"], mce["t_mce"], mce["l_ece"], mce["l_mce"]
@@ -592,6 +657,32 @@ instance, and it was sitting in `dl_h6.json` unreported until a late audit of th
 committed metrics found it. **The recurring lesson is not about any one metric: an
 average over a distribution says nothing about its tail, and in a safety-critical
 advisory the tail is the product.**
+
+### 2.13 What the extension analyses added
+
+Six follow-up analyses were run after the main results were compiled. None overturned
+a headline claim; two qualified one and one sharpened it.
+
+{extension_table}
+
+**The fold-count result is the load-bearing one.** The published rolling-origin
+conclusion rests on five folds, whose two-sided Wilcoxon floor (0.0625) is *above*
+alpha — that design could not have produced a two-sided significant result whatever
+the data showed. Re-running at eight folds, where the floor is 0.0078, leaves the
+conclusion intact across five model families: the best any model reaches is 4 of 8,
+exactly half, and XGBoost turns out to be *significantly worse* than persistence, a
+fact only the higher fold count can detect. Both fold counts are reported side by
+side in `fold_count_comparison_h6.md`; the five-fold numbers quoted throughout this
+document are unchanged.
+
+**The station result needs its caveat carried with it.** A class-weighted forest beats
+each held-out station's own persistence floor at all twelve stations. That is not in
+conflict with the temporal result, because holding out a *station* leaves the *time
+axis intact*: the model trains on eleven stations across the whole record and is
+evaluated on a twelfth over the same period, so it has already seen every pollution
+episode in the evaluation window, measured elsewhere in the same airshed. Spatial
+transfer within a shared period is an easier problem than forecasting an unseen one,
+and the rolling-origin result remains the binding one for deployment.
 
 ### What did work
 
@@ -1483,6 +1574,13 @@ finding rather than a disappointment.
 | 11 | `dhaka_ground_truth_validation.md` | US Embassy reference monitor vs the reanalysis |
 | 11b | `dhaka_ground_truth_model_h6.md` | PM2.5-only model; the validated Hazardous result |
 | 11c | `openaq_multichannel_validation.md` | station survey; no multi-pollutant Dhaka source qualifies |
+| 8 | `fold_count_comparison_h6.md` | 5-fold against 8-fold; the conclusion at higher power |
+| 8 | `rolling_origin_cv_h6_f8.md` | the 8-fold run, tabular models |
+| 8 | `rolling_origin_cv_h6_f8_seq.md` | the 8-fold run, sequence models |
+| 8 | `station_holdout_h6.md` | leave-one-station-out; generalisation across place |
+| 8 | `selective_prediction_h6.md` | accuracy when the conformal set is small |
+| 10 | `selective_prediction_h6_bangladesh.md` | the same, for the deployed model |
+| 11b | `sensor_noise_robustness_h6.md` | the Hazardous detector on low-cost-sensor input |
 | — | `figures/README.md` | all 23 figures with the JSON each was generated from |
 | — | `reference_list_expanded.md` | 61 references, 22 registry-verified additions |
 """
