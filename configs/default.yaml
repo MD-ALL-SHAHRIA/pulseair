@@ -194,5 +194,4 @@ deployment:
   # may give up at most this much macro-F1 (measured on validation).
   macro_f1_tolerance: 0.01
   onnx_opset: 17
-  tflite_quantization: int8   # required for TFLite Micro on ESP32
   artifacts_dir: reports/deployment

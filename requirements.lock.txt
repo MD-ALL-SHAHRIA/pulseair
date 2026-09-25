@@ -1,10 +1,17 @@
 # Exact resolved environment that produced the results in reports/.
-# Regenerated 2026-09-22 with `pip freeze` on Python 3.11.
+# Regenerated 2026-09-25 with `pip freeze` on Python 3.11.
 #
 # requirements.txt holds the intended version ranges; this file is the pin.
-# Note: `anthropic` is present as a leftover from the pre-migration advisory
-# implementation (src/explainability/llm_advisory.py now uses google-genai) and is
-# not required to reproduce anything.
+#
+# Two notes on what is and is not here:
+#   * `tensorflow` and its bundle (keras, tensorboard, libclang, ...) were removed.
+#     They existed for a TFLite Micro conversion path that was planned and never
+#     implemented; nothing in src/ ever imported them. TensorFlow was also the only
+#     installed package that constrained numpy, so the numpy pin in requirements.txt
+#     is now a reproducibility choice rather than a dependency constraint.
+#   * `anthropic` is a leftover from the pre-migration advisory implementation
+#     (src/explainability/llm_advisory.py now uses google-genai) and is not required
+#     to reproduce anything.
 absl-py==2.5.0
 annotated-types==0.8.0
 anthropic==1.7.0
@@ -14,7 +21,6 @@ argon2-cffi==25.1.0
 argon2-cffi-bindings==26.1.0
 arrow==1.4.0
 asttokens==3.0.2
-astunparse==1.6.3
 async-lru==2.3.0
 attrs==26.1.0
 babel==2.18.0
@@ -22,6 +28,7 @@ beautifulsoup4==4.15.0
 bleach==6.4.0
 boto3==1.43.98
 botocore==1.43.98
+build==1.6.1
 certifi==2026.7.22
 cffi==2.1.1
 charset-normalizer==3.5.1
@@ -45,7 +52,6 @@ flatbuffers==25.12.19
 fonttools==4.65.0
 fqdn==1.5.1
 fsspec==2026.9.0
-gast==0.7.0
 google-ai-generativelanguage==0.6.15
 google-api-core==2.33.0
 google-api-python-client==2.200.0
@@ -53,7 +59,6 @@ google-auth==2.58.0
 google-auth-httplib2==0.4.2
 google-genai==2.24.0
 google-generativeai==0.8.6
-google-pasta==0.2.0
 googleapis-common-protos==1.75.0
 graphviz==0.21
 grpcio==1.84.0
@@ -91,10 +96,8 @@ jupyter_server_terminals==0.5.4
 jupyterlab==4.6.3
 jupyterlab_pygments==0.3.0
 jupyterlab_server==2.28.1
-keras==3.15.1
 kiwisolver==1.5.1
 lark==1.3.1
-libclang==18.1.1
 llvmlite==0.49.0
 Markdown==3.10.3
 markdown-it-py==4.2.0
@@ -119,7 +122,6 @@ onnx==1.22.0
 onnx-ir==1.0.0
 onnxruntime==1.30.0
 onnxscript==0.7.2
-opt_einsum==3.4.0
 optree==0.20.0
 overrides==7.7.0
 packaging==26.3
@@ -145,6 +147,7 @@ pydantic==2.13.5
 pydantic_core==2.46.5
 Pygments==2.21.0
 pyparsing==3.3.2
+pyproject_hooks==1.3.3
 pytest==8.4.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.3
@@ -177,11 +180,6 @@ soupsieve==2.9.2
 stack-data==0.6.3
 sympy==1.14.0
 tenacity==9.1.4
-tensorboard==2.19.0
-tensorboard-data-server==0.7.2
-tensorflow==2.19.1
-tensorflow-io-gcs-filesystem==0.37.1
-termcolor==3.3.0
 terminado==0.18.1
 threadpoolctl==3.7.0
 tinycss2==1.5.1

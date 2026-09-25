@@ -175,6 +175,22 @@ It was not. Two defects, both invisible to the score:
    fifths of the synthetic rows encoded a time of day that cannot occur. Each column's
    *marginal* was reproduced acceptably, which is all Column Shapes measures.
 
+   **The failure was structural, not specific to `hour`.** The month pair broke in the
+   same way: **74.28%** of synthetic rows on the unit circle and **74,530 distinct
+   `month_sin` values** where 12 months exist. Both cyclical pairs were handed to the
+   synthesizer as free continuous columns and both came back off the circle — `month`
+   less often than `hour` on the unit-circle test, and just as completely on distinct
+   values. That rules out a quirk of one column and identifies the cause as the
+   representation: a synthesizer given a derived feature will model the feature, not
+   the constraint that produced it.
+
+   *Provenance of the month figures.* The original diagnosis recorded only `hour`, so
+   the month numbers come from the reproduction in
+   `reports/metrics/gan_validity_before_fix.json` rather than from the discarded run —
+   a different random draw of the same configuration. The hour figures quoted above are
+   the original ones; the re-run put them at 22.06% and 82,710, which is the agreement
+   that run was built to establish.
+
 2. **A violated physical constraint.** Dew point cannot exceed air temperature.
    **13.1%** of synthetic rows had `DEWP > TEMP`, against 0.18% in the real data. TEMP
    and DEWP each scored above the quality floor individually, and their linear

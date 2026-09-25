@@ -259,15 +259,27 @@ def build_report(a: dict, validity: dict | None = None) -> str:
     #      ~60k test rows a bootstrap resolves differences far below anything that
     #      matters in practice, so significance alone does not justify carrying a
     #      generator through the rest of the project.
+    #
+    # The rule itself lives in pulsebench.advisory_disqualification. It was extracted
+    # from this block, and calling it back here is the point: the package the project
+    # publishes should be the one the project's own verdict came from, not a second
+    # implementation that happens to agree.
+    from pulsebench import advisory_disqualification
+
     MATERIAL = 0.01
     candidates, disqualified = [], {}
     for n in ("broad-4", "targeted-2"):
-        harmed = [m for m in RARE
-                  if tests[n][m]["significant"] and tests[n][m]["observed_diff"] < 0]
-        if harmed:
-            disqualified[n] = harmed
-        elif (tests[n]["macro_f1"]["significant"]
-              and tests[n]["macro_f1"]["observed_diff"] >= MATERIAL):
+        verdict = advisory_disqualification(
+            {m: {"delta": tests[n][m]["observed_diff"],
+                 "significant": tests[n][m]["significant"]}
+             for m in tests[n] if m != "macro_f1"},
+            protected_classes=RARE,
+            practical_threshold=MATERIAL,
+            aggregate_delta=tests[n]["macro_f1"]["observed_diff"],
+            aggregate_significant=tests[n]["macro_f1"]["significant"])
+        if verdict["disqualified"]:
+            disqualified[n] = verdict["harmed"]
+        elif verdict["verdict"] == "accepted":
             candidates.append(n)
 
     best_point = max(("unaugmented", "broad-4", "targeted-2"),

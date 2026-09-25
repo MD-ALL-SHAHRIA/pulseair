@@ -356,6 +356,32 @@ and it is also the cheapest of the three. A paper proposing GAN-based augmentati
 rare-class air-quality prediction needs to clear both of these controls, and this one
 does not.
 
+### 2.12 ECE and MCE disagree about which sequence model is better calibrated
+
+The same shape a third time. Calibration was measured two ways: **ECE**, the average
+gap across reliability bins, and **MCE**, the worst single bin.
+
+| Model | ECE (mean bin gap) | MCE (worst bin gap) |
+| --- | --- | --- |
+| transformer | 0.0113 | 0.1969 |
+| lstm | 0.0190 | 0.0448 |
+
+**The Transformer wins on ECE (0.0113 vs 0.0190) and loses on MCE
+(0.1969 vs 0.0448) — 4.4x worse in its worst bin.** On average it is
+the better-calibrated model; where it is most confidently wrong, it is far worse. The
+advisory layer suppresses low-confidence warnings, so the worst bin is the operative
+number, and a selection made on ECE alone would have chosen the wrong model.
+
+**Why it belongs beside 2.3 and 2.7.** Those two are the same failure in different
+places: an aggregate improved while a tail got worse. Section 2.3 is augmentation
+raising macro-F1 while significantly degrading both advisory classes — the pattern the
+disqualification rule exists to catch. Section 2.7 is marginal conformal meeting its
+90% target on average while covering Hazardous at 0.8432. This is the third
+instance, and it was sitting in `dl_h6.json` unreported until a late audit of the
+committed metrics found it. **The recurring lesson is not about any one metric: an
+average over a distribution says nothing about its tail, and in a safety-critical
+advisory the tail is the product.**
+
 ### What did work
 
 - **Moving the horizon to 6 h**, which turned a persistence-echo task into a
@@ -796,7 +822,7 @@ Bonferroni: **α = 0.05 / 9 ≈ 0.0056**.
 | RF + CTGAN, targeted 2-class | -0.0075 | <0.0020 | worse | yes | **yes** |
 | RF + SMOTE (imbalanced-learn) | +0.0089 | <0.0020 | better | yes | **yes** |
 | Compressed RF + class weight (10 trees x depth 10) | -0.0098 | <0.0020 | worse | yes | **yes** |
-| RandomForest (Phase 3) | +0.0055 | 0.0020 | better | yes | **yes** |
+| RandomForest (Phase 3) | +0.0055 | <0.0020 | better | yes | **yes** |
 | LSTM + MC dropout | -0.0044 | 0.0380 | worse | yes | no |
 | Compressed RF (100 trees x depth 16) | +0.0034 | 0.0800 | better | no | no |
 | RandomForest, class_weight=balanced | +0.0031 | 0.1180 | better | no | no |
@@ -810,7 +836,7 @@ need more resamples to separate further.
 - **"RandomForest beats persistence"** — **holds** at α/k (p = 0.0020 vs 0.0056)
 - **"the compressed model fails to beat persistence"** — **holds** at α/k (p < 0.0020 vs 0.0056)
 
-6 of 9 comparisons survive the corrected threshold: **RandomForest (Phase 3)** (+0.0055), **XGBoost (Phase 3)** (-0.0127), **RF + CTGAN, broad 4-class** (+0.0094), **RF + CTGAN, targeted 2-class** (-0.0075), **RF + SMOTE (imbalanced-learn)** (+0.0089), **Compressed RF + class weight (10 trees x depth 10)** (-0.0098).
+6 of 9 comparisons survive the corrected threshold: **XGBoost (Phase 3)** (-0.0127), **RF + CTGAN, broad 4-class** (+0.0094), **RF + CTGAN, targeted 2-class** (-0.0075), **RF + SMOTE (imbalanced-learn)** (+0.0089), **Compressed RF + class weight (10 trees x depth 10)** (-0.0098), **RandomForest (Phase 3)** (+0.0055).
 
 **1 comparison(s) are significant at α = 0.05 but not after correction**: LSTM + MC dropout (p = 0.0380). These should be reported as suggestive, not established.
 
@@ -828,7 +854,7 @@ Correction is applied here to the *persistence* comparisons only. The GAN-ablati
 | How is the EPA PM2.5 breakpoint mapping justified for Chinese monitoring stations, which use the CAQMS/HJ 633-2012 scale? | **Not currently answered — address it.** The breakpoints in `configs/default.yaml` are US EPA. China's ambient standard uses different PM2.5 cut-points (e.g. 35/75/115/150/250 µg/m³ for the 24-h scale). The choice is defensible for international comparability and because the AQI bands are a *labelling* convention rather than a claim about Chinese regulation. **Now written up as Limitations section 6**, including why the choice is not a neutral relabelling. The HJ 633-2012 sensitivity re-run remains outstanding. |
 | Coverage is reported on the same test split used throughout. Is the conformal guarantee not then contaminated? | **Answered.** Calibration uses the **validation** split (61,466 observed rows); test is only ever measured on. Split conformal's guarantee requires exchangeability between calibration and test, which a chronological split strains — and the report says so. `conformal_h6.md` §1. |
 | Exchangeability fails under a chronological split. Does the conformal guarantee hold at all? | **Partially answered — strengthen it.** The empirical coverage (0.8865 overall, 0.9083 Hazardous) is measured, not assumed, which is the practical answer. But the theoretical guarantee does assume exchangeability and seasonal drift violates it. Cite the adaptive/online conformal literature (Gibbs & Candès) and state that the measured coverage is the operative claim. |
-| The sequence models had ~53k–70k parameters on 294k training samples. Were they large enough to be a fair test? | **Answered.** The learning-rate sweep (`dl_metrics_h6.md` §1) shows both architectures were optimisation-limited at lr=1e-3 and improved at 3e-4, and the entropy decomposition shows 1.7% of uncertainty is epistemic — i.e. capacity is not the binding constraint. A capacity sweep alongside the LR sweep would close this completely. |
+| The sequence models had ~53k–70k parameters on 294k training samples. Were they large enough to be a fair test? | **Answered.** The learning-rate sweep (`dl_metrics_h6.md` §1) shows both architectures were optimisation-limited at lr=1e-3 and improved at 3e-4, and the entropy decomposition shows 1.7% of uncertainty is epistemic — i.e. capacity is not the binding constraint. **The capacity sweep was subsequently run and closes this** (`capacity_sweep_h6.md`, figure 06): hidden sizes 64, 128, 256 at the swept learning rate, and both architectures decline *monotonically* with size — LSTM -0.0322 and Transformer -0.0201 from smallest to largest, over ~15x the parameters. More capacity made both models worse, which is what an aleatoric ceiling predicts. |
 | Only one dataset, one city, one four-year window. How general are the negative results? | **Acknowledged as a limitation.** The persistence-floor argument and the marginal-vs-Mondrian coverage finding are *methodological* and transfer directly; the specific negative results (CTGAN, LSTM) are claims about this data. Replication on a second city — the UCI Italy or a US EPA AirNow extract — is the single highest-value extension. |
 | The wearable framing is not validated: no body-worn sensor data was collected, and reference-grade monitors are not low-cost sensors. | **Acknowledged.** Stated in Limitations §6. The 9-channel feature subset is justified by sensor availability and cost (`preprocessing_summary_h6.md` §2), but ambient-station readings are a proxy for personal exposure. Any field deployment would need re-calibration against the actual sensor, and — as Phase 7 §2 shows — re-calibrating conformal along with it. |
 | Test-set reuse: many variants were evaluated against the same test split. Is there a multiple-comparisons problem? | **Partially answered — disclose it.** Selection was always on validation, so test was never optimised against; but 11 variants were ultimately *reported* on it with 1,000-resample bootstraps. The **this is now addressed in section 6**, which applies a Bonferroni-corrected threshold to every persistence comparison and states explicitly which headline claims survive it. |
@@ -846,7 +872,19 @@ Correction is applied here to the *persistence* comparisons only. The GAN-ablati
 | 4 | `gan_quality_report_h6.md` | CTGAN validity, the quality-score methodological note |
 | 4 | `gan_ablation_h6.md` | broad vs targeted vs unaugmented, bootstrap CIs |
 | 5 | `dl_metrics_h6.md` | LSTM/Transformer, MC dropout, calibration, LR sweep |
+| 5 | `capacity_sweep_h6.md` | hidden-size sweep; both architectures decline with size |
 | 6 | `conformal_h6.md` | split vs Mondrian conformal, per-class coverage |
 | 6 | `shap_examples/README.md` | attributions, 12 case plots |
 | 6 | `llm_advisory_examples.md` | 5 live advisories, honesty constraints, free-tier rationale |
 | 7 | `deployment_report_h6.md` | compression sweep, ONNX, latency, ESP32 feasibility |
+| 7 | `deployment_report_h6_cw.md` | the class-weighted re-sweep under the two-sided rule |
+| 8 | `rolling_origin_cv_h6.md` | 5 chronological folds on Beijing, Wilcoxon on fold deltas |
+| 8 | `hj633_sensitivity.md` | EPA vs HJ 633-2012 breakpoints; the conclusion is unchanged |
+| 10 | `bangladesh_validation.md` | the data-integrity audit, transfer vs native, §1 is a contribution in itself |
+| 10 | `bangladesh_rolling_cv.md` | 5 folds on Bangladesh; the class-weighted forest takes 5/5 |
+| 10 | `bangladesh_deployment.md` | the deployed compression point, ONNX, conformal, latency |
+| 11 | `dhaka_ground_truth_validation.md` | US Embassy reference monitor vs the reanalysis |
+| 11b | `dhaka_ground_truth_model_h6.md` | PM2.5-only model; the validated Hazardous result |
+| 11c | `openaq_multichannel_validation.md` | station survey; no multi-pollutant Dhaka source qualifies |
+| — | `figures/README.md` | all 23 figures with the JSON each was generated from |
+| — | `reference_list_expanded.md` | 61 references, 22 registry-verified additions |

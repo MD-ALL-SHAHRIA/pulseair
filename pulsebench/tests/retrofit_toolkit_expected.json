@@ -1,0 +1,43 @@
+{
+  "_provenance": "Captured from the pre-retrofit implementations before src/ was wired to call pulsebench. Each block was produced by the local duplicate that has since been replaced, and is frozen here as the expectation the pulsebench version must reproduce.",
+  "dhaka_persistence_floor": {
+    "_source": "src/models/dhaka_ground_truth.persistence_floor, local time-join implementation",
+    "n_pairs": 74535,
+    "macro_f1": 0.42250300441003574,
+    "accuracy": 0.4777889582075535,
+    "label_unchanged_pct": 47.77889582075535,
+    "per_class_f1": {
+      "Good": 0.3383564396222624,
+      "Moderate": 0.5586083366222411,
+      "Unhealthy (sensitive)": 0.3352693315112174,
+      "Unhealthy": 0.5515406621840777,
+      "Very unhealthy": 0.42912595368759204,
+      "Hazardous": 0.3221173028328235
+    },
+    "support": {
+      "Good": 2479, "Moderate": 16456, "Unhealthy (sensitive)": 13186,
+      "Unhealthy": 27459, "Very unhealthy": 11200, "Hazardous": 3755
+    }
+  },
+  "bonferroni_family": {
+    "_source": "src/reporting/compile_results.multiplicity_section, inline alpha/k",
+    "k": 9,
+    "alpha": 0.05,
+    "corrected_alpha": 0.005555555555555556,
+    "resolution_floor": 0.002,
+    "survivors": [
+      "RandomForest (Phase 3)", "XGBoost (Phase 3)", "RF + CTGAN, broad 4-class",
+      "RF + CTGAN, targeted 2-class", "RF + SMOTE (imbalanced-learn)",
+      "Compressed RF + class weight (10 trees x depth 10)"
+    ],
+    "lost": ["LSTM + MC dropout"],
+    "_known_difference": "The inline version rendered p exactly at the resolution floor (RandomForest (Phase 3), p=0.002) as '0.0020'; pulsebench renders it '<0.0020'. Display only -- k, corrected alpha, survivors and lost are identical. pulsebench's rendering is the correct one: a 1,000-resample bootstrap cannot resolve a two-sided p below 2/1000, so an exact-looking 0.0020 overstates the procedure's precision."
+  },
+  "disqualification": {
+    "_source": "src/gan/ablation.py, inline decision rule",
+    "material_threshold": 0.01,
+    "protected_classes": ["Very unhealthy", "Hazardous"],
+    "broad-4": {"disqualified": true, "harmed": ["Very unhealthy", "Hazardous"], "accepted": false},
+    "targeted-2": {"disqualified": true, "harmed": ["Very unhealthy", "Hazardous"], "accepted": false}
+  }
+}

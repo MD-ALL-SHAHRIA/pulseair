@@ -74,6 +74,7 @@ class BaselineConfig:
     xgb_params: dict
     seed: int
     horizon: int
+    select_on: str = "val_observed_macro_f1"
     horizons: tuple[int, ...] = ()
     augmented: bool = False
     aug_variant: str = "broad"
@@ -126,6 +127,7 @@ def load_config(path: Path | str = DEFAULT_CONFIG, root: Path | None = None,
     raw = yaml.safe_load(Path(path).read_text())
     data, base, prep = raw["data"], raw["baseline"], raw["preprocessing"]
     return BaselineConfig(
+        select_on=base.get("select_on", "val_observed_macro_f1"),
         processed_root=root / data["processed_dir"],
         artifacts_dir=root / base["artifacts_dir"],
         reports_dir=root / Path(base["report"]).parent,
@@ -244,6 +246,28 @@ def build_models(cfg: BaselineConfig) -> dict:
     }
 
 
+def _parse_select_on(spec: str) -> tuple[str, str, str]:
+    """Turn ``baseline.select_on`` into the (split, scope, metric) path it names.
+
+    Only ``val_observed_macro_f1`` is supported, and deliberately so: selecting on the
+    test split would invalidate every reported number, and selecting on all rows rather
+    than observed ones would let forward-filled labels drive the choice. The key exists
+    so the rule is stated in the config rather than buried here -- not so it can be
+    changed casually. Anything else raises.
+
+    >>> _parse_select_on("val_observed_macro_f1")
+    ('val', 'observed', 'macro_f1')
+    """
+    supported = {"val_observed_macro_f1": ("val", "observed", "macro_f1")}
+    if spec not in supported:
+        raise ValueError(
+            f"baseline.select_on={spec!r} is not supported. Only "
+            f"{sorted(supported)} is: selection must use the validation split "
+            f"(test is reserved for final reporting) and observed-only rows "
+            f"(imputed labels inflate the rare classes).")
+    return supported[spec]
+
+
 def persistence_baseline(split: Split, cfg: BaselineConfig, scaler,
                          scaled_columns: list[str]) -> np.ndarray:
     """Reference point: predict that the next hour's class equals the current hour's.
@@ -323,8 +347,13 @@ def run(cfg: BaselineConfig | None = None, *, write: bool = True, verbose: bool 
     # test score into a selection-contaminated estimate, and the agreement is only
     # knowable by looking, which is the thing being avoided.
     learned = {k: v for k, v in results.items() if v["model"] is not None}
-    best_name = max(learned, key=lambda k: learned[k]["val"]["observed"]["macro_f1"])
-    would_be_test = max(learned, key=lambda k: learned[k]["test"]["observed"]["macro_f1"])
+    # `baseline.select_on` was previously declared in configs/default.yaml and read by
+    # nothing -- the rule was hardcoded here. A config key that documents behaviour it
+    # does not control can drift away from the code silently, so it is now the thing
+    # that chooses, and an unsupported value raises instead of being ignored.
+    split, scope, metric = _parse_select_on(cfg.select_on)
+    best_name = max(learned, key=lambda k: learned[k][split][scope][metric])
+    would_be_test = max(learned, key=lambda k: learned[k]["test"][scope][metric])
     say(f"selected on VAL observed macro-F1: {best_name} "
         f"({learned[best_name]['val']['observed']['macro_f1']:.4f})")
     if would_be_test != best_name:
@@ -333,7 +362,7 @@ def run(cfg: BaselineConfig | None = None, *, write: bool = True, verbose: bool 
     payload = {
         "results": results,
         "best": best_name,
-        "selected_on": "val_observed_macro_f1",
+        "selected_on": cfg.select_on,
         "test_would_pick": would_be_test,
         "horizon": cfg.horizon,
         "features": features,
@@ -754,9 +783,9 @@ hour's. It has no parameters and needs no training. See
 The forest is depth- and leaf-capped in `configs/default.yaml` for a reason worth
 recording: an unbounded forest on these 294k rows pickles to **2.4 GB** and scores
 *lower* (0.7970 vs {b['observed']['macro_f1']:.4f} observed macro-F1) -- it memorises
-rather than generalises. Neither variant is remotely deployable to an ESP32; that is
-what the TFLite Micro path in `src/deployment/` is for, and a tree ensemble is not the
-model that will make that trip.
+rather than generalises. Neither variant is remotely deployable to an ESP32. Phase 7
+compresses the forest and exports it to ONNX; a TFLite Micro conversion path was planned
+and abandoned, because a tree ensemble is not the model that will make that trip.
 
 Selection used **validation observed-only macro-F1**
 ({results[best]['val']['observed']['macro_f1']:.4f}) -- observed-only rather than overall,

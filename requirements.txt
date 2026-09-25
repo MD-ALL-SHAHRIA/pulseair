@@ -4,7 +4,11 @@
 # ---------------------------------------------------------------------------
 
 # --- core data stack -------------------------------------------------------
-numpy>=1.26,<2.0          # <2.0: tensorflow / sdv / shap wheels still pin numpy 1.x
+numpy>=1.26,<2.0          # a reproducibility pin, not a dependency constraint: the
+                          # committed results were produced on numpy 1.26.4 and the
+                          # SDV/CTGAN stack is only verified there. Nothing installed
+                          # here still requires numpy 1.x -- tensorflow was the only
+                          # package that did, and it has been removed.
 pandas>=2.2,<3.0
 scipy>=1.11,<2.0
 
@@ -42,9 +46,6 @@ onnx>=1.16,<2.0
 onnxruntime>=1.18,<2.0
 onnxscript>=0.2,<1.0       # required by torch>=2.9 torch.onnx.export (dynamo exporter)
 skl2onnx>=1.17,<2.0        # scikit-learn -> ONNX for the deployed RandomForest
-
-# --- edge deployment: TFLite / TFLite Micro conversion path ----------------
-tensorflow>=2.16,<2.20    # provides the TFLiteConverter used for the ESP32 build
 
 # --- notebooks / EDA -------------------------------------------------------
 jupyterlab>=4.2,<5.0

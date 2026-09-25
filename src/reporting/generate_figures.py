@@ -442,44 +442,72 @@ def fig_ctgan_validity() -> plt.Figure:
     n_after = req_num(after, "synthetic.n", after_src)
     n_before = req_num(b_val, "synthetic.n", before_src)
 
-    panels = [
-        ("Cyclical encoding valid\n(hour_sin² + hour_cos² = 1)", "% of synthetic rows",
-         req_num(b_val, "synthetic.hour.on_unit_circle_pct", before_src),
-         req_num(after, "synthetic.hour.on_unit_circle_pct", after_src),
-         100.0, "must be 100%", False, "{:.2f}"),
-        ("Distinct hour_sin values\n(24 hours exist)", "distinct values",
-         req_num(b_val, "synthetic.hour.distinct_sin", before_src),
-         req_num(after, "synthetic.hour.distinct_sin", after_src),
-         req_num(after, "synthetic.hour.expected_distinct", after_src),
-         "24 possible", True, "{:,.0f}"),
-        ("Impossible air\n(dew point above temperature)", "% of synthetic rows",
-         req_num(b_val, "synthetic.dewp_above_temp_pct", before_src),
-         req_num(after, "synthetic.dewp_above_temp_pct", after_src),
-         req_num(after, "real.dewp_above_temp_pct", after_src), "real data", False,
-         "{:.4g}"),
-    ]
+    # Both cyclical pairs, because both broke. Showing only `hour` would leave the
+    # reader unable to tell a column-specific quirk from a structural one.
+    cyc = [("hour", 24), ("month", 12)]
+    circle, distinct = [], []
+    for base, _ in cyc:
+        circle += [
+            {"Channel": base, "Configuration": "Before\n(broken)",
+             "Value": req_num(b_val, f"synthetic.{base}.on_unit_circle_pct", before_src)},
+            {"Channel": base, "Configuration": "After\n(integer + recompute)",
+             "Value": req_num(after, f"synthetic.{base}.on_unit_circle_pct", after_src)}]
+        distinct += [
+            {"Channel": f"{base}_sin", "Configuration": "Before\n(broken)",
+             "Value": req_num(b_val, f"synthetic.{base}.distinct_sin", before_src)},
+            {"Channel": f"{base}_sin", "Configuration": "After\n(integer + recompute)",
+             "Value": req_num(after, f"synthetic.{base}.distinct_sin", after_src)}]
+    circle_df, distinct_df = pd.DataFrame(circle), pd.DataFrame(distinct)
+    dewp = pd.DataFrame([
+        {"Configuration": "Before\n(broken)",
+         "Value": req_num(b_val, "synthetic.dewp_above_temp_pct", before_src)},
+        {"Configuration": "After\n(sdv.cag.Inequality)",
+         "Value": req_num(after, "synthetic.dewp_above_temp_pct", after_src)}])
+    dewp_real = req_num(after, "real.dewp_above_temp_pct", after_src)
+    pal = {"Before\n(broken)": C_BAD, "After\n(integer + recompute)": C_MODEL}
 
-    fig, axes = plt.subplots(1, 3, figsize=(FIG_WIDTH * 1.4, 4.6))
-    for ax, (title, ylab, b, a, ref, reflab, log, fmt) in zip(axes, panels):
-        df = pd.DataFrame([{"Configuration": "Before\n(broken)", "Value": b},
-                           {"Configuration": "After\n(sdv.cag.Inequality)", "Value": a}])
-        sns.barplot(df, x="Configuration", y="Value", hue="Configuration",
-                    palette=[C_BAD, C_MODEL], legend=False, ax=ax,
-                    edgecolor="white", linewidth=0.8)
-        if log:
-            ax.set_yscale("log")
-            ax.set_ylim(0.5, max(b, a, ref) * 6)
-        else:
-            ax.set_ylim(0, max(b, a, ref) * 1.30 or 1)
-        ax.axhline(ref, color="#444444", ls=":", lw=1.5, zorder=4,
-                   label=f"{reflab} ({fmt.format(ref)})")
-        for i, r in df.iterrows():
-            ax.annotate(fmt.format(r["Value"]), (i, r["Value"]),
-                        textcoords="offset points", xytext=(0, 5), ha="center",
-                        fontsize=FS_ANNOT, fontweight="bold")
-        ax.set_title(title, fontsize=FS_LABEL - 0.5)
-        ax.set_xlabel(""); ax.set_ylabel(ylab)
-        ax.legend(loc="upper right", fontsize=7.2, framealpha=0.95)
+    fig, axes = plt.subplots(1, 3, figsize=(FIG_WIDTH * 1.55, 4.6))
+
+    ax = axes[0]
+    sns.barplot(circle_df, x="Channel", y="Value", hue="Configuration",
+                palette=pal, ax=ax, edgecolor="white", linewidth=0.8)
+    ax.axhline(100, color="#444444", ls=":", lw=1.5, zorder=4, label="must be 100%")
+    _annotate_bars(ax, fmt="{:.2f}", fontsize=7.6)
+    ax.set_ylim(0, 118)
+    ax.set_title("Cyclical encoding valid\n(sin² + cos² = 1)", fontsize=FS_LABEL - 0.5)
+    ax.set_xlabel(""); ax.set_ylabel("% of synthetic rows")
+    # Below the axes: inside, it lands on the 100% bars, which are the point.
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2,
+              frameon=False, fontsize=7.0)
+
+    ax = axes[1]
+    sns.barplot(distinct_df, x="Channel", y="Value", hue="Configuration",
+                palette=pal, legend=False, ax=ax, edgecolor="white", linewidth=0.8)
+    for base, period in cyc:
+        ax.axhline(period, color="#444444", ls=":", lw=1.2, zorder=4)
+    _annotate_bars(ax, fmt="{:,.0f}", fontsize=7.6)
+    ax.set_yscale("log")
+    ax.set_ylim(0.6, distinct_df["Value"].max() * 12)
+    ax.set_title("Distinct values emitted\n(24 hours, 12 months exist)",
+                 fontsize=FS_LABEL - 0.5)
+    ax.set_xlabel(""); ax.set_ylabel("distinct values (log)")
+    # The reference lines are labelled by the title; a floating annotation here
+    # collided with the post-fix bars, which sit at exactly those values.
+    for base, period in cyc:
+        ax.annotate(f"{period}", (-0.46, period), fontsize=7.0, color="#444444",
+                    va="center", ha="left")
+
+    ax = axes[2]
+    sns.barplot(dewp, x="Configuration", y="Value", hue="Configuration",
+                palette=[C_BAD, C_MODEL], legend=False, ax=ax,
+                edgecolor="white", linewidth=0.8)
+    ax.axhline(dewp_real, color="#444444", ls=":", lw=1.5, zorder=4,
+               label=f"real data ({dewp_real:.4g})")
+    _annotate_bars(ax, fmt="{:.4g}", fontsize=7.6)
+    ax.set_ylim(0, max(dewp["Value"].max(), dewp_real) * 1.30 or 1)
+    ax.set_title("Impossible air\n(dew point above temperature)", fontsize=FS_LABEL - 0.5)
+    ax.set_xlabel(""); ax.set_ylabel("% of synthetic rows")
+    ax.legend(loc="upper right", fontsize=7.0, framealpha=0.95)
 
     # Whether the reconstruction lands on the numbers already in the report is the
     # figure's own provenance, so it is stated on the figure rather than in a caption
@@ -901,21 +929,28 @@ def fig_bonferroni() -> plt.Figure:
               if isinstance(v.get("vs_persistence"), dict)]
     if not tested:
         raise MissingMetric("no variant carries a vs_persistence bootstrap result")
-    n_boot = req_num(load("ablation_h6.json"), "n_boot", "ablation_h6.json")
-    resolution = 2.0 / n_boot
-    alpha = 0.05
-    corrected = alpha / len(tested)
+    from pulsebench import bonferroni_report
 
-    rows = []
-    for v in tested:
-        p = req_num(v, "vs_persistence.p_two_sided", f"variant {v['name']}")
-        diff = req_num(v, "vs_persistence.observed_diff", f"variant {v['name']}")
-        rows.append({"Variant": v["name"].split(" —")[0],
-                     "p": max(p, resolution), "at_floor": p < resolution,
-                     "Direction": "better than persistence" if diff > 0
-                                  else "worse than persistence",
-                     "survives": p < corrected})
-    df = pd.DataFrame(rows).sort_values("p").reset_index(drop=True)
+    n_boot = req_num(load("ablation_h6.json"), "n_boot", "ablation_h6.json")
+    # Same correction object the written summary uses, so the figure and section 6
+    # cannot disagree about which comparisons survive.
+    report = bonferroni_report(
+        {v["name"].split(" —")[0]: {
+            "p": req_num(v, "vs_persistence.p_two_sided", f"variant {v['name']}"),
+            "delta": req_num(v, "vs_persistence.observed_diff", f"variant {v['name']}")}
+         for v in tested},
+        alpha=0.05, n_resamples=int(n_boot))
+    alpha, corrected = report["alpha"], report["corrected_alpha"]
+    resolution = report["resolution_floor"]
+
+    df = pd.DataFrame([{
+        "Variant": r["name"],
+        "p": max(r["p"], resolution),
+        "at_floor": r["at_resolution_floor"],
+        "Direction": ("better than persistence" if r["direction"] == "better"
+                      else "worse than persistence"),
+        "survives": r["survives"],
+    } for r in report["rows"]]).reset_index(drop=True)
 
     fig, ax = plt.subplots(figsize=(FIG_WIDTH * 1.15, 0.42 * len(df) + 2.4))
     sns.barplot(df, y="Variant", x="p", hue="Direction",

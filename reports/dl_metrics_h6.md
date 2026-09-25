@@ -120,6 +120,31 @@ Gap is accuracy minus confidence; negative is overconfident.
 
 ECE **0.0190**, MCE **0.0448**. No bin is overconfident by more than 5 points: where the model says 0.7 it is right about 70% of the time, which is what the advisory layer needs if it is going to gate on confidence.
 
+### ECE and MCE disagree about which model is better calibrated
+
+| Model | ECE (mean bin gap) | MCE (worst bin gap) |
+| --- | --- | --- |
+| transformer | 0.0113 | 0.1969 |
+| lstm | 0.0190 | 0.0448 |
+
+**transformer has the better ECE (0.0113 vs 0.0190) and the worse
+MCE (0.1969 vs 0.0448) — 4.4x worse in its worst bin.** On
+average it is the better-calibrated model; where it is most confidently wrong it is far
+worse. For a system that suppresses low-confidence warnings, the worst bin is the
+operative number, and selecting on ECE alone would have picked the wrong model.
+
+This is the third time in this project an aggregate metric has concealed a tail failure.
+The first was the augmentation ablation, where CTGAN and SMOTE both raised macro-F1 while
+significantly degrading the two advisory classes — the pattern the disqualification rule
+exists to catch. The second was conformal coverage, where the marginal guarantee was met
+on average while Hazardous was covered only 84.3% of the time, which Mondrian calibration
+fixed. This is the same shape a third time, in a third place. **The recurring lesson is
+not about any one metric: it is that an average over a distribution says nothing about
+its tail, and in a safety-critical advisory the tail is the product.**
+
+
+
+
 Of the 1.0713 nats of mean predictive entropy, only 0.0178 (1.7%) is epistemic — the part that comes from the model disagreeing with itself across passes. The remaining ~98% is aleatoric: irreducible overlap between classes given these nine channels and this horizon. **That is a statement about the task, not the model.** More capacity, more epochs, or more data move the epistemic sliver and leave the rest alone, which is consistent with every result in this phase and the last two. If the six-hour-ahead category is to be predicted better, the input has to change — more channels, a longer window, or spatial context from neighbouring stations — not the architecture.
 
 ---

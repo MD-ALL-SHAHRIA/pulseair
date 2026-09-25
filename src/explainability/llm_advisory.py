@@ -334,7 +334,7 @@ def _validate(text: str, reading: Reading) -> str | None:
 
 
 def generate(reading: Reading, profile: UserProfile, model: str, max_tokens: int,
-             verbose: bool = False) -> AdvisoryResult:
+             temperature: float = 0.3, verbose: bool = False) -> AdvisoryResult:
     """Ask Gemini; fall back to the template on any failure.
 
     Uses the **google-genai** SDK. The older `google-generativeai` package this
@@ -367,7 +367,10 @@ def generate(reading: Reading, profile: UserProfile, model: str, max_tokens: int
     config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT,
         max_output_tokens=max_tokens,
-        temperature=0.3,             # advisory copy should be steady, not creative
+        # Steady rather than creative. Previously hardcoded here while
+        # `explainability.llm_temperature` sat in configs/default.yaml unread; the two
+        # agreed, but nothing made them agree. The config is now the source.
+        temperature=temperature,
     )
 
     # Free-tier quota comes in two flavours needing opposite treatment: a per-minute
@@ -571,6 +574,7 @@ def run(n: int = 5, horizon: int = 6, *, write: bool = True,
     cfg_raw = yaml.safe_load(DEFAULT_CONFIG.read_text())
     ex = cfg_raw["explainability"]
     model, max_tokens = ex["llm_model"], int(ex["llm_max_tokens"])
+    temperature = float(ex.get("llm_temperature", 0.3))
     say = print if verbose else (lambda *a, **k: None)
 
     has_key = bool(os.environ.get("GEMINI_API_KEY") or
@@ -590,7 +594,8 @@ def run(n: int = 5, horizon: int = 6, *, write: bool = True,
         if i and has_key:
             time.sleep(PACING_SECONDS)
         reading = load_reading(row, horizon)
-        out = generate(reading, profile, model, max_tokens, verbose)
+        out = generate(reading, profile, model, max_tokens,
+                       temperature=temperature, verbose=verbose)
         results.append({"reading": reading, "profile": profile, "result": out})
         err = (out.error or "ok").splitlines()[0][:90]
         say(f"  row {row:>6,} set={len(reading.conformal_set)} [{out.source}] {err}")
@@ -834,7 +839,8 @@ def main(argv: list[str] | None = None) -> int:
         reading = load_reading(args.row, args.horizon)
         profile = UserProfile(args.age, args.respiratory)
         out = generate(reading, profile, cfg_raw["llm_model"],
-                       int(cfg_raw["llm_max_tokens"]))
+                       int(cfg_raw["llm_max_tokens"]),
+                       temperature=float(cfg_raw.get("llm_temperature", 0.3)))
         print(json.dumps({"reading": asdict(reading), "profile": asdict(profile),
                           "advisory": asdict(out)}, indent=2, default=str))
         return 0

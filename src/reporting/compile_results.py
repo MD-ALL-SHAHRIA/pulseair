@@ -233,6 +233,24 @@ def per_class_table(d: dict) -> str:
 # ----------------------------------------------------------------- narrative
 
 
+def _mce_bits(d: dict) -> dict:
+    """ECE/MCE per architecture, read from dl_h6.json.
+
+    Computed rather than asserted: if a rerun changes which model wins on which
+    metric, section 2.12 follows the numbers instead of contradicting them.
+    """
+    cal = d["dl"]["calibration"]
+    rows = sorted(((a, c["ece"], c["mce"]) for a, c in cal.items()), key=lambda r: r[1])
+    best, worst = rows[0], rows[-1]
+    return {
+        "mce_table": ("| Model | ECE (mean bin gap) | MCE (worst bin gap) |\n| --- | --- | --- |\n"
+                      + "\n".join(f"| {a} | {e:.4f} | {m:.4f} |" for a, e, m in rows)),
+        "t_ece": best[1], "t_mce": best[2], "l_ece": worst[1], "l_mce": worst[2],
+        "mce_ratio": best[2] / worst[2] if worst[2] else float("inf"),
+        "mce_reversal": best[2] > worst[2],
+    }
+
+
 def negatives_section(d: dict) -> str:
     ab, dl, conf, dep = d["ab"], d["dl"], d["conf"], d["dep"]
     gan = d["gan"]
@@ -325,6 +343,9 @@ selection is allowed to use, and on validation the verdict is unambiguous."""
     comp_vs_persist = (
         f"**{cv['observed_diff']:+.4f}** [{cv['ci_low']:+.4f}, {cv['ci_high']:+.4f}]"
         if cv != "untested" else "not tested")
+    mce = _mce_bits(d)
+    mce_table, mce_ratio = mce["mce_table"], mce["mce_ratio"]
+    t_ece, t_mce, l_ece, l_mce = mce["t_ece"], mce["t_mce"], mce["l_ece"], mce["l_mce"]
 
     return f"""## 2. What worked, what didn't
 
@@ -549,6 +570,29 @@ and it is also the cheapest of the three. A paper proposing GAN-based augmentati
 rare-class air-quality prediction needs to clear both of these controls, and this one
 does not.
 
+### 2.12 ECE and MCE disagree about which sequence model is better calibrated
+
+The same shape a third time. Calibration was measured two ways: **ECE**, the average
+gap across reliability bins, and **MCE**, the worst single bin.
+
+{mce_table}
+
+**The Transformer wins on ECE ({t_ece:.4f} vs {l_ece:.4f}) and loses on MCE
+({t_mce:.4f} vs {l_mce:.4f}) — {mce_ratio:.1f}x worse in its worst bin.** On average it is
+the better-calibrated model; where it is most confidently wrong, it is far worse. The
+advisory layer suppresses low-confidence warnings, so the worst bin is the operative
+number, and a selection made on ECE alone would have chosen the wrong model.
+
+**Why it belongs beside 2.3 and 2.7.** Those two are the same failure in different
+places: an aggregate improved while a tail got worse. Section 2.3 is augmentation
+raising macro-F1 while significantly degrading both advisory classes — the pattern the
+disqualification rule exists to catch. Section 2.7 is marginal conformal meeting its
+90% target on average while covering Hazardous at {marg_haz:.4f}. This is the third
+instance, and it was sitting in `dl_h6.json` unreported until a late audit of the
+committed metrics found it. **The recurring lesson is not about any one metric: an
+average over a distribution says nothing about its tail, and in a safety-critical
+advisory the tail is the product.**
+
 ### What did work
 
 - **Moving the horizon to 6 h**, which turned a persistence-echo task into a
@@ -631,7 +675,7 @@ provenance, and the rolling-origin protocol itself.
 | Selection rule | two-sided: within tolerance of the full model **and** significantly above **Bangladesh's own** persistence floor ({sw['persistence_val_macro_f1']:.4f}) — {sw['n_accepted']}/{len(sw['rows'])} configurations qualified |
 | Inference | **{lat['onnx_single']['mean_ms']:.4f} ms** single-sample, single-threaded |
 | Conformal layer | {lat['conformal_single']['mean_ms']:.4f} ms; overall coverage {newc['test']['coverage']:.4f} |
-| ONNX ↔ sklearn parity | max \|Δp\| {dep['parity']['max_abs_prob_diff']:.1e}, argmax agreement {dep['parity']['argmax_agreement']:.4f} |
+| ONNX ↔ sklearn parity | max \\|Δp\\| {dep['parity']['max_abs_prob_diff']:.1e}, argmax agreement {dep['parity']['argmax_agreement']:.4f} |
 
 The compression point was re-selected against **Bangladesh's** floor
 ({sw['persistence_val_macro_f1']:.4f}), not Beijing's — the earlier Beijing
@@ -1137,28 +1181,31 @@ def _span_pct(a: dict) -> float:
 
 def multiplicity_section(d: dict) -> str:
     """Bonferroni over every variant tested against persistence on one test split."""
+    from pulsebench import bonferroni_report
+
     tested = [v for v in d["variants"]
               if v["vs_persistence"] not in (None, "untested")]
-    k = len(tested)
-    alpha, corrected = 0.05, 0.05 / k
     n_boot = d["n_boot"]
-    resolution = 2.0 / n_boot   # finest non-zero two-sided p a 1,000-resample bootstrap can report
 
-    rows = []
-    for v in sorted(tested, key=lambda x: x["vs_persistence"]["p_two_sided"]):
-        t = v["vs_persistence"]
-        p = t["p_two_sided"]
-        naive = "yes" if p < alpha else "no"
-        bonf = "**yes**" if p < corrected else "no"
-        direction = "better" if t["observed_diff"] > 0 else "worse"
-        rows.append([v["name"].split(" —")[0], f"{t['observed_diff']:+.4f}",
-                     f"{p:.4f}" if p > 0 else f"<{resolution:.4f}",
-                     direction, naive, bonf])
+    # The correction is pulsebench's, not a local copy. This section used to compute
+    # alpha/k and the resolution floor inline; that made the published toolkit and the
+    # numbers in this document two separate implementations of the same rule.
+    report = bonferroni_report(
+        {v["name"].split(" —")[0]: {"p": v["vs_persistence"]["p_two_sided"],
+                                    "delta": v["vs_persistence"]["observed_diff"]}
+         for v in tested},
+        alpha=0.05, n_resamples=n_boot)
+    k, alpha = report["k"], report["alpha"]
+    corrected, resolution = report["corrected_alpha"], report["resolution_floor"]
 
-    survivors = [v for v in tested
-                 if v["vs_persistence"]["p_two_sided"] < corrected]
-    lost = [v for v in tested
-            if alpha > v["vs_persistence"]["p_two_sided"] >= corrected]
+    rows = [[r["name"], f"{r['delta']:+.4f}", r["p_display"], r["direction"],
+             "yes" if r["significant_uncorrected"] else "no",
+             "**yes**" if r["survives"] else "no"]
+            for r in report["rows"]]
+
+    by_name = {v["name"].split(" —")[0]: v for v in tested}
+    survivors = [by_name[n] for n in report["survivors"]]
+    lost = [by_name[n] for n in report["lost"]]
     rf = next((v for v in tested if v["name"].startswith("RandomForest (Phase 3)")), None)
     comp = next((v for v in tested if v["name"].startswith("Compressed RF")), None)
 
@@ -1275,7 +1322,15 @@ def reviewer_section(d: dict) -> str:
          "and the entropy decomposition shows "
          f"{dl['uncertainty'][dl['selected']]['mean_epistemic'] / dl['uncertainty'][dl['selected']]['mean_entropy']:.1%} "
          "of uncertainty is epistemic — i.e. capacity is not the binding constraint. "
-         "A capacity sweep alongside the LR sweep would close this completely."],
+         "**The capacity sweep was subsequently run and closes this** "
+         "(`capacity_sweep_h6.md`, figure 06): hidden sizes "
+         f"{', '.join(str(x) for x in d['cap']['sweep']['sizes'])} at the swept "
+         f"learning rate, and both architectures decline *monotonically* with size — "
+         f"LSTM {d['cap']['analysis']['lstm']['gain_smallest_to_largest']:+.4f} and "
+         f"Transformer {d['cap']['analysis']['transformer']['gain_smallest_to_largest']:+.4f} "
+         f"from smallest to largest, over ~{d['cap']['analysis']['lstm']['param_ratio']:.0f}x "
+         "the parameters. More capacity made both models worse, which is what an "
+         "aleatoric ceiling predicts."],
         ["Only one dataset, one city, one four-year window. How general are the "
          "negative results?",
          "**Acknowledged as a limitation.** The persistence-floor argument and the "
@@ -1384,10 +1439,22 @@ finding rather than a disappointment.
 | 4 | `gan_quality_report_h6.md` | CTGAN validity, the quality-score methodological note |
 | 4 | `gan_ablation_h6.md` | broad vs targeted vs unaugmented, bootstrap CIs |
 | 5 | `dl_metrics_h6.md` | LSTM/Transformer, MC dropout, calibration, LR sweep |
+| 5 | `capacity_sweep_h6.md` | hidden-size sweep; both architectures decline with size |
 | 6 | `conformal_h6.md` | split vs Mondrian conformal, per-class coverage |
 | 6 | `shap_examples/README.md` | attributions, 12 case plots |
 | 6 | `llm_advisory_examples.md` | 5 live advisories, honesty constraints, free-tier rationale |
 | 7 | `deployment_report_h6.md` | compression sweep, ONNX, latency, ESP32 feasibility |
+| 7 | `deployment_report_h6_cw.md` | the class-weighted re-sweep under the two-sided rule |
+| 8 | `rolling_origin_cv_h6.md` | 5 chronological folds on Beijing, Wilcoxon on fold deltas |
+| 8 | `hj633_sensitivity.md` | EPA vs HJ 633-2012 breakpoints; the conclusion is unchanged |
+| 10 | `bangladesh_validation.md` | the data-integrity audit, transfer vs native, §1 is a contribution in itself |
+| 10 | `bangladesh_rolling_cv.md` | 5 folds on Bangladesh; the class-weighted forest takes 5/5 |
+| 10 | `bangladesh_deployment.md` | the deployed compression point, ONNX, conformal, latency |
+| 11 | `dhaka_ground_truth_validation.md` | US Embassy reference monitor vs the reanalysis |
+| 11b | `dhaka_ground_truth_model_h6.md` | PM2.5-only model; the validated Hazardous result |
+| 11c | `openaq_multichannel_validation.md` | station survey; no multi-pollutant Dhaka source qualifies |
+| — | `figures/README.md` | all 23 figures with the JSON each was generated from |
+| — | `reference_list_expanded.md` | 61 references, 22 registry-verified additions |
 """
 
 

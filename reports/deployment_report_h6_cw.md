@@ -225,6 +225,13 @@ graph metadata a device does not need.
 
 ### The caveat that matters most
 
+**A TFLite Micro conversion path was planned for this phase and abandoned**: TensorFlow
+Lite Micro does not serve a scikit-learn tree ensemble, so the route would have required
+re-training the predictor as a different model and re-validating every result against it.
+ONNX was taken instead, as an explicit portability proxy. The dependency has now been
+removed from the project rather than left advertised in a requirements file nothing
+imported.
+
 **This ONNX benchmark is a portability and feasibility proxy. It is not a claim that
 this model can be flashed to an ESP32.** There is no ONNX Runtime for the ESP32 —
 no interpreter, no execution provider, nothing to load the file with. Getting this

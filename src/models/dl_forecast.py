@@ -557,6 +557,52 @@ def run(cfg: DLConfig | None = None, *, write: bool = True, verbose: bool = True
 # ------------------------------------------------------------------------- report
 
 
+def _calibration_comparison(payload: dict) -> str:
+    """Report ECE against MCE across architectures, when they disagree.
+
+    ECE is an average over reliability bins and MCE is the worst one. They can rank
+    two models in opposite directions, and when they do it is the worst bin that
+    matters here: the advisory gates on confidence, so the question is not how well
+    calibrated the model is on average but how badly it can be wrong when it is
+    confident. Written only when a reversal is present -- there is no point asserting
+    a pattern the numbers do not show.
+    """
+    cal = payload.get("calibration") or {}
+    if len(cal) < 2:
+        return ""
+    rows = sorted(((a, c["ece"], c["mce"]) for a, c in cal.items()), key=lambda r: r[1])
+    best_ece, worst_ece = rows[0], rows[-1]
+    if best_ece[2] <= worst_ece[2]:          # same ranking on both -> nothing to report
+        table = "\n".join(f"| {a} | {e:.4f} | {m:.4f} |" for a, e, m in rows)
+        return (f"| Model | ECE | MCE |\n| --- | --- | --- |\n{table}\n\n"
+                f"ECE and MCE agree on the ranking here.")
+    ratio = best_ece[2] / worst_ece[2] if worst_ece[2] else float("inf")
+    table = "\n".join(f"| {a} | {e:.4f} | {m:.4f} |" for a, e, m in rows)
+    return f"""### ECE and MCE disagree about which model is better calibrated
+
+| Model | ECE (mean bin gap) | MCE (worst bin gap) |
+| --- | --- | --- |
+{table}
+
+**{best_ece[0]} has the better ECE ({best_ece[1]:.4f} vs {worst_ece[1]:.4f}) and the worse
+MCE ({best_ece[2]:.4f} vs {worst_ece[2]:.4f}) — {ratio:.1f}x worse in its worst bin.** On
+average it is the better-calibrated model; where it is most confidently wrong it is far
+worse. For a system that suppresses low-confidence warnings, the worst bin is the
+operative number, and selecting on ECE alone would have picked the wrong model.
+
+This is the third time in this project an aggregate metric has concealed a tail failure.
+The first was the augmentation ablation, where CTGAN and SMOTE both raised macro-F1 while
+significantly degrading the two advisory classes — the pattern the disqualification rule
+exists to catch. The second was conformal coverage, where the marginal guarantee was met
+on average while Hazardous was covered only 84.3% of the time, which Mondrian calibration
+fixed. This is the same shape a third time, in a third place. **The recurring lesson is
+not about any one metric: it is that an average over a distribution says nothing about
+its tail, and in a safety-critical advisory the tail is the product.**
+
+
+"""
+
+
 def build_report(payload: dict) -> str:
     cfg, sel = payload["config"], payload["selected"]
     results, tests, calib = payload["results"], payload["tests"], payload["calibration"]
@@ -703,6 +749,7 @@ evidence of a test win, and the write-up should not present it as one.
            "is right about 70% of the time, which is what the advisory layer needs if "
            "it is going to gate on confidence.")
     )
+    cal_compare = _calibration_comparison(payload)
 
     return f"""# Sequence models — horizon {cfg.horizon} h
 
@@ -762,6 +809,8 @@ Gap is accuracy minus confidence; negative is overconfident.
 {table(["Confidence bin", "n", "Mean confidence", "Accuracy", "Gap"], cal_rows)}
 
 {cal_note}
+
+{cal_compare}
 
 {uncertainty_note}
 

@@ -32,7 +32,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
-from sklearn.metrics import f1_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = REPO_ROOT / "configs" / "default.yaml"
@@ -103,27 +102,37 @@ def classify(pm: np.ndarray, breakpoints, labels) -> np.ndarray:
 def persistence_floor(df: pd.DataFrame, breakpoints, labels, horizon: int) -> dict:
     """Univariate persistence at h: does the class at t predict the class at t+h?
 
+    Delegates to :func:`pulsebench.persistence_floor`. This module used to carry its
+    own copy of the time-join-and-score logic; the extracted package is the same
+    computation, and keeping two of them meant the toolkit the project publishes was
+    not the one the project's own numbers came from.
+
+    The only work left here is the part that is specific to this dataset: the station
+    reports continuous PM2.5, so the series is binned to classes first, and the result
+    is re-keyed from class indices back to label names. ``labels=range(k)`` is passed
+    explicitly so a class absent from the series still appears in ``support`` with a
+    zero, as the per-class tables downstream expect.
+
     Samples require both endpoints present on the hourly grid; the station has ~5%
     missing hours, so pairs are formed by an explicit time join rather than by
-    positional shift.
+    positional shift. ``pulsebench.persistence_floor`` guarantees that.
     """
-    s = df.set_index("datetime")["pm25"]
-    now = s.to_frame("pm_now")
-    now["target_time"] = now.index + pd.Timedelta(hours=horizon)
-    joined = now.merge(s.rename("pm_future"), left_on="target_time",
-                       right_index=True, how="inner")
-    y = classify(joined.pm_future.to_numpy(), breakpoints, labels)
-    p = classify(joined.pm_now.to_numpy(), breakpoints, labels)
+    from pulsebench import persistence_floor as pb_persistence_floor
+
     k = len(labels)
+    frame = pd.DataFrame({
+        "datetime": df["datetime"].to_numpy(),
+        "__class": classify(df["pm25"].to_numpy(), breakpoints, labels),
+    })
+    out = pb_persistence_floor(frame, "__class", horizon, time_col="datetime",
+                               labels=list(range(k)))
     return {
-        "n_pairs": int(len(joined)),
-        "macro_f1": float(f1_score(y, p, labels=list(range(k)), average="macro",
-                                   zero_division=0)),
-        "accuracy": float((y == p).mean()),
-        "label_unchanged_pct": float((y == p).mean() * 100),
-        "per_class_f1": {labels[i]: float(f1_score(y == i, p == i, zero_division=0))
-                         for i in range(k)},
-        "support": {labels[i]: int((y == i).sum()) for i in range(k)},
+        "n_pairs": out["n_pairs"],
+        "macro_f1": out["macro_f1"],
+        "accuracy": out["accuracy"],
+        "label_unchanged_pct": out["label_unchanged_pct"],
+        "per_class_f1": {labels[i]: out["per_class_f1"][i] for i in range(k)},
+        "support": {labels[i]: out["support"][i] for i in range(k)},
     }
 
 
