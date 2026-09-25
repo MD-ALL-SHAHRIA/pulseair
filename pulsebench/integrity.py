@@ -84,7 +84,7 @@ def _lag1(y: np.ndarray) -> float:
     return float(np.corrcoef(a, b)[0, 1])
 
 
-def _check_trend(t: np.ndarray, y: np.ndarray, period: str = "YS") -> dict:
+def _check_trend(times: pd.Series, y: np.ndarray, period: str = "YS") -> dict:
     """Find the longest leading segment that a straight line explains too well.
 
     Two things make this work on real data. First, the series is aggregated to period
@@ -101,7 +101,12 @@ def _check_trend(t: np.ndarray, y: np.ndarray, period: str = "YS") -> dict:
     fewer points than that says nothing. Pass a finer ``period`` when the suspected
     segment is short.
     """
-    ser = pd.Series(y, index=pd.to_datetime(t)).dropna()
+    # Datetimes are passed through as datetimes. An earlier version round-tripped
+    # them via int64 nanoseconds and rebuilt with pd.to_datetime, which pandas 3
+    # interprets differently from pandas 2 -- the span collapsed and annual
+    # resampling returned two periods instead of twenty-six.
+    ser = pd.Series(np.asarray(y, dtype=float),
+                    index=pd.DatetimeIndex(times)).dropna()
     if len(ser) < MIN_WINDOW:
         return {"name": "trend_linearity", "r2": 0.0, "threshold": R2_SUSPICIOUS,
                 "flagged": False, "boundary_index": None, "prefix_fraction": 0.0,
@@ -115,7 +120,12 @@ def _check_trend(t: np.ndarray, y: np.ndarray, period: str = "YS") -> dict:
     agg, period_used = None, None
     for rung in ladder:
         candidate = ser.resample(rung).median().dropna()
-        if len(candidate) >= MIN_PERIODS:
+        # 2x, not 1x. A rung yielding exactly MIN_PERIODS periods passes a naive
+        # length check and is still useless: the shortest testable prefix is then the
+        # whole series, so a fabricated prefix cannot be isolated from the genuine
+        # remainder. Requiring twice the minimum guarantees that a prefix covering
+        # half the span is itself long enough to fit.
+        if len(candidate) >= 2 * MIN_PERIODS:
             agg, period_used = candidate, rung
             break
     if agg is None:
@@ -138,7 +148,9 @@ def _check_trend(t: np.ndarray, y: np.ndarray, period: str = "YS") -> dict:
     boundary_idx = None
     if flagged:
         cutoff_time = agg.index[min(best_end_period, len(agg) - 1)]
-        boundary_idx = int(np.searchsorted(np.sort(t), cutoff_time.value))
+        boundary_idx = int(np.searchsorted(
+            np.sort(pd.DatetimeIndex(times).to_numpy()),
+            np.datetime64(cutoff_time)))
     return {"name": "trend_linearity",
             "r2": round(best_r2 if flagged else pooled, 6),
             "r2_pooled": round(pooled, 6),
@@ -319,11 +331,12 @@ def dataset_audit(df: pd.DataFrame, time_col: str, value_col: str,
 def _audit_one(work: pd.DataFrame, time_col: str, value_col: str,
                n_windows: int, period: str = "YS") -> dict:
     work = work.sort_values(time_col, kind="mergesort").reset_index(drop=True)
-    t_num = work[time_col].astype("int64").to_numpy()
+    times = work[time_col]
+    t_num = times.astype("int64").to_numpy()      # only the scale check needs ordinals
     y = work[value_col].to_numpy(dtype=float)
 
     checks = {}
-    for c in (_check_trend(t_num, y, period), _check_clip(y),
+    for c in (_check_trend(times, y, period), _check_clip(y),
               _check_scale(t_num, y, n_windows),
               _check_autocorrelation(y, n_windows)):
         checks[c["name"]] = c

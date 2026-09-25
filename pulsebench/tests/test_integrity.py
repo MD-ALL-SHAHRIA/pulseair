@@ -15,6 +15,7 @@ import pandas as pd
 import pytest
 
 from pulsebench import dataset_audit
+from pulsebench.integrity import MIN_PERIODS
 
 HOURS = 24 * 365
 
@@ -192,3 +193,54 @@ def test_a_segment_shorter_than_the_aggregation_window_is_not_detectable():
     # and with a finer aggregation it becomes visible again
     finer = dataset_audit(df, time_col="t", value_col="v", period="W")
     assert finer["checks"]["trend_linearity"]["n_periods"] > 8
+
+
+# ---------------------------------------------------- regressions, pandas 2 and 3
+
+
+def test_timestamps_survive_the_audit_without_being_rebuilt_from_integers():
+    """A 2020 series must be audited as 2020, on every supported pandas.
+
+    An earlier version handed the trend check ``int64`` nanoseconds and rebuilt the
+    index with ``pd.to_datetime``. pandas 2 read those integers as nanoseconds;
+    pandas 3 does not, so ``2020-01-01`` arrived as ``1970-01-19``, the span
+    collapsed from months to hours, and annual resampling returned two periods
+    instead of twenty-six. Every downstream check then silently under-reported.
+    """
+    n = 3000
+    idx = pd.date_range("2020-01-01", periods=2 * n, freq="h")
+    rng = np.random.default_rng(0)
+    y = np.r_[np.linspace(10, 300, n), 60 + 30 * np.sin(np.arange(n) / 24)
+              + rng.normal(0, 8, n)]
+    out = dataset_audit(pd.DataFrame({"t": idx, "v": y}), time_col="t", value_col="v")
+
+    # The span is 250 days, so the chosen rung cannot be annual and must be finer.
+    assert out["checks"]["trend_linearity"]["aggregated_to"] in {"W", "D"}
+    # The boundary must land inside the series, not in 1970.
+    assert idx[0] <= pd.Timestamp(out["suspected_boundary"]) <= idx[-1]
+
+
+def test_the_chosen_rung_leaves_room_for_a_prefix_shorter_than_the_series():
+    """A rung with exactly MIN_PERIODS periods is rejected, not accepted.
+
+    Accepting it passes a naive length check and cannot work: the shortest prefix
+    the scan may fit is then the whole series, so a fabricated prefix is never
+    separable from the genuine remainder. This series aggregates to nine monthly
+    medians -- one more than the minimum -- and was reported clean until the ladder
+    required twice the minimum and dropped to weeks.
+    """
+    n = 3000
+    idx = pd.date_range("2020-01-01", periods=2 * n, freq="h")
+    rng = np.random.default_rng(0)
+    fake = np.minimum(np.linspace(10, 300, n) + rng.normal(0, 4, n), 250.0)
+    real = 60 + 30 * np.sin(np.arange(n) / 24) + rng.normal(0, 8, n)
+    df = pd.DataFrame({"t": idx, "v": np.r_[fake, real]})
+
+    monthly = pd.Series(df["v"].to_numpy(), index=idx).resample("MS").median().dropna()
+    assert MIN_PERIODS <= len(monthly) < 2 * MIN_PERIODS, "fixture no longer bites"
+
+    trend = dataset_audit(df, time_col="t", value_col="v")["checks"]["trend_linearity"]
+    assert trend["n_periods"] >= 2 * MIN_PERIODS
+    assert trend["flagged"]
+    # and the prefix it names is a prefix, not the entire series
+    assert 0.3 < trend["prefix_fraction"] < 0.95

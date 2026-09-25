@@ -45,6 +45,7 @@ jobs:
           pip install "pandas${{ matrix.pandas }}"
           pip install pyyaml joblib              # src/preprocessing
           pip install matplotlib seaborn         # src/reporting figure generation
+          pip install python-docx                # src/reporting thesis build
           python -c "import pandas, numpy, sklearn; print('pandas', pandas.__version__, '| numpy', numpy.__version__, '| sklearn', sklearn.__version__)"
 
       - name: pulsebench unit tests + Phase 9 regression pin
@@ -53,7 +54,8 @@ jobs:
       - name: pulsebench doctests
         run: |
           python -m doctest pulsebench/persistence.py pulsebench/cv.py \
-                            pulsebench/disqualification.py pulsebench/multiplicity.py
+                            pulsebench/disqualification.py pulsebench/multiplicity.py \
+                            pulsebench/integrity.py
 
       - name: Preprocessing pipeline tests
         run: python -m pytest src/preprocessing/test_pipeline.py -q
@@ -64,6 +66,20 @@ jobs:
       # stop building and CI says so.
       - name: Figure generation smoke test
         run: python -m pytest src/reporting/test_generate_figures.py -q
+
+      # The six extension phases (fold-count sensitivity, station-held-out CV,
+      # sensor-noise robustness, selective prediction, integrity auditing) assert
+      # properties of their own results -- including that no model reaches a majority
+      # of folds at either fold count, which is the thesis's central claim. These
+      # ran only locally until now.
+      - name: Extension phase tests
+        run: python -m pytest src/models/test_phase_additions.py -q
+
+      # Guards the defect that shipped once: the thesis built with 23 captions and
+      # zero embedded images, because moving XML between documents left the image
+      # parts behind. This counts media parts in the saved file.
+      - name: Thesis assembly tests
+        run: python -m pytest src/reporting/test_build_thesis.py -q
 
       - name: Import pulsebench from outside the repo
         working-directory: /tmp

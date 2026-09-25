@@ -47,6 +47,9 @@ FIGURES = REPO_ROOT / "reports" / "figures"
 PALETTE = sns.color_palette("colorblind")
 
 C_PERSISTENCE = "#7a7a7a"        # the floor: always grey, never a "real" colour
+
+# Any figure drawing jittered points seeds this first, so reruns are byte-identical.
+JITTER_SEED = 20260101
 C_BEIJING = PALETTE[0]           # blue
 C_BANGLADESH = PALETTE[1]        # orange
 C_MODEL = PALETTE[2]             # green  -- a trained model on its own
@@ -1359,6 +1362,11 @@ def fig_phase11b() -> plt.Figure:
         xs = [b.get_x() + b.get_width() / 2 for b in container]
         ax1.errorbar(xs, grp["Mean"], yerr=grp["SD"], fmt="none", ecolor="#333333",
                      elinewidth=1.3, capsize=4, zorder=5)
+    # Seeded: stripplot jitter draws from the global numpy RNG, so this was the one
+    # figure of the 23 that produced different bytes on every run. A figure the thesis
+    # cites should be reproducible from the committed JSON down to the file, not just
+    # to the eye.
+    np.random.seed(JITTER_SEED)
     sns.stripplot(pts_df, x="Metric", y="Value", hue="Which", order=order,
                   hue_order=hue_order, palette=pal,
                   dodge=True, ax=ax1, size=4.5, edgecolor="white", linewidth=0.6,

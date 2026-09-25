@@ -1,281 +1,285 @@
 {
- "n_rows": 227016,
- "span": [
-  "2000-01-01 00:00:00",
-  "2025-11-23 23:00:00"
- ],
- "checks": {
-  "trend_linearity": {
-   "name": "trend_linearity",
-   "r2": 0.956512,
-   "r2_pooled": 0.221675,
-   "aggregated_to": "YS",
-   "n_periods": 26,
-   "threshold": 0.9,
-   "flagged": true,
-   "boundary_index": 201624,
-   "prefix_fraction": 0.8846,
-   "note": "a linear fit to 26 period medians explains 95.7% of the variance over the first 88% of the series"
+  "n_rows": 227016,
+  "span": [
+    "2000-01-01 00:00:00",
+    "2025-11-23 23:00:00"
+  ],
+  "checks": {
+    "trend_linearity": {
+      "name": "trend_linearity",
+      "r2": 0.956512,
+      "r2_pooled": 0.221675,
+      "aggregated_to": "YS",
+      "n_periods": 26,
+      "threshold": 0.9,
+      "flagged": true,
+      "boundary_index": 201624,
+      "prefix_fraction": 0.8846,
+      "note": "a linear fit to 26 period medians explains 95.7% of the variance over the first 88% of the series"
+    },
+    "hard_clip": {
+      "name": "hard_clip",
+      "pct_at_value": 0.881,
+      "clip_value": 250.0,
+      "typical_repeat_pct": 0.00044,
+      "ratio_to_typical": 2000.0,
+      "n_distinct": 196371,
+      "threshold_pct": 0.2,
+      "threshold_ratio": 50.0,
+      "flagged": true,
+      "note": "0.88% of values sit on exactly 250, 2000x the typical repeat rate"
+    },
+    "scale_discontinuity": {
+      "name": "scale_discontinuity",
+      "window_medians": [
+        42.2498,
+        49.1848,
+        59.0748,
+        69.256,
+        80.4059,
+        92.6518,
+        107.8347,
+        119.702,
+        132.9378,
+        148.2836,
+        97.8,
+        39.5
+      ],
+      "max_ratio": 2.476,
+      "threshold": 5.0,
+      "flagged": false,
+      "boundary_index": null,
+      "note": "no scale discontinuity"
+    },
+    "autocorrelation_break": {
+      "name": "autocorrelation_break",
+      "window_lag1": [
+        0.4435,
+        0.5164,
+        0.5892,
+        0.6511,
+        0.7005,
+        0.7597,
+        0.8168,
+        0.8467,
+        0.8644,
+        0.8762,
+        0.9752,
+        0.9812
+      ],
+      "max_regime_gap": 0.3262,
+      "threshold": 0.2,
+      "flagged": true,
+      "boundary_index": 37836,
+      "note": "mean lag-1 autocorrelation differs by 0.326 either side of the split"
+    }
   },
-  "hard_clip": {
-   "name": "hard_clip",
-   "pct_at_value": 0.881,
-   "clip_value": 250.0,
-   "typical_repeat_pct": 0.00044,
-   "ratio_to_typical": 2000.0,
-   "n_distinct": 196371,
-   "threshold_pct": 0.2,
-   "threshold_ratio": 50.0,
-   "flagged": true,
-   "note": "0.88% of values sit on exactly 250, 2000x the typical repeat rate"
-  },
-  "scale_discontinuity": {
-   "name": "scale_discontinuity",
-   "window_medians": [
-    42.2498,
-    49.1848,
-    59.0748,
-    69.256,
-    80.4059,
-    92.6518,
-    107.8347,
-    119.702,
-    132.9378,
-    148.2836,
-    97.8,
-    39.5
-   ],
-   "max_ratio": 2.476,
-   "threshold": 5.0,
-   "flagged": false,
-   "boundary_index": null,
-   "note": "no scale discontinuity"
-  },
-  "autocorrelation_break": {
-   "name": "autocorrelation_break",
-   "window_lag1": [
-    0.4435,
-    0.5164,
-    0.5892,
-    0.6511,
-    0.7005,
-    0.7597,
-    0.8168,
-    0.8467,
-    0.8644,
-    0.8762,
-    0.9752,
-    0.9812
-   ],
-   "max_regime_gap": 0.3262,
-   "threshold": 0.2,
-   "flagged": true,
-   "boundary_index": 37836,
-   "note": "mean lag-1 autocorrelation differs by 0.326 either side of the split"
-  }
- },
- "n_flagged": 3,
- "flagged": [
-  "trend_linearity",
-  "hard_clip",
-  "autocorrelation_break"
- ],
- "boundary_candidates": {
-  "trend_linearity": "2023-01-01 00:00:00",
-  "autocorrelation_break": "2004-04-25 12:00:00"
- },
- "boundary_agreement": false,
- "suspected_boundary_index": 201624,
- "suspected_boundary": "2023-01-01 00:00:00",
- "verdict": "fabrication suspected",
- "summary": {
   "n_flagged": 3,
-  "verdict": "fabrication suspected",
   "flagged": [
-   "trend_linearity",
-   "hard_clip",
-   "autocorrelation_break"
-  ]
- },
- "focus_group": "Dhaka",
- "per_group": {
-  "Azimpur": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Badarganj": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Baniachang": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Baris\u0101l": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Bera": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Bhairab B\u0101z\u0101r": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Bher\u0101m\u0101ra": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Bhola": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Bh\u0101nd\u0101ria": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Bh\u0101tp\u0101ra Abhaynagar": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Bogra": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Burh\u0101nuddin": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "B\u0101jitpur": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "B\u0101ndarban": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Char Bhadr\u0101san": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Chh\u0101galn\u0101iya": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Chh\u0101tak": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Chilm\u0101ri": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Chittagong": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Comilla": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Cox\u2019s B\u0101z\u0101r": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Dhaka": {
-   "n_flagged": 3,
-   "verdict": "fabrication suspected",
-   "flagged": [
     "trend_linearity",
     "hard_clip",
     "autocorrelation_break"
-   ]
+  ],
+  "boundary_candidates": {
+    "trend_linearity": "2023-01-01 00:00:00",
+    "autocorrelation_break": "2004-04-25 12:00:00"
   },
-  "Din\u0101jpur": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
+  "boundary_agreement": false,
+  "suspected_boundary_index": 201624,
+  "suspected_boundary": "2023-01-01 00:00:00",
+  "verdict": "fabrication suspected",
+  "summary": {
+    "n_flagged": 3,
+    "verdict": "fabrication suspected",
+    "flagged": [
+      "trend_linearity",
+      "hard_clip",
+      "autocorrelation_break"
+    ]
   },
-  "Doh\u0101r": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
+  "focus_group": "Dhaka",
+  "per_group": {
+    "Azimpur": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Badarganj": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Baniachang": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Baris\u0101l": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Bera": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Bhairab B\u0101z\u0101r": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Bher\u0101m\u0101ra": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Bhola": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Bh\u0101nd\u0101ria": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Bh\u0101tp\u0101ra Abhaynagar": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Bogra": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Burh\u0101nuddin": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "B\u0101jitpur": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "B\u0101ndarban": {
+      "n_flagged": 2,
+      "verdict": "inconclusive",
+      "flagged": [
+        "trend_linearity",
+        "scale_discontinuity"
+      ]
+    },
+    "Char Bhadr\u0101san": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Chh\u0101galn\u0101iya": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Chh\u0101tak": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Chilm\u0101ri": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Chittagong": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Comilla": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Cox\u2019s B\u0101z\u0101r": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Dhaka": {
+      "n_flagged": 3,
+      "verdict": "fabrication suspected",
+      "flagged": [
+        "trend_linearity",
+        "hard_clip",
+        "autocorrelation_break"
+      ]
+    },
+    "Din\u0101jpur": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Doh\u0101r": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Far\u012bdpur": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Fatikchari": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Feni": {
+      "n_flagged": 1,
+      "verdict": "no structural anomaly",
+      "flagged": [
+        "scale_discontinuity"
+      ]
+    },
+    "Gafargaon": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Gaibandha": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    },
+    "Gaurnadi": {
+      "n_flagged": 0,
+      "verdict": "no structural anomaly",
+      "flagged": []
+    }
   },
-  "Far\u012bdpur": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Fatikchari": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Feni": {
-   "n_flagged": 1,
-   "verdict": "no structural anomaly",
-   "flagged": [
-    "scale_discontinuity"
-   ]
-  },
-  "Gafargaon": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Gaibandha": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  },
-  "Gaurnadi": {
-   "n_flagged": 0,
-   "verdict": "no structural anomaly",
-   "flagged": []
-  }
- },
- "groups_flagged": [
-  "Dhaka"
- ],
- "group_note": "1 of 30 groups show two or more flags; the audit focused on Dhaka, which has the longest history"
+  "groups_flagged": [
+    "B\u0101ndarban",
+    "Dhaka"
+  ],
+  "group_note": "2 of 30 groups show two or more flags; the audit focused on Dhaka, which has the longest history",
+  "manual_boundary": "2022-08-05 00:00:00",
+  "boundary_error_days": 149
 }

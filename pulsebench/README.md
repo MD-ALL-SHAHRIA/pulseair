@@ -183,7 +183,11 @@ their median and turned a correct 2023 estimate plus a meaningless 2004 one into
 
 It has a stated resolution limit: a fabricated segment shorter than `MIN_PERIODS`
 aggregation units cannot be found, because a line through fewer points than that says
-nothing. Pass a finer `period` when the suspected segment is short.
+nothing. The aggregation rung is therefore chosen to yield at least `2 * MIN_PERIODS`
+periods — a rung giving exactly `MIN_PERIODS` passes a length check and is still
+useless, because the shortest prefix it can fit is the whole series, so a fabricated
+prefix can never be separated from the genuine remainder. Pass a finer `period` when
+the suspected segment is short.
 
 **Validated against a real case.** Run on the unfiltered 1,048,551-row Mendeley
 Bangladesh file with no boundary supplied, it returns *fabrication suspected* on 3 of

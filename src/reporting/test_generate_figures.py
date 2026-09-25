@@ -14,6 +14,7 @@ number is worse than a figure that fails, so :func:`require` is tested for raisi
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -150,3 +151,26 @@ def test_class_order_matches_the_committed_labels():
     labels = gf.require(gf.load("ablation_h6.json"), "labels", "ablation_h6.json")
     assert list(labels) == gf.CLASS_ORDER
     assert set(gf.CLASS_SHORT) == set(gf.CLASS_ORDER)
+
+
+def test_the_whole_set_is_byte_reproducible(rendered):
+    """Two runs over the same committed JSON must produce identical files.
+
+    One of the 23 figures failed this for the life of the project: the Phase 11b
+    stripplot draws jitter from the global numpy RNG, so its bytes changed on every
+    run while the plot looked the same. A figure a thesis cites should reproduce
+    from its inputs down to the file, or "regenerated from committed metrics" is a
+    weaker statement than it sounds.
+    """
+    first = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+             for p in sorted(gf.FIGURES.glob("*.png"))}
+    assert len(first) >= EXPECTED_FIGURES
+
+    gf.generate()
+    second = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+              for p in sorted(gf.FIGURES.glob("*.png"))}
+
+    drifted = sorted(n for n in first if first[n] != second.get(n))
+    assert not drifted, ("these figures are not reproducible run to run: "
+                         f"{drifted}. Seed whatever randomness they draw on "
+                         "(see JITTER_SEED) rather than accepting the drift.")
