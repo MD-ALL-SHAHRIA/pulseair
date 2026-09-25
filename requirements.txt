@@ -47,6 +47,9 @@ onnxruntime>=1.18,<2.0
 onnxscript>=0.2,<1.0       # required by torch>=2.9 torch.onnx.export (dynamo exporter)
 skl2onnx>=1.17,<2.0        # scikit-learn -> ONNX for the deployed RandomForest
 
+# --- thesis document generation --------------------------------------------
+python-docx>=1.1,<2.0      # src/reporting/build_thesis.py; PDF via LibreOffice
+
 # --- notebooks / EDA -------------------------------------------------------
 jupyterlab>=4.2,<5.0
 ipykernel>=6.29,<7.0

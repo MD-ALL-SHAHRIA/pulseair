@@ -272,6 +272,7 @@ python -m src.models.rolling_cv                         # -> reports/rolling_ori
 python -m src.models.hj633_sensitivity                  # EPA vs HJ 633-2012 breakpoints
 python -m src.reporting.compile_results                 # -> reports/final_results_summary.md
 python -m src.reporting.generate_figures                # -> reports/figures/ (23 thesis figures)
+python -m src.reporting.build_thesis                    # -> docs/PulseAir_Thesis.docx
 
 # Phase 10 — Bangladesh external validation + deployment
 python -m src.preprocessing.bangladesh                  # -> data/processed/bd_h6/
