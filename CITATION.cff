@@ -37,17 +37,31 @@ version: 1.0.2
 date-released: "2026-09-26"
 repository-code: "https://github.com/MD-ALL-SHAHRIA/pulseair"
 references:
-  - type: generic
+  - type: data
     title: "Beijing Multi-Site Air-Quality Data"
+    authors:
+      - family-names: "Chen"
+        given-names: "Song"
+    year: 2017
+    doi: "10.24432/C5RK5G"
     notes: "UCI Machine Learning Repository, id=501."
     url: "https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data"
-  - type: generic
+  - type: data
     title: "Air Quality Index (AQI) dataset of Bangladesh"
+    authors:
+      - family-names: "Paul"
+        given-names: "Tapon"
+    doi: "10.17632/9j447cynb9.2"
+    version: "2"
     notes: >-
       Mendeley Data 9j447cynb9 v2. Used with the integrity limitations documented
       in reports/bangladesh_validation.md; only data from 2022-08-05 onward.
     url: "https://data.mendeley.com/datasets/9j447cynb9"
-  - type: generic
+  - type: data
     title: "US Embassy Dhaka PM2.5 reference monitor, historical hourly files"
-    notes: "AirNow Embassy archive, 2016-2025."
+    authors:
+      - name: "U.S. Department of State"
+    notes: >-
+      AirNow Embassy archive, 2016-2025. The archive lists no individual creator;
+      the operating institution is cited as an entity author.
     url: "https://files.airnowtech.org"
