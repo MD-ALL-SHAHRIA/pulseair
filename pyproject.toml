@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pulsebench"
-version = "1.0.2"
+version = "1.0.3"
 description = "An evaluation protocol for seasonal, imbalanced time-series classification: persistence floors, rolling-origin CV, protected-class disqualification, and multiplicity correction."
 readme = "pulsebench/README.md"
 requires-python = ">=3.10"
