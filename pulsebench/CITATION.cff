@@ -28,8 +28,8 @@ keywords:
   - conformal prediction
   - air quality
 license: MIT
-version: 0.1.0
-date-released: "2026-09-21"
+version: 1.0.1
+date-released: "2026-09-26"
 repository-code: "https://github.com/MD-ALL-SHAHRIA/pulseair"
 references:
   - type: generic

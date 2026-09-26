@@ -33,8 +33,8 @@ keywords:
   - CTGAN
   - edge deployment
 license: MIT
-version: 1.0.0
-date-released: "2026-09-22"
+version: 1.0.1
+date-released: "2026-09-26"
 repository-code: "https://github.com/MD-ALL-SHAHRIA/pulseair"
 references:
   - type: generic

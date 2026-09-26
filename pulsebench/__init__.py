@@ -25,7 +25,7 @@ from pulsebench.integrity import dataset_audit
 from pulsebench.multiplicity import bonferroni_report, format_markdown
 from pulsebench.persistence import persistence_floor, seasonal_naive_floor
 
-__version__ = "0.1.0"
+__version__ = "1.0.1"
 __all__ = ["persistence_floor", "seasonal_naive_floor", "rolling_origin_cv",
            "make_folds", "aggregate_folds", "dataset_audit",
            "advisory_disqualification", "bonferroni_report", "format_markdown",
