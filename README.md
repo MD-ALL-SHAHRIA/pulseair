@@ -1,5 +1,6 @@
 # pulseair-ml
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22979304.svg)](https://doi.org/10.5281/zenodo.22979304)
 [![tests](https://github.com/MD-ALL-SHAHRIA/pulseair/actions/workflows/tests.yml/badge.svg)](https://github.com/MD-ALL-SHAHRIA/pulseair/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -348,10 +349,23 @@ is readable without running anything. Start with:
 
 ## Citation
 
-If you use this code or the evaluation protocol, please cite it via
-[`CITATION.cff`](CITATION.cff) (project) or [`pulsebench/CITATION.cff`](pulsebench/CITATION.cff)
-(the toolkit alone). GitHub renders a ready-made citation from these under *"Cite this
-repository"*.
+Releases from v1.0.1 onward are archived on Zenodo. Cite the **concept DOI**
+[`10.5281/zenodo.22979304`](https://doi.org/10.5281/zenodo.22979304), which always
+resolves to the latest archived version:
+
+> Shahria, M. A., Mithila, S. D., Rudro, A. S., & Payel, I. I. PulseAir: rigor-first
+> evaluation of wearable air-quality forecasting. Zenodo. 10.5281/zenodo.22979304
+
+To cite the exact version you ran, use that release's own DOI from the
+[Zenodo record](https://doi.org/10.5281/zenodo.22979304) instead — the concept DOI
+moves, a version DOI does not.
+
+Machine-readable metadata is in [`CITATION.cff`](CITATION.cff) (project) or
+[`pulsebench/CITATION.cff`](pulsebench/CITATION.cff) (the toolkit alone); GitHub renders
+a ready-made citation from these under *"Cite this repository"*. Note that the
+`CITATION.cff` files shipped in **v1.0.0 through v1.0.2 fail CFF schema validation** — a
+required field was missing from every `references` entry. Use v1.0.3 or later if a
+reference manager needs to parse them.
 
 ---
 
