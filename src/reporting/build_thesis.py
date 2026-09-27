@@ -724,6 +724,21 @@ def chapter_intro(doc: Document) -> None:
          "Chapter 7 describes the concept and states plainly what has and has not been "
          "built.",
          align="justify")
+    para(doc,
+         "This work also sits alongside an explicit national policy direction. "
+         "Bangladesh's National Air Quality Management Plan 2024–2030 anticipates that, "
+         "once forecasting systems are in place, restrictions on high-pollution days "
+         "could be triggered days ahead on the basis of forecasts rather than only "
+         "after measured exceedances "
+         + cite("Government of Bangladesh 2024") + " (§3.4). The Department of "
+         "Environment's own intended route to those forecasts is physics-based "
+         "chemistry-transport modelling — models such as WRF-Chem or CAMx driven by "
+         "meteorological forecasts and emissions inventories (§3.3.3). The present "
+         "thesis develops the complementary, data-driven route, and — more to the "
+         "point — subjects it to the kind of scrutiny that establishes what a "
+         "statistical or machine-learning forecaster can and cannot deliver on this "
+         "problem. Chapter 6 returns to this relationship.",
+         align="justify")
 
     heading(doc, "1.2 The evaluation problem in this literature", 2)
     unch1 = num("horizon_comparison.json:rows.1.label_unchanged_pct", "h1 unchanged", ".1f")
@@ -1818,9 +1833,25 @@ def chapter_results(doc: Document) -> None:
     para(doc,
          "**This is a finding about infrastructure, and it bounds the thesis.** A "
          "multi-pollutant model cannot currently be validated against instrument-grade "
-         "data in Dhaka, because the instruments are not there. A zero here is the "
+         "data in Dhaka through public open-data channels. A zero here is the "
          "correct answer, not a missing measurement, and it is reported rather than "
          "worked around.",
+         align="justify")
+    para(doc,
+         "The precise version of this claim matters, and it is stronger than the "
+         "absence it first appears to be. The Department of Environment does operate a "
+         "real monitoring network: the National Air Quality Management Plan 2024–2030 "
+         "records 31 stations — 16 continuous air monitoring stations and 15 compact "
+         "monitoring stations — across 13 cities in eight divisions "
+         + cite("Government of Bangladesh 2024") + ". None of these is registered on "
+         "OpenAQ or any comparable international open-data platform, and the DoE's own "
+         "real-time portal exposes its readings only through a token-gated application "
+         "interface rather than a bulk download or documented public API. The obstacle "
+         "is therefore access, not existence: the stations are real, but their data is "
+         "not available in a form this study could consume, and this thesis does not "
+         "claim the network is absent — only that it is closed to the kind of use made "
+         "here. The primary source is retained in the repository at "
+         "`docs/reference/NAQMP_2024-2030.pdf`.",
          align="justify")
 
     # ---------------------------------------------------------------- 4.13
@@ -2543,7 +2574,33 @@ def chapter_limitations(doc: Document) -> None:
          "enough to validate a multi-channel model. That is a property of the "
          "monitoring infrastructure, not of the method, and no modelling choice "
          "addresses it. It is the direct cause of Section 6.1 and the reason the "
-         "stationary variant in Section 7.2 is worth considering.",
+         "stationary variant in Section 7.2 is worth considering. As Section 4.12 "
+         "records, the constraint is one of access rather than absence: the Department "
+         "of Environment's 31-station network exists but is not published in an "
+         "openly consumable form " + cite("Government of Bangladesh 2024") + ".",
+         align="justify")
+    para(doc,
+         "This limitation is worth reading against the government's own roadmap, "
+         "because the two are complementary rather than competing. The National Air "
+         "Quality Management Plan 2024–2030 foresees forecast-triggered management of "
+         "high-pollution days once a forecasting capability is operational (§3.4), and "
+         "the route it names for that capability is physics-based chemistry-transport "
+         "modelling — WRF-Chem or CAMx, driven by meteorology and emissions "
+         "inventories (§3.3.3) " + cite("Government of Bangladesh 2024") + ". That is a "
+         "deliberately different instrument from the one built here: a "
+         "chemistry-transport model encodes atmospheric processes and can attribute "
+         "and forecast without a long observational record, at the cost of gridded "
+         "emissions data and substantial compute; the statistical and machine-learning "
+         "approach this thesis develops needs only a monitoring record but, as every "
+         "chapter above documents, is sharply bounded by what that record can support "
+         "— a persistence floor that is hard to beat at short horizons, augmentation "
+         "that helps the aggregate while hurting the safety-critical classes, and "
+         "advisory classes that cannot yet be validated on local ground truth. Read "
+         "that way, the contribution of this thesis to the national roadmap is not a "
+         "rival forecaster but evidence about the data-driven option: it shows, with a "
+         "protocol built to resist flattering itself, where a purely statistical "
+         "approach delivers and where it does not — which is exactly the kind of "
+         "prior a programme choosing between modelling routes needs before it commits.",
          align="justify")
 
     heading(doc, "6.3 Two datasets, and the negative results rest on one", 2)

@@ -61,11 +61,19 @@ overlap, better than **70%** hourly completeness.
 | 22 | SPARTAN - Dhaka University | Spartan | pm25 | — | 0 |
 | 1285342 | SPARTAN - Dhaka University | SPARTAN Network | pm25 | — | 0 |
 
-**Notable absences.** No **CO** sensor exists anywhere in the radius. No **Bangladesh
-Department of Environment** station is registered on OpenAQ — the DoE network is
-referenced in earlier phases as a possible source and it is *not* available here.
-The US Embassy record appears as two entries (`2445`, `8415`) and is the same
-instrument already used in Phase 11.
+**Notable absences.** No **CO** sensor exists anywhere in the radius. And the more
+precise finding, which replaces the looser "no government stations" phrasing used in
+earlier drafts: the **Bangladesh Department of Environment does operate a real
+monitoring network** — 31 stations (16 continuous air monitoring stations plus 15
+compact monitoring stations) across 13 cities in eight divisions, per the National Air
+Quality Management Plan 2024–2030 (§3.3.2). **None of them is registered on OpenAQ or
+any comparable international open-data platform**, and the DoE's own real-time portal
+exposes its data only through a token-gated application interface, not a bulk download
+or documented public API (verified directly; see `docs/reference/NAQMP_2024-2030.pdf`
+and the data-availability note in `docs/outreach/`). The gap is therefore not that the
+stations do not exist — they do — but that their data is not openly accessible in a form
+a study like this can consume. The US Embassy record appears as two entries (`2445`,
+`8415`) and is the same instrument already used in Phase 11.
 
 ---
 

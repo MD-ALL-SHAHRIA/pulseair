@@ -14,7 +14,9 @@ Compiled in Phase 1 of the thesis write-up. Two parts, kept distinguishable on p
 > list as *37 entries*; it contains **39**. All 39 are carried through unchanged.
 > Totals below use the actual count.
 
-**Total: 61 entries — 39 existing, 22 new.**
+**Total: 61 Phase 1 entries — 39 existing, 22 new — plus 1 primary source added later
+(entry 62, the National Air Quality Management Plan 2024–2030), listed under its own
+heading at the end.**
 
 ---
 
@@ -161,6 +163,24 @@ Compiled in Phase 1 of the thesis write-up. Two parts, kept distinguishable on p
 60. Zhao, Kunar, Birke, Chen 2022
 
 61. Zhou, Wang, Zhu, Qiao, Kang 2024
+
+---
+
+## Primary source added after Phase 1
+
+This entry is not part of the Phase 1 academic-registry compilation above. It is a
+primary government document obtained directly and read in full; it is listed here so
+that the in-text citations to it resolve, and marked distinctly from the **[NEW]**
+academic entries, which were verified through Crossref, arXiv or a publisher page. It
+is placed at the end rather than in the alphabetical run so the 61 verified entries and
+their numbering are left exactly as compiled.
+
+62. **[PRIMARY SOURCE]** Government of Bangladesh (2024). Ministry of Environment, Forest and Climate Change, Department of Environment. *Bangladesh National Air Quality Management Plan 2024–2030.* Retained in the repository at
+    `docs/reference/NAQMP_2024-2030.pdf`. Figures cited in the text (31 stations = 16
+    CAMS + 15 compact monitoring stations across 13 cities in eight divisions, §3.3.2;
+    forecast-triggered hazard-day management, §3.4; WRF-Chem / CAMx chemistry-transport
+    modelling, §3.3.3; open data access for researchers, §3.3.4) were confirmed against
+    the document's own text.
 
 ---
 
