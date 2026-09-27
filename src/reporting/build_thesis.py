@@ -848,6 +848,57 @@ def chapter_intro(doc: Document) -> None:
         "language-model advisory layer whose honesty constraints are enforced outside "
         "the model. Section 4.13.",
     ])
+    para(doc,
+         "It is worth being exact about which of these are genuinely new and which are "
+         "careful application of established practice, judged only against the works "
+         "cited in this thesis. Overstating novelty would be the same error the thesis "
+         "argues against elsewhere.",
+         align="justify")
+    para(doc,
+         "**Methodological.** The advisory-class disqualification rule — rejecting an "
+         "intervention that improves an aggregate metric while significantly degrading a "
+         "named safety-critical class — does not appear in the cited literature: the "
+         "imbalance and augmentation methods reviewed there "
+         + cite("Chawla, Bowyer, Hall, Kegelmeyer 2002",
+                "Adiputra & Wanchai 2024") + " optimise aggregate performance and do not "
+         "impose a protected-class veto, so this is the clearest methodological "
+         "contribution. By contrast, two framings that recur in this thesis are "
+         "**not** claimed as novel: reporting every score beside a zero-parameter "
+         "persistence floor is a discipline, not a new technique — naive and base-rate "
+         "baselines are long-standing "
+         + cite("Bergmeir & Benítez 2012", "Cheung 2026") + " — and the caveat that "
+         "rolling-origin folds are not independent, so the signed-rank p-value is "
+         "anti-conservative (Section 3.10), is a known property of time-series "
+         "cross-validation " + cite("Bergmeir & Benítez 2012", "Liu & Zhou 2024")
+         + ", stated here explicitly rather than discovered. The contribution in both is "
+         "rigour, not invention.",
+         align="justify")
+    para(doc,
+         "**Dataset and audit.** The finding that a widely indexed air-quality dataset "
+         "is substantially fabricated over its advertised span, established by five "
+         "independent structural signatures and then confirmed against two external "
+         "references — the US Embassy reference monitor and the Department of "
+         "Environment's own published monthly averages — is, to the extent the cited "
+         "literature covers, a genuinely new result about that specific dataset. Prior "
+         "cited work assesses reanalysis accuracy against instruments "
+         + cite("Ali et al. 2022") + " but does not audit a published dataset for "
+         "fabrication, and the packaged, reusable form of the audit is described below.",
+         align="justify")
+    para(doc,
+         "**Evaluation framework.** PulseBench's value is not that its individual "
+         "components are new — rolling-origin cross-validation, signed-rank testing over "
+         "folds and multiplicity correction are textbook "
+         + cite("Bergmeir & Benítez 2012", "Demšar 2006", "Corani et al. 2017")
+         + " — but that they are assembled into a packaged, dataset-agnostic library "
+         "that enforces the persistence floor, the embargo, per-fold scaling, the "
+         "protected-class rule and the resampling resolution floor together, tested on "
+         "synthetic data so the package needs none of the study's own. The contribution "
+         "is engineering and reusability, and it is described as such. In short, the "
+         "higher-novelty claims are the disqualification rule and the fabrication audit; "
+         "the persistence-floor discipline, the fold-independence caveat and the "
+         "evaluation mechanics are rigour and packaging, and are not dressed up as more "
+         "than that.",
+         align="justify")
 
 
 # ------------------------------------------------------------------- chapter two
@@ -3041,6 +3092,40 @@ def chapter_conclusion(doc: Document) -> None:
         "**Test the protocol on other pollution regimes.** PulseBench is dataset-"
         "agnostic, and the negative results deserve a third and fourth city.",
     ])
+
+    heading(doc, "8.2 Scope boundary: what this thesis does not attempt", 2)
+    para(doc,
+         "Several further steps would strengthen this work, and they are named here "
+         "explicitly so that their absence is read as a deliberate scope boundary rather "
+         "than an oversight. Each is a legitimate research programme in its own right — "
+         "PhD-level or multi-year — and none is part of what an undergraduate thesis "
+         "sets out to deliver:",
+         align="justify")
+    bullets(doc, [
+        "**A multi-venue systematic literature review.** The related-work chapter covers "
+        "the techniques this project uses and a verified reference set; it is not a "
+        "PRISMA-style systematic review across databases, which is a distinct scholarly "
+        "undertaking.",
+        "**Cross-country or cross-continent external validation.** The work validates on "
+        "Beijing and Bangladesh. Establishing that the conclusions transfer across many "
+        "countries or continents — the generalisation question Section 6.3 leaves open — "
+        "would require datasets, compute and time beyond this thesis.",
+        "**Adversarial robustness testing.** The sensor-noise study (Section 4.15.4) "
+        "probes one natural failure mode. Deliberate adversarial attacks on the model "
+        "are a separate security-oriented research direction and are not attempted.",
+        "**A second, standalone publication.** PulseBench and the data-integrity audit "
+        "are released as software and documented here; turning either into its own "
+        "peer-reviewed paper is future work, not a deliverable of the thesis.",
+        "**Formal multi-reviewer peer review.** The results are reported with their "
+        "evidence and limitations for examination; they have not been through the "
+        "multi-reviewer peer-review process that a journal or conference would apply, "
+        "and no claim here should be read as carrying that endorsement.",
+    ])
+    para(doc,
+         "Naming these boundaries is itself part of the thesis's discipline: the same "
+         "reason a headline number is reported beside its baseline is the reason the "
+         "edge of the work is stated plainly rather than left for a reader to infer.",
+         align="justify")
 
 
 def availability(doc: Document) -> None:

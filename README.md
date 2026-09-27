@@ -232,6 +232,33 @@ before using it**; only the portion from 2022-08-05 onward survives the integrit
 
 ---
 
+## Reproducing everything with one command
+
+The whole pipeline — every phase below, in the order the artifacts depend on each other —
+is wrapped in a single orchestrator so a clean clone does not need the steps run by hand:
+
+```bash
+make setup        # install the package and its dependencies
+make all          # run the entire pipeline end to end
+# or, without make:
+python -m src.reproduce_all
+```
+
+Useful variants (`python -m src.reproduce_all --help` lists them all):
+
+```bash
+python -m src.reproduce_all --list            # print the ordered plan, run nothing
+python -m src.reproduce_all --skip-slow       # skip the multi-hour GAN + deep-learning steps
+python -m src.reproduce_all --skip-network    # skip steps that download data or call an API
+python -m src.reproduce_all --only-reporting  # just rebuild the summary, figures and thesis
+python -m src.reproduce_all --from rolling_cv # resume from a named stage after a failure
+make fast                                     # = --skip-slow --skip-network --skip-optional
+```
+
+`reproduce_all` only orchestrates; each stage is exactly the `python -m …` command
+documented below, run in sequence with progress and timing. The per-phase commands remain
+the way to run or re-run any single step.
+
 ## Reproducing each phase
 
 Run from the repo root with the venv active. Phase ordering matters — later phases read
