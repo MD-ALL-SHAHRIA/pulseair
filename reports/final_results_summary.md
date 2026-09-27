@@ -918,6 +918,7 @@ Correction is applied here to the *persistence* comparisons only. The GAN-ablati
 | 8 | `rolling_origin_cv_h6.md` | 5 chronological folds on Beijing, Wilcoxon on fold deltas |
 | 8 | `hj633_sensitivity.md` | EPA vs HJ 633-2012 breakpoints; the conclusion is unchanged |
 | 10 | `bangladesh_validation.md` | the data-integrity audit, transfer vs native, §1 is a contribution in itself |
+| 10 | `dhaka_monthly_fabrication_crosscheck.md` | fifth fabrication signature: discarded pre-2022 Dhaka vs DoE published monthly CAMS averages |
 | 10 | `bangladesh_rolling_cv.md` | 5 folds on Bangladesh; the class-weighted forest takes 5/5 |
 | 10 | `bangladesh_deployment.md` | the deployed compression point, ONNX, conformal, latency |
 | 11 | `dhaka_ground_truth_validation.md` | US Embassy reference monitor vs the reanalysis |
