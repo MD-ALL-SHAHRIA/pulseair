@@ -1,9 +1,9 @@
 # Claim ledger
 
 An audit of every major claim in `docs/PulseAir_Thesis.docx`, chapter by chapter,
-against the committed evidence. Built for review **before** any thesis edit: the
-proposed fixes in the last column are *proposals only* and have not been applied to the
-thesis text.
+against the committed evidence. Built for review before any thesis edit. The last column
+records the fix each flagged claim needed; the one overclaim found (claim 17) has since
+been applied to the thesis, as noted there.
 
 Status key: **SUPPORTED** — the evidence backs the claim as stated;
 **PARTIALLY SUPPORTED** — true but with a material caveat the thesis already states or
@@ -13,7 +13,7 @@ softening.
 Evidence sources are the committed `reports/metrics/*.json` and `reports/*.md` the
 thesis builds from; every number is recomputed at build time, not transcribed.
 
-| # | Claim | Evidence source | Statistical support | Limitation | Location | Status | Proposed fix (not yet applied) |
+| # | Claim | Evidence source | Statistical support | Limitation | Location | Status | Fix |
 |---|-------|-----------------|---------------------|------------|----------|--------|--------------------------------|
 | 1 | At h=1 the AQI category is unchanged ~80% of the time and persistence scores ~0.79 macro-F1; at h=6 the floor drops to ~0.51 | `horizon_comparison.json` | Descriptive (label-unchanged %, macro-F1) | None material | §1.2, §4.1, Fig 1 | SUPPORTED | — |
 | 2 | Persistence must be reported beside every headline number (the central methodological claim) | Whole evaluation design | Framing, not a test | It is a discipline, not a new technique (see novelty audit) | §1.2, §4.1 | SUPPORTED | — |
@@ -31,7 +31,7 @@ thesis builds from; every number is recomputed at build time, not transcribed.
 | 14 | Discarding the fabricated portion costs ~19% of rows but ~87% of the advertised span | `bangladesh_h6.json:audit` | Recomputed from raw file | — | §4.9 | SUPPORTED | — |
 | 15 | On Bangladesh a class-weighted forest beats persistence in 5 of 5 folds (p=0.0312) | `rolling_cv_h6_bangladesh.json` | Folds-won 5/5; Wilcoxon one-sided p=0.0312 | **p-value anti-conservative** (fold independence); folds-won is primary; evaluation blocks too sparse to cover advisory classes | §4.9, Figs 14,15 | SUPPORTED | — (fold-independence caveat now added §3.10, §4.9, §6.4) |
 | 16 | The reanalysis records far fewer Hazardous hours than the reference monitor | `dhaka_ground_truth.json` | Direct count comparison | Single station | §4.10, Fig 18 | SUPPORTED | — |
-| 17 | A PM2.5-only model "closes the gap", detecting Hazardous above its floor in 7 of 7 folds (p=0.0156) | `dhaka_pm25_model_h6.json` | Folds-won 7/7; Wilcoxon two-sided p=0.0156 (at resolution floor) | **Different model** (PM2.5-only, single-station) than the deployed multi-channel one; p anti-conservative | §4.11, Fig 19 | **OVERCLAIMED** (wording only) | Replace "closes the gap" (abstract line ~443; §1.3 line ~842) with **"narrows the gap"** or "shows the advisory-class task is learnable on ground truth" — §4.11 itself states this is *not* evidence about the deployed model, so "closes" contradicts the body |
+| 17 | A PM2.5-only model "closes the gap", detecting Hazardous above its floor in 7 of 7 folds (p=0.0156) | `dhaka_pm25_model_h6.json` | Folds-won 7/7; Wilcoxon two-sided p=0.0156 (at resolution floor) | **Different model** (PM2.5-only, single-station) than the deployed multi-channel one; p anti-conservative | §4.11, Fig 19 | SUPPORTED (fix applied) | **APPLIED:** "closes the gap" → "narrows the gap" in the Abstract and §1.3. (The unrelated "closes that gap" in §4.6, about the compression criterion, and the forward-looking "closing the gap" in §8.1 are correct and were left as-is.) |
 | 18 | No OpenAQ station near Dhaka meets multi-pollutant coverage; DoE operates 31 stations but none are on open platforms | `openaq_survey.json`, NAQMP 2024-2030 | Descriptive survey + primary-source counts | Access, not existence, is the barrier (stated) | §4.12, Fig 20 | SUPPORTED | — |
 | 19 | The deployed multi-channel model's advisory classes remain unvalidated on ground truth | design + §4.9–4.12 | Stated as a limitation, not a positive claim | This is itself the honest limitation | §4.13, §6.1 | SUPPORTED | — |
 | 20 | Leave-one-station-out: the forest beats each station's own floor 12/12 | `station_holdout_h6.json` | 12/12, mean +0.043, p=0.0005 | **Folds overlap in time** — easier than forecasting the future (stated §4.15.3, §6.3) | §4.15.3, Fig 25 | PARTIALLY SUPPORTED | None needed — the temporal-overlap caveat is already stated at both the result and in Limitations |
@@ -44,14 +44,15 @@ thesis builds from; every number is recomputed at build time, not transcribed.
 
 - **23 of 24** major claims are SUPPORTED or PARTIALLY SUPPORTED with a caveat the thesis
   already states.
-- **One OVERCLAIMED item, and it is wording only, not evidence:** claim 17's phrase
-  **"closes the gap"** (used in the Abstract and in the §1.3 contributions list)
+- **One OVERCLAIMED item was found (wording only) and has since been fixed:** claim 17's
+  phrase **"closes the gap"** (used in the Abstract and in the §1.3 contributions list)
   overstates what a PM2.5-only, single-station model does for the *deployed*
   multi-channel model. §4.11 already says in the body that it "is not evidence about the
   deployed model", so the abstract/contributions wording contradicts the thesis's own
-  careful framing. **Proposed fix:** change "closes the/that gap" to "narrows the gap"
-  (or "shows the advisory-class task is learnable on ground truth") in both places. No
-  number changes.
+  careful framing. **Fix applied:** "closes the/that gap" → "narrows the gap" in both
+  places (Abstract and §1.3); no number changes. The unrelated "closes that gap" in §4.6
+  (compression criterion) and "closing the gap" in §8.1 (future work) are correct uses
+  and were left unchanged.
 - The two rolling-origin significance claims (15, 17) and the station-holdout claim (20)
   are the places where a p-value or a generalisation could be read as stronger than it
   is; all three now carry the correct caveat in the thesis (fold independence for 15/17;

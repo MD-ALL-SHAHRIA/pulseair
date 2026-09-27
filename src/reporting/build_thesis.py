@@ -440,7 +440,7 @@ def abstract(doc: Document) -> None:
         f"cover them. Validation against the US Embassy Dhaka reference monitor "
         f"confirmed why: the reanalysis records {rea_h} Hazardous hours where the "
         f"instrument records {ref_h}. A PM2.5-only model trained on that ground truth "
-        f"closes the gap, reaching Hazardous F1 {haz_m} against a {haz_f} persistence "
+        f"narrows the gap, reaching Hazardous F1 {haz_m} against a {haz_f} persistence "
         f"floor in {haz_w} of {haz_n} folds (p = {haz_p}). A survey of OpenAQ found "
         f"{oaq} stations near Dhaka meeting multi-pollutant coverage requirements, "
         f"which bounds what any multi-channel model can currently be validated on.",
@@ -839,7 +839,7 @@ def chapter_intro(doc: Document) -> None:
         "the temperature/dew-point relationship. Section 4.3.",
         "**Ground-truth validation against a reference monitor**, resolving why the "
         "advisory classes could not be validated on the published dataset, and a "
-        "PM2.5-only model that closes that gap. Sections 4.10 and 4.11.",
+        "PM2.5-only model that narrows that gap. Sections 4.10 and 4.11.",
         "**A survey of available monitoring infrastructure** near Dhaka that bounds "
         "what any multi-pollutant model can currently be validated against. "
         "Section 4.12.",
