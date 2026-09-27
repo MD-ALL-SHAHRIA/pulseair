@@ -60,7 +60,7 @@ jobs:
       - name: Preprocessing pipeline tests
         run: python -m pytest src/preprocessing/test_pipeline.py -q
 
-      # Renders all 21 figures from the committed metrics JSON. This is the check
+      # Renders all 28 figures from the committed metrics JSON. This is the check
       # that the figures and the reported numbers cannot drift apart: if a phase is
       # re-run with a different schema, or a metrics file is dropped, the figures
       # stop building and CI says so.

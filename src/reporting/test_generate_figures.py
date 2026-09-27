@@ -31,7 +31,7 @@ def rendered():
     return gf.generate()
 
 
-EXPECTED_FIGURES = 23
+EXPECTED_FIGURES = 28
 
 
 def test_registry_holds_the_expected_figure_count():

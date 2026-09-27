@@ -1604,7 +1604,7 @@ finding rather than a disappointment.
 | 8 | `selective_prediction_h6.md` | accuracy when the conformal set is small |
 | 10 | `selective_prediction_h6_bangladesh.md` | the same, for the deployed model |
 | 11b | `sensor_noise_robustness_h6.md` | the Hazardous detector on low-cost-sensor input |
-| — | `figures/README.md` | all 23 figures with the JSON each was generated from |
+| — | `figures/README.md` | all 28 figures with the JSON each was generated from |
 | — | `reference_list_expanded.md` | 61 references, 22 registry-verified additions |
 """
 

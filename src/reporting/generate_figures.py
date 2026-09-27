@@ -1859,6 +1859,225 @@ def fig_coverage_timeline() -> plt.Figure:
 # ------------------------------------------------------------------------- driver
 
 
+# ============================================ 24 rolling-origin CV at eight folds
+
+
+@figure("24_rolling_cv_8fold",
+        "Rolling-origin CV at eight folds: no model clears persistence a majority of the time",
+        ["rolling_cv_h6_f8.json"])
+def fig_rolling_cv_8fold() -> plt.Figure:
+    """Phase B. The published conclusion rested on five folds, whose two-sided
+    Wilcoxon floor (0.0625) sits above alpha. Re-run at eight folds (floor 0.0078)
+    the answer holds: the best any model manages is four of eight."""
+    src = "rolling_cv_h6_f8.json"
+    d = load(src)
+    n = int(req_num(d, "n_folds", src))
+    pm = require(d, "aggregate.per_model", src)
+    order = ["Persistence", "RandomForest (unweighted)",
+             "RandomForest (class_weight=balanced)", "XGBoost"]
+    colours = {"Persistence": C_PERSISTENCE, "RandomForest (unweighted)": C_ALT,
+               "RandomForest (class_weight=balanced)": C_MODEL, "XGBoost": C_BAD}
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH, 4.0))
+    xs = list(range(1, n + 1))
+    for m in order:
+        if m not in pm:
+            continue
+        ys = require(pm, f"{m}.per_fold", f"{src}:aggregate.per_model")
+        lab = m.replace("RandomForest ", "RF ")
+        if m != "Persistence":
+            t = require(d, f"aggregate.tests.{m}", src)
+            w = int(req_num(t, "wins", f"{src}:tests.{m}"))
+            pv = req_num(t, "p_two_sided", f"{src}:tests.{m}")
+            lab += f"  ({w}/{n} folds, p={pv:.4f})"
+        ax.plot(xs, ys, marker="o", ms=4.5, lw=2.0 if m == "Persistence" else 1.6,
+                ls="--" if m == "Persistence" else "-",
+                color=colours.get(m), label=lab, zorder=3 if m == "Persistence" else 2)
+    ax.set_xticks(xs)
+    ax.set_xlabel("Rolling-origin fold (chronological)")
+    ax.set_ylabel("Macro-F1")
+    ax.set_title("Eight folds, four tabular families: the floor is still not beaten")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2, fontsize=FS_ANNOT)
+    fig.tight_layout()
+    return fig
+
+
+# ============================================ 25 leave-one-station-out generalisation
+
+
+@figure("25_station_holdout",
+        "Leave-one-station-out: every held-out Beijing station beats its own floor",
+        ["station_holdout_h6.json"])
+def fig_station_holdout() -> plt.Figure:
+    """Phase C. A class-weighted forest trained on eleven stations and tested on the
+    twelfth, each station scored against its own persistence floor. Twelve of twelve,
+    with the temporal-overlap caveat noted in the text."""
+    src = "station_holdout_h6.json"
+    d = load(src)
+    rows = []
+    for i, st in enumerate(require(d, "stations", src)):
+        rows.append({"Station": require(st, "station", f"{src}:stations.{i}"),
+                     "Model": req_num(st, "model.macro_f1", f"{src}:stations.{i}"),
+                     "Persistence": req_num(st, "persistence.macro_f1", f"{src}:stations.{i}")})
+    df = pd.DataFrame(rows)
+    df["delta"] = df["Model"] - df["Persistence"]
+    df = df.sort_values("delta")
+    mean_delta = req_num(d, "aggregate.mean_delta_macro", src)
+    wins = int(req_num(d, "aggregate.wins_macro", src))
+    nst = int(req_num(d, "n_stations", src))
+    pv = req_num(d, "aggregate.p_two_sided", src)
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH, 4.6))
+    y = range(len(df))
+    ax.hlines(y, df["Persistence"], df["Model"], color=C_ALT, lw=2, zorder=1)
+    ax.scatter(df["Persistence"], y, color=C_PERSISTENCE, s=42, zorder=2,
+               label="Its own persistence floor")
+    ax.scatter(df["Model"], y, color=C_MODEL, s=42, zorder=2,
+               label="Class-weighted forest")
+    ax.set_yticks(list(y))
+    ax.set_yticklabels(df["Station"], fontsize=FS_TICK)
+    ax.set_xlabel("Macro-F1 on the held-out station")
+    ax.set_title(f"Leave-one-station-out: {wins}/{nst} beat their floor "
+                 f"(mean +{mean_delta:.4f}, p={pv:.4f})")
+    ax.legend(loc="lower right", fontsize=FS_ANNOT)
+    fig.tight_layout()
+    return fig
+
+
+# ============================================ 26 sensor-noise robustness
+
+
+@figure("26_sensor_noise_robustness",
+        "Low-cost-sensor noise: the Hazardous detector degrades but still beats its noisy floor",
+        ["sensor_noise_robustness_h6.json"])
+def fig_sensor_noise() -> plt.Figure:
+    """Phase D. Gaussian noise sized to the R-squared of a published phone-sensor
+    field study is injected, and the detector is re-evaluated against a persistence
+    floor computed on the same noisy input."""
+    src = "sensor_noise_robustness_h6.json"
+    d = load(src)
+    metrics = [("f1_Hazardous", "Hazardous F1"), ("macro_f1", "Macro-F1")]
+    rows = []
+    for key, lab in metrics:
+        rows.append({"Metric": lab, "Condition": "Clean input",
+                     "Score": req_num(d, f"summary.{key}.clean.mean", src)})
+        rows.append({"Metric": lab, "Condition": "Noisy input",
+                     "Score": req_num(d, f"summary.{key}.noisy.mean", src)})
+        rows.append({"Metric": lab, "Condition": "Noisy persistence floor",
+                     "Score": req_num(d, f"summary.{key}.persistence_noisy.mean", src)})
+    df = pd.DataFrame(rows)
+    pal = {"Clean input": C_MODEL, "Noisy input": C_ACCENT,
+           "Noisy persistence floor": C_PERSISTENCE}
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH, 4.0))
+    sns.barplot(df, x="Metric", y="Score", hue="Condition", hue_order=list(pal),
+                palette=pal, ax=ax, edgecolor="white", linewidth=0.7)
+    _annotate_bars(ax, fmt="%.3f")
+    drop = req_num(d, "summary.f1_Hazardous.relative_drop_pct", src)
+    won = int(req_num(d, "summary.f1_Hazardous.folds_won_noisy", src))
+    nf = int(req_num(d, "n_folds", src))
+    r2 = req_num(d, "injection.achieved_r2", src)
+    ax.set_ylabel("Score (mean over folds)")
+    ax.set_xlabel("")
+    ax.set_ylim(0, max(df["Score"]) * 1.25)
+    ax.set_title(f"Sensor noise (R²≈{r2:.2f}): Hazardous F1 falls {drop:.0f}% "
+                 f"but still wins {won}/{nf} folds vs its noisy floor")
+    ax.legend(loc="upper right", fontsize=FS_ANNOT)
+    fig.tight_layout()
+    return fig
+
+
+# ============================================ 27 selective prediction
+
+
+@figure("27_selective_prediction",
+        "Selective prediction: accuracy rises on the confident subset while macro-F1 does not",
+        ["selective_prediction_h6.json"])
+def fig_selective_prediction() -> plt.Figure:
+    """Phase E. Abstaining where the Mondrian conformal set is large keeps the
+    fraction the model is surest about. Accuracy rises; macro-F1 does not, because
+    the abstained cases are disproportionately the safety-critical tail."""
+    src = "selective_prediction_h6.json"
+    d = load(src)
+    frac = req_num(d, "confident_fraction", src)
+    rows = [
+        {"Metric": "Accuracy", "Subset": "All predictions",
+         "Score": req_num(d, "full.accuracy", src)},
+        {"Metric": "Accuracy", "Subset": f"Confident only ({frac:.0%})",
+         "Score": req_num(d, "confident.accuracy", src)},
+        {"Metric": "Macro-F1", "Subset": "All predictions",
+         "Score": req_num(d, "full.macro_f1", src)},
+        {"Metric": "Macro-F1", "Subset": f"Confident only ({frac:.0%})",
+         "Score": req_num(d, "confident.macro_f1", src)},
+    ]
+    df = pd.DataFrame(rows)
+    pal = {"All predictions": C_ALT, f"Confident only ({frac:.0%})": C_MODEL}
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH, 3.9))
+    sns.barplot(df, x="Metric", y="Score", hue="Subset", hue_order=list(pal),
+                palette=pal, ax=ax, edgecolor="white", linewidth=0.7)
+    _annotate_bars(ax, fmt="%.3f")
+    ax.set_ylim(0, max(df["Score"]) * 1.25)
+    ax.set_ylabel("Score")
+    ax.set_xlabel("")
+    ax.set_title("Abstention buys accuracy, not macro-F1: the tail is what gets abstained")
+    ax.legend(loc="upper right", fontsize=FS_ANNOT)
+    fig.tight_layout()
+    return fig
+
+
+# ============================================ 28 Dhaka fabrication: monsoon washout
+
+
+@figure("28_dhaka_monthly_fabrication",
+        "Fifth fabrication signature: the discarded pre-2022 Dhaka series has no monsoon washout",
+        ["dhaka_monthly_crosscheck.json"])
+def fig_dhaka_monthly() -> plt.Figure:
+    """Signature 5. The discarded (fabricated) Mendeley pre-2022 Dhaka monthly mean
+    against the DoE's published monthly CAMS average, over the overlap. The real
+    series crashes every monsoon; the fabricated one does not."""
+    src = "dhaka_monthly_crosscheck.json"
+    d = load(src)
+    doe = require(d, "doe_dhaka_pm25", src)
+    men = require(d, "mendeley_dhaka_pm25", src)
+    months = sorted(set(doe) & set(men))
+    if len(months) < 12:
+        raise MissingMetric(f"{src}: only {len(months)} shared months; expected the full overlap")
+    x = list(range(len(months)))
+    dy = [doe[m] for m in months]
+    my = [men[m] for m in months]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(FIG_WIDTH * 1.28, 4.0),
+                                   gridspec_kw={"width_ratios": [2.4, 1]})
+    ax1.plot(x, dy, marker="o", ms=3, lw=1.8, color=C_BANGLADESH,
+             label="DoE published CAMS average (real)")
+    ax1.plot(x, my, marker="s", ms=3, lw=1.8, color=C_BAD,
+             label="Mendeley pre-2022 (discarded / fabricated)")
+    # shade monsoon months (Jun-Sep)
+    for i, m in enumerate(months):
+        if int(m[5:7]) in (6, 7, 8, 9):
+            ax1.axvspan(i - 0.5, i + 0.5, color=C_BEIJING, alpha=0.07, zorder=0)
+    ticks = [i for i, m in enumerate(months) if m.endswith("-01")]
+    ax1.set_xticks(ticks)
+    ax1.set_xticklabels([months[i][:4] for i in ticks], fontsize=FS_TICK)
+    ax1.set_ylabel("Monthly mean PM2.5 (µg/m³)")
+    ax1.set_xlabel("Month (shaded = monsoon, Jun–Sep)")
+    r = req_num(d, "stats.pearson", src)
+    mad = req_num(d, "stats.mad", src)
+    r2d = req_num(d, "stats.r2_doe_overlap", src)
+    r2m = req_num(d, "stats.r2_mendeley_overlap", src)
+    ax1.set_title(f"Monthly series (r={r:.2f}, MAD={mad:.0f} µg/m³)\n"
+                  f"yearly-median linearity: real R²={r2d:.2f} vs fabricated R²={r2m:.2f}",
+                  fontsize=FS_ANNOT + 1)
+    ax1.legend(loc="upper left", fontsize=FS_ANNOT)
+
+    md = req_num(d, "stats.monsoon_doe_mean", src)
+    mm = req_num(d, "stats.monsoon_mendeley_mean", src)
+    bars = ax2.bar(["Real\n(DoE)", "Fabricated\n(Mendeley)"], [md, mm],
+                   color=[C_BANGLADESH, C_BAD], edgecolor="white", linewidth=0.7)
+    ax2.bar_label(bars, fmt="%.0f", fontsize=FS_LABEL, padding=2)
+    ax2.set_ylabel("Monsoon (Jun–Sep) mean PM2.5 (µg/m³)")
+    ax2.set_ylim(0, mm * 1.25)
+    ax2.set_title("No monsoon washout", fontsize=FS_ANNOT + 1)
+    fig.tight_layout()
+    return fig
+
+
 @dataclass
 class Result:
     fig: Figure

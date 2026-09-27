@@ -388,6 +388,10 @@ def abstract(doc: Document) -> None:
                    "Bangladesh mean delta", "+.4f")
     bd_p = num("rolling_cv_h6_bangladesh.json:aggregate.tests.RandomForest (class_weight=balanced).p_one_sided",
                "Bangladesh one-sided p")
+    f8_rf = num("rolling_cv_h6_f8.json:aggregate.tests.RandomForest (class_weight=balanced).wins",
+                "8-fold RF wins", ".0f")
+    f8_n = need("rolling_cv_h6_f8.json:n_folds", "8-fold count")
+    f8_xgb_p = num("rolling_cv_h6_f8.json:aggregate.tests.XGBoost.p_two_sided", "8-fold XGB p")
     epi = _epistemic_share()
     haz_m = num("dhaka_pm25_model_h6.json:cv.aggregate.f1_Hazardous.model_mean", "11b Hazardous F1")
     haz_f = num("dhaka_pm25_model_h6.json:cv.aggregate.f1_Hazardous.persistence_mean", "11b Hazardous floor")
@@ -411,7 +415,12 @@ def abstract(doc: Document) -> None:
         f"On the UCI Beijing multi-site dataset, a RandomForest reaches {rf} macro-F1 "
         f"on the test split. Under five-fold rolling-origin cross-validation with an "
         f"embargo and per-fold rescaling, no Beijing-trained model beats persistence in "
-        f"more than {bj_folds} of {bj_n} folds, and persistence's own fold-to-fold "
+        f"more than {bj_folds} of {bj_n} folds. Because a five-fold signed-rank test "
+        f"cannot reach significance by construction — its two-sided floor of 0.0625 lies "
+        f"above alpha — the comparison was repeated at eight folds, where the floor "
+        f"(0.0078) does not, and the conclusion held: the best model reaches only "
+        f"{f8_rf} of {f8_n} folds and gradient boosting is now significantly worse than "
+        f"persistence (p = {f8_xgb_p}). Persistence's own fold-to-fold "
         f"spread exceeds any model-to-baseline difference. Three class-imbalance "
         f"interventions were compared under a disqualification rule that rejects an "
         f"aggregate gain bought by degrading a safety-critical class: CTGAN "
@@ -567,6 +576,13 @@ def toc(doc: Document) -> None:
         ("4.12 Monitoring infrastructure: the OpenAQ survey", 2),
         ("4.13 The deployed system", 2),
         ("4.14 Explainability: SHAP case studies", 2),
+        ("4.15 Extended validation and robustness", 2),
+        ("4.15.1 Holm–Bonferroni over the persistence family", 3),
+        ("4.15.2 Rolling-origin cross-validation at eight folds", 3),
+        ("4.15.3 Leave-one-station-out generalisation", 3),
+        ("4.15.4 Robustness to low-cost-sensor noise", 3),
+        ("4.15.5 Selective prediction on the conformal sets", 3),
+        ("4.15.6 An independent data-integrity audit", 3),
         ("5. Discussion", 1),
         ("5.1 An average says nothing about its tail", 2),
         ("5.2 The ceiling is in the data", 2),
@@ -1724,6 +1740,34 @@ def chapter_results(doc: Document) -> None:
          "Every number in that audit is recomputed from the raw file at report time "
          "rather than asserted, so a reader with the file can check it.",
          align="justify")
+    _cc = "dhaka_monthly_crosscheck.json"
+    para(doc,
+         f"**A fifth signature tests that audit against real government data.** The four "
+         f"signals above are internal to the file. As an external check, the discarded "
+         f"pre-2022 Dhaka series was compared month by month, over the "
+         f"{need(_cc + ':n_months', 'crosscheck months')}-month overlap it shares with "
+         f"the Department of Environment's own published monthly CAMS averages for Dhaka "
+         f"(the DoE reports, parsed only where two independent methods agreed). The "
+         f"fabricated series runs {num(_cc + ':stats.bias_mendeley_minus_doe', 'cc bias', '+.0f')} "
+         f"micrograms per cubic metre high on average, and — most tellingly — it has no "
+         f"monsoon washout: the real series falls to "
+         f"{num(_cc + ':stats.monsoon_doe_mean', 'cc monsoon doe', '.0f')} micrograms per "
+         f"cubic metre every June to September while the fabricated one sits at "
+         f"{num(_cc + ':stats.monsoon_mendeley_mean', 'cc monsoon men', '.0f')} and drifts "
+         f"upward. Over the same six years the real yearly medians show no linear trend "
+         f"(R-squared {num(_cc + ':stats.r2_doe_overlap', 'cc r2 doe', '.2f')}) where the "
+         f"fabricated ones are almost a perfect line "
+         f"(R-squared {num(_cc + ':stats.r2_mendeley_overlap', 'cc r2 men', '.2f')}), "
+         f"confirming the linearity signature against an independent reference rather "
+         f"than only by the series' own shape. This does not reopen the pre-2022 data — "
+         f"it stays excluded from every model — it only confirms the exclusion was right.",
+         align="justify")
+    figure(doc, "28_dhaka_monthly_fabrication.png",
+           "Fifth fabrication signature: the discarded pre-2022 Dhaka monthly PM2.5 "
+           "(fabricated) against the DoE's published monthly CAMS average (real), over "
+           "their overlap. The real series crashes every monsoon (shaded); the "
+           "fabricated one does not, and its yearly trend is near-linear where the real "
+           "one is flat.", figsrc("28_dhaka_monthly_fabrication.png"))
     figure(doc, "14_rolling_cv_bangladesh.png",
            "Bangladesh rolling-origin cross-validation: per-fold macro-F1 across five "
            "chronological folds.", figsrc("14_rolling_cv_bangladesh.png"))
@@ -1888,6 +1932,147 @@ def chapter_results(doc: Document) -> None:
          "confident prediction and an ambiguous one are distinguishable before any text "
          "is generated, which is what lets the wearer-facing sentence hedge when it "
          "should and commit when it can.",
+         align="justify")
+
+    # ---------------------------------------------------------------- 4.15
+    heading(doc, "4.15 Extended validation and robustness", 2)
+    para(doc,
+         "Six further analyses were run after the main results were compiled, each "
+         "designed to try to break an existing conclusion rather than decorate it. They "
+         "are reported here in the order they were run. None overturned a headline "
+         "claim: two qualified one, one sharpened the central rolling-origin result, and "
+         "three were purely additive. Where a phase changed a headline number it is "
+         "stated as such; the pre-2022 exclusion and the persistence-floor conclusion "
+         "both stand.",
+         align="justify")
+
+    heading(doc, "4.15.1 Holm–Bonferroni over the persistence family", 3)
+    para(doc,
+         "The family-wise correction in Section 4.8 used Bonferroni. Applying the "
+         "uniformly more powerful Holm step-down procedure to the same set of "
+         "persistence comparisons reproduces Bonferroni's survivors exactly. The reason "
+         "is structural: the p-values are bimodal — a comparison is either clearly "
+         "significant or clearly not, with nothing in the narrow band where the extra "
+         "power would change a verdict. Holm is now available in PulseBench, but "
+         "Bonferroni is kept as the reported default because it is the more conservative "
+         "of the two and the change is immaterial here. This phase altered no claim.",
+         align="justify")
+
+    heading(doc, "4.15.2 Rolling-origin cross-validation at eight folds", 3)
+    f8 = "rolling_cv_h6_f8.json"
+    para(doc,
+         f"The published rolling-origin conclusion (Section 4.2) rested on five folds, "
+         f"and a five-fold two-sided signed-rank test cannot reach alpha = 0.05: its "
+         f"smallest attainable p is 0.0625. That design could not have produced a "
+         f"significant result whatever the data showed, so the comparison was re-run at "
+         f"eight folds, where the floor drops to 0.0078. Across "
+         f"{need(f8 + ':n_folds', '8-fold count')} folds and four tabular model families "
+         f"the conclusion is unchanged and, if anything, sharper: the class-weighted "
+         f"forest reaches only "
+         f"{num(f8 + ':aggregate.tests.RandomForest (class_weight=balanced).wins', 'f8 rf wins', '.0f')} "
+         f"of {need(f8 + ':n_folds', '8-fold count')} folds — exactly half — and XGBoost "
+         f"is now **significantly worse** than persistence "
+         f"(mean {num(f8 + ':aggregate.tests.XGBoost.mean_delta', 'f8 xgb delta', '+.4f')}, "
+         f"two-sided p = {num(f8 + ':aggregate.tests.XGBoost.p_two_sided', 'f8 xgb p')}), "
+         f"a fact only the higher fold count has the power to detect. The eight-fold "
+         f"result is now the headline rolling-origin number for Beijing; the five-fold "
+         f"figures are retained as the historical record and as the worked example of an "
+         f"underpowered design. This phase **sharpened** an existing claim without "
+         f"reversing it.",
+         align="justify")
+    figure(doc, "24_rolling_cv_8fold.png",
+           "Per-fold macro-F1 across eight rolling-origin folds on Beijing for the four "
+           "tabular families. Persistence (grey, dashed) interleaves with the models; "
+           "the best reaches four of eight folds and gradient boosting is significantly "
+           "worse.", figsrc("24_rolling_cv_8fold.png"))
+
+    heading(doc, "4.15.3 Leave-one-station-out generalisation", 3)
+    sh = "station_holdout_h6.json"
+    para(doc,
+         f"Rolling-origin CV rotates the evaluation block through time. This phase "
+         f"rotates it through space instead: a class-weighted forest trained on "
+         f"{need(sh + ':n_stations', 'stations')} minus one Beijing stations and tested "
+         f"on the held-out station, each station scored against its own persistence "
+         f"floor. The model beats that floor at "
+         f"{num(sh + ':aggregate.wins_macro', 'sh wins', '.0f')} of "
+         f"{need(sh + ':n_stations', 'stations')} stations "
+         f"({num(sh + ':aggregate.wins_macro_significant', 'sh wins sig', '.0f')} of them "
+         f"significantly), mean gain {num(sh + ':aggregate.mean_delta_macro', 'sh delta', '+.4f')} "
+         f"(p = {num(sh + ':aggregate.p_two_sided', 'sh p')}). This is **additive** "
+         f"evidence on a different axis, and it is reported with the caveat that makes it "
+         f"an easier test than rolling-origin: the folds overlap in time, so a "
+         f"held-out station is predicted from the same calendar period the model trained "
+         f"on. It shows the model generalises across place, not that it forecasts the "
+         f"future — that is what Section 4.15.2 tests, and there it does not.",
+         align="justify")
+    figure(doc, "25_station_holdout.png",
+           "Leave-one-station-out: each held-out Beijing station's macro-F1 for the "
+           "class-weighted forest against its own persistence floor. Every station "
+           "clears its floor.", figsrc("25_station_holdout.png"))
+
+    heading(doc, "4.15.4 Robustness to low-cost-sensor noise", 3)
+    sn = "sensor_noise_robustness_h6.json"
+    para(doc,
+         f"The validated Hazardous detector (Section 4.11) was trained on "
+         f"reference-grade input. A wearable carries a low-cost sensor, so Gaussian "
+         f"noise was injected at a level derived only from the published field-study "
+         f"R-squared of such sensors (achieved "
+         f"R-squared {num(sn + ':injection.achieved_r2', 'sn r2', '.2f')}); no noise "
+         f"characteristics were invented. Under that noise the Hazardous F1 falls "
+         f"{num(sn + ':summary.f1_Hazardous.relative_drop_pct', 'sn drop', '.0f')}% "
+         f"(from {num(sn + ':summary.f1_Hazardous.clean.mean', 'sn clean')} to "
+         f"{num(sn + ':summary.f1_Hazardous.noisy.mean', 'sn noisy')}), but it still "
+         f"beats a persistence floor computed on the same noisy input in "
+         f"{num(sn + ':summary.f1_Hazardous.folds_won_noisy', 'sn won', '.0f')} of "
+         f"{need(sn + ':n_folds', 'sn folds')} folds. This **qualifies** the Section 4.11 "
+         f"result — the detector is degraded but not destroyed by realistic sensor "
+         f"noise — and it is a simulation of noise only, not of a specific device's full "
+         f"error model.",
+         align="justify")
+    figure(doc, "26_sensor_noise_robustness.png",
+           "Hazardous F1 and macro-F1 on clean input, on noisy input, and against a "
+           "persistence floor recomputed on the noisy input. The detector degrades but "
+           "stays above its noisy floor.", figsrc("26_sensor_noise_robustness.png"))
+
+    heading(doc, "4.15.5 Selective prediction on the conformal sets", 3)
+    sp = "selective_prediction_h6.json"
+    para(doc,
+         f"The Mondrian conformal layer (Section 4.5) already reports a set size per "
+         f"prediction. Abstaining wherever that set is large keeps the "
+         f"{num(sp + ':confident_fraction', 'sp frac', '.0%')} of cases the model is "
+         f"surest about. On that confident subset accuracy rises from "
+         f"{num(sp + ':full.accuracy', 'sp full acc')} to "
+         f"{num(sp + ':confident.accuracy', 'sp conf acc')} — but macro-F1 does not "
+         f"({num(sp + ':full.macro_f1', 'sp full f1')} to "
+         f"{num(sp + ':confident.macro_f1', 'sp conf f1')}), because the cases the model "
+         f"abstains on are disproportionately the safety-critical tail. This is "
+         f"**additive** and report-only — nothing is deployed on it — and it is a fourth "
+         f"instance of the pattern that runs through the whole thesis: an aggregate gain "
+         f"that comes out of the classes that matter most.",
+         align="justify")
+    figure(doc, "27_selective_prediction.png",
+           "Accuracy and macro-F1 on all predictions against the confident subset "
+           "selected by conformal set size. Accuracy rises; macro-F1 does not.",
+           figsrc("27_selective_prediction.png"))
+
+    heading(doc, "4.15.6 An independent data-integrity audit", 3)
+    ia = "integrity_audit_bangladesh.json"
+    para(doc,
+         f"The Bangladesh audit in Section 4.9 was hand-built for that dataset. This "
+         f"phase reimplements it as a general, reusable function — PulseBench's fifth "
+         f"exported entry point, `dataset_audit` — and runs it on the unfiltered "
+         f"Mendeley file with no boundary supplied. Given only the raw series it returns "
+         f"'{need(ia + ':verdict', 'ia verdict')}' on "
+         f"{num(ia + ':n_flagged', 'ia flagged', '.0f')} of four structural checks, dates "
+         f"the boundary to {need(ia + ':suspected_boundary', 'ia boundary')} — "
+         f"{num(ia + ':boundary_error_days', 'ia err', '.0f')} days from the "
+         f"{need(ia + ':manual_boundary', 'ia manual')} boundary that manual inspection "
+         f"had found — and identifies {need(ia + ':focus_group', 'ia city')} as the "
+         f"affected city unprompted. This is **additive**: it reproduces, independently "
+         f"and without hints, the finding that the pre-2022 data is fabricated, and it "
+         f"packages the check so others can run it on their own datasets. The "
+         f"month-by-month comparison against real DoE measurements in Section 4.9 is the "
+         f"fifth signature that same conclusion now rests on.",
          align="justify")
 
 
@@ -2612,6 +2797,17 @@ def chapter_limitations(doc: Document) -> None:
          "Whether the same conclusions hold in a regime with different dynamics is "
          "untested, and the toolkit was released partly so that others can test them.",
          align="justify")
+    para(doc,
+         "The extended validation in Section 4.15 strengthens the central claim without "
+         "removing this limitation. Re-running the Beijing rolling-origin comparison at "
+         "eight folds (Section 4.15.2) closes the specific hole that the five-fold "
+         "signed-rank test could not reach significance, and it is now the headline "
+         "rolling-origin result; the leave-one-station-out test (Section 4.15.3) adds a "
+         "spatial axis. But both still live inside the single Beijing regime — the "
+         "station-holdout folds even overlap in time, which makes them an easier test "
+         "than forecasting the future — so the question of whether the conclusions "
+         "transfer to a genuinely different pollution regime remains open.",
+         align="justify")
 
     heading(doc, "6.4 Methodological caveats", 2)
     bullets(doc, [
@@ -2637,6 +2833,17 @@ def chapter_limitations(doc: Document) -> None:
         "metrics summary. Substituting the shared version would have invalidated every "
         "paired test in the thesis. The difference is structural, and it is documented "
         "rather than resolved.",
+
+        "**The sensor-noise robustness test (Section 4.15.4) is a simulation of noise, "
+        "not of a device.** Gaussian noise sized to a published field-study R-squared is "
+        "not the full error model of any specific low-cost sensor, which also has "
+        "calibration drift, humidity dependence and non-Gaussian tails. The result "
+        "bounds one failure mode; it does not certify any particular hardware.",
+
+        "**Selective prediction (Section 4.15.5) buys accuracy, not tail performance.** "
+        "Its usefulness to a wearer depends on abstention being acceptable, and the "
+        "cases it abstains on are exactly the safety-critical ones, so it is reported as "
+        "evidence about the tail rather than as a deployable mechanism.",
     ])
 
     heading(doc, "6.5 Engineering and infrastructure caveats", 2)
@@ -2724,16 +2931,34 @@ def chapter_conclusion(doc: Document) -> None:
          f"get worse as they get larger. At a six-hour horizon on Beijing data, no "
          f"model beats a zero-parameter baseline in more than "
          f"{_beijing_best_folds()} of "
-         f"{need('rolling_cv_h6.json:n_folds', 'folds')} rolling-origin folds.",
+         f"{need('rolling_cv_h6.json:n_folds', 'folds')} rolling-origin folds — a "
+         f"conclusion that was re-tested at eight folds precisely because the five-fold "
+         f"design was underpowered, and that held there too, with the best model at "
+         f"{num('rolling_cv_h6_f8.json:aggregate.tests.RandomForest (class_weight=balanced).wins', 'concl f8 wins', '.0f')} "
+         f"of {need('rolling_cv_h6_f8.json:n_folds', 'concl f8 n')} folds and gradient "
+         f"boosting significantly worse than doing nothing.",
          align="justify")
     para(doc,
          "What survived is smaller and better supported. A class-weighted Random Forest "
          "on Bangladesh data clears its own persistence floor in every fold, for the "
          "four common classes. Class-conditional conformal prediction restores coverage "
          "where the marginal guarantee failed. A PM2.5-only model on reference-monitor "
-         "data detects hazardous air above its floor in every fold. A published dataset "
-         "was audited and found substantially fabricated over its advertised span. And "
-         "the evaluation protocol that established all of this is released as software.",
+         "data detects hazardous air above its floor in every fold — and it survives "
+         "low-cost-sensor noise, losing about a quarter of its Hazardous F1 but still "
+         "beating a floor computed on the same noisy input. A published dataset was "
+         "audited and found substantially fabricated over its advertised span, a finding "
+         "an independent reimplementation reproduces unprompted and that a fifth "
+         "signature — a month-by-month comparison against the Department of Environment's "
+         "own published measurements — independently confirms. And the evaluation "
+         "protocol that established all of this is released as software.",
+         align="justify")
+    para(doc,
+         "That protocol also speaks to policy. Bangladesh's National Air Quality "
+         "Management Plan 2024–2030 anticipates forecast-triggered management of "
+         "high-pollution days and names physics-based chemistry-transport modelling as "
+         "its intended route; this thesis is complementary evidence on the data-driven "
+         "alternative, establishing with a protocol built to resist flattering itself "
+         "where a purely statistical forecaster delivers and where it does not.",
          align="justify")
     para(doc,
          "The central claim of the thesis is methodological: **a reported accuracy in "
