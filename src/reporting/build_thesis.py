@@ -1382,6 +1382,33 @@ def chapter_methods(doc: Document) -> None:
          "p-value below 2^(1-n), so a result sitting at that floor is the strongest the "
          "design can yield and is described as such rather than as an exact value.",
          align="justify")
+    para(doc,
+         "One assumption of that test deserves to be stated plainly, because it is not "
+         "fully satisfied here. The Wilcoxon signed-rank test treats the fold-level "
+         "deltas as independent draws. In an expanding-window design they are not: each "
+         "fold's training set is a superset of the previous fold's, and adjacent "
+         "evaluation windows are close in time, so a single weather regime or pollution "
+         "episode can influence more than one fold's outcome. The fold-level deltas may "
+         "therefore be positively correlated, and positively correlated observations "
+         "carry less information than the same number of independent ones. The practical "
+         "consequence is that the nominal Wilcoxon p-value is likely **anti-conservative** "
+         "— it overstates significance relative to the true, unknown effective sample "
+         "size — because the effective number of independent folds is smaller than the "
+         "nominal count.",
+         align="justify")
+    para(doc,
+         "For that reason the primary, assumption-light evidence in every rolling-origin "
+         "result reported in this thesis is the raw folds-won count — “5 of 5”, "
+         "“7 of 7”, “2 of 8” — a plain descriptive statistic that does "
+         "not depend on fold independence. The accompanying Wilcoxon p-value is reported "
+         "as a supplementary, assumption-dependent statistic, not as a free-standing "
+         "proof of significance. Where a p-value is quoted beside a folds-won count in "
+         "Chapter 4, it should be read in that supporting role. This cuts in a helpful "
+         "direction for the thesis's central negative result: a test that is "
+         "conservative in the wrong direction — one that, if anything, over-finds "
+         "significance — still failing to show that a Beijing model beats persistence in "
+         "a majority of folds makes that null conclusion safer, not weaker.",
+         align="justify")
 
     heading(doc, "3.11 Multiple-comparisons correction", 2)
     para(doc,
@@ -1785,6 +1812,14 @@ def chapter_results(doc: Document) -> None:
          f"p = {num(bd + '.p_one_sided', 'bd p')}. The same protocol that rejected every "
          f"Beijing model accepts this one, which is the result the deployment rests on.",
          align="justify")
+    para(doc,
+         "The load-bearing statistic in that sentence is the folds-won count, not the "
+         "p-value. As Section 3.10 sets out, the Wilcoxon test assumes independent folds, "
+         "which an expanding-window design does not fully provide, so the p-value here is "
+         "likely anti-conservative and should be read as supplementary support for the "
+         "plain fact that the model wins every fold, rather than as a free-standing proof "
+         "of significance.",
+         align="justify")
     _bd_conformal_table(doc)
     _coverage_caveat(doc)
 
@@ -1846,6 +1881,14 @@ def chapter_results(doc: Document) -> None:
          f"(two-sided p = {num(g + '.p_two_sided', '11b p')}). That p-value sits at the "
          f"signed-rank resolution floor for this fold count, which is the strongest the "
          f"design can produce rather than a weak result.",
+         align="justify")
+    para(doc,
+         "Here too the primary evidence is that the detector wins every one of the seven "
+         "folds, not the p-value beside it. Per Section 3.10, the Wilcoxon test assumes "
+         "independent folds and the expanding-window design does not fully satisfy that, "
+         "so this p-value is likely anti-conservative; the clean-sweep folds-won count is "
+         "the assumption-light claim, and the p-value supports it rather than standing "
+         "alone.",
          align="justify")
     para(doc,
          "**What this does and does not establish.** It is evidence about the *task*: "
@@ -2811,6 +2854,19 @@ def chapter_limitations(doc: Document) -> None:
 
     heading(doc, "6.4 Methodological caveats", 2)
     bullets(doc, [
+        "**The rolling-origin Wilcoxon p-values assume fold independence, which the "
+        "design does not fully provide.** As set out in Section 3.10, an expanding "
+        "window makes each fold's training set a superset of the last and places "
+        "adjacent evaluation windows close in time, so the fold-level deltas can be "
+        "positively correlated and the effective sample size is smaller than the nominal "
+        "fold count. The nominal Wilcoxon p-value is therefore likely anti-conservative "
+        "(it overstates significance). Every rolling-origin claim in this thesis should "
+        "be read with the folds-won count as the primary, assumption-light statistic and "
+        "the p-value as supplementary — which is how they are reported. This cuts in "
+        "favour of the central negative result: a test biased toward over-finding "
+        "significance that still fails to beat persistence on Beijing makes that null "
+        "safer, not weaker.",
+
         "**Monte Carlo dropout is an approximation.** The aleatoric/epistemic split is "
         "load-bearing in Section 5.2, and dropout-based uncertainty estimates have known "
         "weaknesses. A deep ensemble would be a stronger check and was not run; the "
