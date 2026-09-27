@@ -22,6 +22,40 @@ advisory-class result in the project.
 
 ---
 
+## At a glance
+
+|  |  |
+| --- | --- |
+| **What it is** | An off-device pipeline and a reusable evaluation toolkit for wearable air-quality risk forecasting |
+| **Datasets** | Beijing multi-site (methodology bench) · Bangladesh (deployment target) |
+| **Headline finding** | No model beats the persistence floor on Beijing — nothing from it is deployed |
+| **Deployment candidate** | Class-weighted RandomForest on Bangladesh, compressed and exported to ONNX |
+| **Reusable toolkit** | [`pulsebench`](pulsebench/README.md) — the evaluation protocol as a standalone, dataset-agnostic library |
+| **Reproduce** | `make all` (or `python -m src.reproduce_all`) |
+| **License** | [MIT](LICENSE) |
+| **DOI** | [10.5281/zenodo.22979304](https://doi.org/10.5281/zenodo.22979304) |
+
+## Contents
+
+- [At a glance](#at-a-glance)
+- [Headline results](#headline-results)
+- [Key findings](#key-findings)
+- [Repository structure](#repository-structure)
+- [Setup](#setup)
+- [Data](#data)
+- [Reproducing everything with one command](#reproducing-everything-with-one-command)
+- [Reproducing each phase](#reproducing-each-phase)
+- [`pulsebench` — the evaluation protocol, extracted](#pulsebench--the-evaluation-protocol-extracted)
+- [Reports](#reports)
+- [Citation](#citation)
+- [Contributing](#contributing)
+- [License](#license)
+
+Version history is in [`CHANGELOG.md`](CHANGELOG.md); a claim-by-claim evidence audit of
+the thesis is in [`docs/claim_ledger.md`](docs/claim_ledger.md).
+
+---
+
 ## Headline results
 
 All Beijing numbers are 6-hour-ahead PM2.5 AQI-category macro-F1 on observed (non-imputed)
@@ -141,12 +175,16 @@ pulseair-ml/
 │   ├── gan/             # CTGAN augmentation, SMOTE control, paired-bootstrap ablation
 │   ├── explainability/  # SHAP attribution + Gemini risk advisory
 │   ├── deployment/      # compression sweep, ONNX export, latency benchmarks
-│   └── reporting/       # results compilation into reports/final_results_summary.md
+│   ├── reporting/       # results compilation into reports/final_results_summary.md
+│   └── reproduce_all.py # one-command orchestrator for the whole pipeline
 ├── pulsebench/          # standalone evaluation toolkit (see below) — no src/ imports
-├── reports/             # 26 generated markdown reports + metrics/*.json + figures/
+├── reports/             # 34 generated markdown reports + metrics/*.json + figures/
+├── docs/                # thesis (.docx/.pdf), claim ledger, reference/ and outreach/
 ├── data/                # raw / interim / processed / external — all gitignored
 ├── configs/default.yaml # every hyperparameter and threshold in the project
 ├── notebooks/           # exploratory analysis
+├── Makefile             # make setup / all / fast / reporting / list / test
+├── CHANGELOG.md
 └── tests/
 ```
 
