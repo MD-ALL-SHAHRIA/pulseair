@@ -179,7 +179,7 @@ pulseair-ml/
 │   └── reproduce_all.py # one-command orchestrator for the whole pipeline
 ├── pulsebench/          # standalone evaluation toolkit (see below) — no src/ imports
 ├── reports/             # 34 generated markdown reports + metrics/*.json + figures/
-├── docs/                # thesis (.docx/.pdf), claim ledger, reference/ and outreach/
+├── docs/                # claim ledger, reference/ and outreach/
 ├── data/                # raw / interim / processed / external — all gitignored
 ├── configs/default.yaml # every hyperparameter and threshold in the project
 ├── notebooks/           # exploratory analysis
@@ -338,7 +338,7 @@ python -m src.models.rolling_cv                         # -> reports/rolling_ori
 python -m src.models.hj633_sensitivity                  # EPA vs HJ 633-2012 breakpoints
 python -m src.reporting.compile_results                 # -> reports/final_results_summary.md
 python -m src.reporting.generate_figures                # -> reports/figures/ (23 thesis figures)
-python -m src.reporting.build_thesis                    # -> docs/PulseAir_Thesis.docx
+python -m src.reporting.build_thesis                    # -> docs/PulseAir_Thesis.docx (local only, gitignored)
 
 # Phase 10 — Bangladesh external validation + deployment
 python -m src.preprocessing.bangladesh                  # -> data/processed/bd_h6/

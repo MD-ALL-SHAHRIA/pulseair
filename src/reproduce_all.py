@@ -137,7 +137,7 @@ STAGES: list[Stage] = [
     Stage("figures", _m("src.reporting.generate_figures"),
           "render all figures from committed metrics", {"report"}),
     Stage("thesis", _m("src.reporting.build_thesis"),
-          "assemble the thesis .docx", {"report"}),
+          "assemble the thesis .docx (local only; gitignored)", {"report"}),
 ]
 
 INSTALL_ARGV = [sys.executable, "-m", "pip", "install", "-e", ".[test]"]

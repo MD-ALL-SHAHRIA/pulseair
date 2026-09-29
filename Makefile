@@ -16,7 +16,7 @@ setup:          ## Install the package and test/reporting dependencies
 fast:           ## Pipeline without the multi-hour or network steps
 	$(PYTHON) -m src.reproduce_all --skip-slow --skip-network --skip-optional
 
-reporting:      ## Recompile results, figures and the thesis from committed metrics only
+reporting:      ## Recompile results, figures and the (local, gitignored) thesis from committed metrics only
 	$(PYTHON) -m src.reproduce_all --only-reporting
 
 list:           ## Print the ordered pipeline plan and exit
