@@ -2086,6 +2086,95 @@ class Result:
     caveat: str = ""
 
 
+# Icons for the workflow schematic: Font Awesome Free (solid), SIL OFL 1.1, vendored in
+# src/reporting/assets so the figure rebuilds offline. See assets/README.md.
+ICON_FONT = Path(__file__).resolve().parent / "assets" / "fa-solid-900.ttf"
+
+
+@figure("29_methodology_workflow",
+        "Methodology workflow: from data collection to the validated advisory",
+        [],
+        caveat="Schematic: hand-specified workflow, not read from metrics. The numbers "
+               "that label it are read from JSON and configs/default.yaml at render time.")
+def fig_methodology_workflow() -> plt.Figure:
+    """Twelve stages of the study in the order they were carried out, one icon each.
+
+    Snake layout (left to right, then right to left) so the reading order stays
+    continuous. Labels carry the few numbers that define each stage, read from the
+    committed files so the diagram cannot drift from the work it summarises.
+    """
+    import yaml
+    from matplotlib.font_manager import FontProperties
+
+    cfg = yaml.safe_load((REPO_ROOT / "configs" / "default.yaml").read_text())
+    window = require(cfg, "preprocessing.window", "configs/default.yaml")
+    horizon = require(cfg, "preprocessing.horizon", "configs/default.yaml")
+    floor = req_num(load("horizon_comparison.json"), f"rows.{horizon}.observed.macro_f1",
+                    "horizon_comparison.json")
+    n_st = int(req_num(load("station_holdout_h6.json"), "n_stations", "station_holdout_h6.json"))
+    trees = int(req_num(load("deployment_h6_bd.json"), "compressed.n_estimators", "deployment_h6_bd.json"))
+    depth = int(req_num(load("deployment_h6_bd.json"), "compressed.max_depth", "deployment_h6_bd.json"))
+    kb = req_num(load("deployment_h6_bd.json"), "compressed.pickle_kb", "deployment_h6_bd.json")
+    bd = "rolling_cv_h6_bangladesh.json:"
+    wins = int(req_num(load("rolling_cv_h6_bangladesh.json"),
+                       "aggregate.tests.RandomForest (class_weight=balanced).wins", bd))
+    nf = int(req_num(load("rolling_cv_h6_bangladesh.json"), "n_folds", bd))
+    icon = FontProperties(fname=str(ICON_FONT))
+
+    D, M, E, O = "#2f6690", "#3a7d44", "#8e5572", "#b5452f"   # data, model, eval, output
+    steps = [
+        ("\uf1c0", "1  Collect data", f"UCI Beijing ({n_st} stations)\nMendeley Bangladesh\nUS Embassy Dhaka\nOpenAQ survey", D),
+        ("\uf51a", "2  Clean data", "forward-fill per station\nis_imputed flag kept\nscore observed rows", D),
+        ("\ue522", "3  Audit data", "find fabricated span\nkeep verified-clean\nBangladesh window", D),
+        ("\uf017", "4  Features", f"PM2.5, PM10, CO,\nTEMP, DEWP, sin/cos\n{window}-h window\n{horizon}-h horizon", D),
+        ("\uf1de", "5  Split & scale", f"chronological 70/15/15\nscaler fit on train\nfloor {floor:.4f}", M),
+        ("\uf1bb", "6  Baselines", "Random Forest\nXGBoost\nvs persistence", M),
+        ("\ue2ca", "7  Augment", "CTGAN vs SMOTE\nvs class weighting\nprotected-class rule", M),
+        ("\uf5dc", "8  Deep models", "LSTM, Transformer\nlearning-rate and\ncapacity sweeps", M),
+        ("\uf24e", "9  Evaluate", "paired bootstrap\nrolling-origin CV\n+ embargo, Bonferroni", E),
+        ("\uf059", "10  Uncertainty", "MC dropout\nMondrian conformal\nSHAP attributions", E),
+        ("\uf4ad", "11  LLM advisory", "Gemini phrases facts\nexternal validator\ntemplate fallback", O),
+        ("\uf2db", "12  Deploy", f"RF {trees} trees, depth {depth}\n{kb:,.0f} KB, ONNX export\nBangladesh: {wins}/{nf} folds", O),
+    ]
+    fig, ax = plt.subplots(figsize=(FIG_WIDTH * 1.35, 6.6))
+    ax.set_xlim(0, 100); ax.set_ylim(0, 100); ax.axis("off"); ax.grid(False)
+    cols, bw, bh = 4, 21.0, 26.0
+    xs = [2.5 + i * 24.8 for i in range(cols)]
+    ys = [69.0, 37.5, 6.0]
+    centres = []
+    for k, (glyph, title, body, colour) in enumerate(steps):
+        r, c = divmod(k, cols)
+        if r % 2:
+            c = cols - 1 - c
+        x, y = xs[c], ys[r]
+        ax.add_patch(FancyBboxPatch((x, y), bw, bh, boxstyle="round,pad=0.4,rounding_size=1.6",
+                                    fc="white", ec=colour, lw=1.6))
+        ax.add_patch(FancyBboxPatch((x, y + bh - 8.2), bw, 8.2, boxstyle="round,pad=0.4,rounding_size=1.6",
+                                    fc=colour, ec=colour, lw=1.6))
+        ax.text(x + 3.2, y + bh - 4.1, glyph, fontproperties=icon, fontsize=12, color="white",
+                ha="center", va="center")
+        ax.text(x + 6.2, y + bh - 4.1, title, fontsize=7.6, color="white", fontweight="bold",
+                ha="left", va="center")
+        ax.text(x + bw / 2, y + (bh - 8.2) / 2, body, fontsize=6.9, color="#1f2933",
+                ha="center", va="center", linespacing=1.35)
+        centres.append((x, y, c, r))
+    for k in range(len(steps) - 1):
+        x0, y0, c0, r0 = centres[k]
+        x1, y1, c1, r1 = centres[k + 1]
+        if r0 == r1:
+            a, b = ((x0 + bw + 0.6, y0 + bh / 2), (x1 - 0.6, y1 + bh / 2)) if c1 > c0 else \
+                   ((x0 - 0.6, y0 + bh / 2), (x1 + bw + 0.6, y1 + bh / 2))
+        else:
+            a, b = (x0 + bw / 2, y0 - 0.6), (x1 + bw / 2, y1 + bh + 0.6)
+        ax.add_patch(FancyArrowPatch(a, b, arrowstyle="-|>", mutation_scale=14, color="#7b8794", lw=1.5))
+    handles = [Line2D([0], [0], marker="s", ls="", ms=9, color=c, label=l) for c, l in
+               ((D, "data preparation"), (M, "modelling"), (E, "evaluation & uncertainty"),
+                (O, "advisory & deployment"))]
+    ax.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, -0.06), ncol=4,
+              frameon=False, fontsize=FS_LEGEND)
+    return fig
+
+
 def generate(only: Sequence[str] | None = None) -> list[Result]:
     """Render every registered figure, collecting failures instead of aborting.
 

@@ -35,6 +35,8 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
+from src.reporting import aiub_template as tpl
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 METRICS = REPO_ROOT / "reports" / "metrics"
 REPORTS = REPO_ROOT / "reports"
@@ -139,8 +141,9 @@ def num(path: str, what: str, fmt: str = ".4f") -> str:
 
 # ------------------------------------------------------------------ docx machinery
 
-BODY_PT, H1_PT, H2_PT, H3_PT = 11, 16, 13, 11.5
-CAPTION_PT, TABLE_PT = 9.5, 9.5
+# Sizes follow the AIUB template (see aiub_template.py): 12 pt body text.
+BODY_PT = 12
+CAPTION_PT, TABLE_PT = 11, 10
 
 
 @dataclass
@@ -155,26 +158,7 @@ REG = Registry()
 
 
 def setup_styles(doc: Document) -> None:
-    normal = doc.styles["Normal"]
-    normal.font.name = "Calibri"
-    normal.font.size = Pt(BODY_PT)
-    normal.paragraph_format.space_after = Pt(6)
-    normal.paragraph_format.line_spacing = 1.15
-    for name, size, colour in (("Heading 1", H1_PT, RGBColor(0x1F, 0x3B, 0x63)),
-                               ("Heading 2", H2_PT, RGBColor(0x1F, 0x3B, 0x63)),
-                               ("Heading 3", H3_PT, RGBColor(0x33, 0x33, 0x33))):
-        st = doc.styles[name]
-        st.font.name = "Calibri"
-        st.font.size = Pt(size)
-        st.font.bold = True
-        st.font.color.rgb = colour
-        st.paragraph_format.space_before = Pt(12)
-        st.paragraph_format.space_after = Pt(4)
-    # US Letter, 1" margins
-    for s in doc.sections:
-        s.page_width, s.page_height = Inches(8.5), Inches(11)
-        for m in ("top_margin", "bottom_margin", "left_margin", "right_margin"):
-            setattr(s, m, Inches(1))
+    """Styles, page size and margins come from the AIUB template; nothing to set."""
 
 
 def page_break(doc: Document) -> None:
@@ -185,10 +169,7 @@ def para(doc: Document, text: str = "", *, style: str | None = None,
          align: str | None = None, size: float | None = None, bold: bool = False,
          italic: bool = False, space_after: float | None = None):
     p = doc.add_paragraph(style=style) if style else doc.add_paragraph()
-    if align:
-        p.alignment = {"center": WD_ALIGN_PARAGRAPH.CENTER,
-                       "right": WD_ALIGN_PARAGRAPH.RIGHT,
-                       "justify": WD_ALIGN_PARAGRAPH.JUSTIFY}[align]
+    tpl.format_body(p, align=align, small=size is not None and size < BODY_PT)
     if text:
         _rich(p, text, size=size, bold=bold, italic=italic)
     if space_after is not None:
@@ -219,6 +200,7 @@ def _run(p, text: str, size, bold, italic):
         if not chunk:
             continue
         r = p.add_run(chunk)
+        r.font.name = tpl.FONT
         r.font.size = Pt(size or BODY_PT)
         r.bold = bold
         r.italic = italic
@@ -228,29 +210,71 @@ def _run(p, text: str, size, bold, italic):
 
 
 def heading(doc: Document, text: str, level: int = 1):
+    """Template headings: '1. Introduction' becomes 'Chapter 1' / 'Introduction' over the
+    template's rule; unnumbered level-1 headings (References, appendices) use the
+    template's References/Appendix heading; sections keep their numbers as written."""
     if level == 1:
-        page_break(doc)
-    return doc.add_heading(text, level=level)
+        m = re.match(r"^(\d+)\.\s+(.*)$", text)
+        if m:
+            return LAYOUT.chapter(m.group(1), m.group(2))
+        return LAYOUT.unnumbered(text, appendix=text.startswith("Appendix"))
+    return LAYOUT.section(text, level)
 
 
 def bullets(doc: Document, items: list[str], *, numbered: bool = False):
-    style = "List Number" if numbered else "List Bullet"
     for it in items:
-        p = doc.add_paragraph(style=style)
-        p.paragraph_format.space_after = Pt(3)
+        p = doc.add_paragraph()
+        tpl.bullet(p)
         _rich(p, it)
+
+
+_SENTENCE_END = re.compile(r"(?<=[a-z0-9)%])\.\s+(?=[A-Z])")
+
+
+def _split_caption(caption: str) -> tuple[str, str]:
+    """The first sentence is the caption proper (and the List of Figures / Tables
+    entry); any further sentences are explanatory and go in a note beside it."""
+    parts = _SENTENCE_END.split(caption.strip(), maxsplit=1)
+    title = parts[0].rstrip(".") + "."
+    return title, (parts[1].strip() if len(parts) > 1 else "")
+
+
+def _source_note(source: str) -> str:
+    """Say in words where a figure's or table's numbers come from. Metrics files are
+    named by their path in the public repository, so a reader can find them."""
+    if not source:
+        return ""
+    if "schematic" in source.lower():
+        return "Schematic diagram drawn by the authors; it is not generated from experimental data."
+    pieces = []
+    for tok in re.split(r",\s*", source):
+        m = re.match(r"^([\w.-]+\.json)(.*)$", tok)
+        pieces.append(f"reports/metrics/{m.group(1)}{m.group(2)}" if m else tok)
+    return ("Source: " + ", ".join(pieces) + " in the PulseAir project repository "
+            "(see Data and Code Availability).")
+
+
+def _note(doc: Document, text: str, *, before_table: bool = False):
+    if not text:
+        return
+    p = para(doc, text, align="center", size=CAPTION_PT - 2, italic=True,
+             space_after=4 if before_table else 6)
+    if before_table:
+        p.paragraph_format.keep_with_next = True
+    return p
 
 
 def table(doc: Document, caption: str, headers: list[str], rows: list[list[str]],
           *, source: str = "", widths: list[float] | None = None):
     """Emit a captioned table and register it for the List of Tables."""
     n = len(REG.tables) + 1
-    label = f"Table {n}. {caption}"
+    title, extra = _split_caption(caption)
+    label = f"Table {n}: {title}"
     REG.tables.append((label, source))
-    cap = para(doc, label, size=CAPTION_PT, bold=True, space_after=3)
+    cap = doc.add_paragraph()
+    tpl.caption(cap, "Table", n, title)
+    _rich(cap, title, size=CAPTION_PT)
     t = doc.add_table(rows=1, cols=len(headers))
-    t.style = "Light Grid Accent 1"
-    t.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(headers):
         cell = t.rows[0].cells[i]
         cell.text = ""
@@ -260,18 +284,13 @@ def table(doc: Document, caption: str, headers: list[str], rows: list[list[str]]
         for i, v in enumerate(row):
             cells[i].text = ""
             _rich(cells[i].paragraphs[0], str(v), size=TABLE_PT)
-    if widths:
-        for r in t.rows:
-            for i, w in enumerate(widths):
-                r.cells[i].width = Inches(w)
-    if source:
-        para(doc, f"Source: {source}", size=CAPTION_PT - 0.5, italic=True,
-             space_after=10)
+    tpl.style_table(t, widths)
+    _note(doc, " ".join(x for x in (extra, _source_note(source)) if x))
     return t
 
 
 def figure(doc: Document, png: str, caption: str, source: str, *, width: float = 6.2):
-    """Embed a figure. The caption always names the JSON the figure came from."""
+    """Embed a figure. A note under the caption names the file its numbers came from."""
     n = len(REG.figures) + 1
     path = FIGURES / png
     if not path.exists():
@@ -279,87 +298,35 @@ def figure(doc: Document, png: str, caption: str, source: str, *, width: float =
         SRC.missing.append(marker)
         para(doc, marker)
         return
-    para(doc, "", space_after=2)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.add_run().add_picture(str(path), width=Inches(width))
-    label = f"Figure {n}. {caption}"
+    p.paragraph_format.keep_with_next = True
+    p.paragraph_format.space_before = Pt(6)
+    from PIL import Image
+    with Image.open(path) as im:
+        aspect = im.height / im.width
+    # at most 5.3 in wide and 5 in tall, so a tall diagram never strands a half page
+    p.add_run().add_picture(str(path), width=Inches(min(width, 5.3, 5.0 / aspect)))
+    title, extra = _split_caption(caption)
+    label = f"Figure {n}: {title}"
     REG.figures.append((label, source))
-    cp = para(doc, f"{label} Generated from {source}.",
-              align="center", size=CAPTION_PT, space_after=10)
-    cp.runs[0].bold = True
+    cp = doc.add_paragraph()
+    tpl.caption(cp, "Figure", n, title)
+    _rich(cp, title, size=CAPTION_PT)
+    cp.paragraph_format.space_after = Pt(0)
+    _note(doc, " ".join(x for x in (extra, _source_note(source)) if x))
     return cp
 
 
 # ------------------------------------------------------------------- front matter
 
 
-def title_page(doc: Document) -> None:
-    for _ in range(4):
-        para(doc, "")
-    para(doc, TITLE, align="center", size=17, bold=True, space_after=24)
-    para(doc, "A thesis submitted in partial fulfilment of the requirements",
-         align="center", size=11, italic=True, space_after=2)
-    para(doc, "for the degree of Bachelor of Science in Computer Science",
-         align="center", size=11, italic=True, space_after=28)
-    para(doc, "Submitted by", align="center", size=11, italic=True, space_after=8)
-    for a in AUTHORS:
-        para(doc, a, align="center", size=12.5, bold=True, space_after=3)
-    para(doc, "", space_after=28)
-    para(doc, "Supervised by", align="center", size=11, italic=True, space_after=8)
-    para(doc, "_________________________", align="center", size=11, space_after=24)
-    para(doc, DEPARTMENT, align="center", size=12.5, bold=True, space_after=2)
-    para(doc, UNIVERSITY, align="center", size=12.5, bold=True, space_after=20)
-    para(doc, date.today().strftime("%B %Y"), align="center", size=11)
+# The title page, Declaration and Approval pages are the AIUB template's own
+# (aiub_template.fill_front_matter); the Declaration wording is the template's,
+# reproduced verbatim as the template requires.
 
 
-def declaration(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "Declaration", align="center", size=H1_PT, bold=True, space_after=18)
-    para(doc,
-         "We hereby declare that this thesis is based on the results of our own work "
-         "carried out in the Department of Computer Science, American International "
-         "University-Bangladesh (AIUB), under the supervision of our supervisor. We "
-         "further declare that the material contained in this thesis has not been "
-         "submitted, either in whole or in part, for the award of any other degree or "
-         "diploma at this or any other institution. Work taken from other sources has "
-         "been acknowledged and cited in the references.",
-         align="justify", space_after=10)
-    para(doc,
-         "All code, data-processing pipelines, metrics and figures presented in this "
-         f"thesis are openly available at {REPO_URL}. Every quantitative result "
-         "reported here is reproducible from the committed metrics files in that "
-         "repository.",
-         align="justify", space_after=30)
-    for a in AUTHORS:
-        para(doc, "_____________________________", space_after=2)
-        para(doc, a, bold=True, space_after=2)
-        para(doc, "Date: ______________________", size=10, space_after=18)
-
-
-def certificate(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "Certificate of Approval", align="center", size=H1_PT, bold=True,
-         space_after=18)
-    para(doc,
-         f"This is to certify that the thesis entitled “{TITLE}”, submitted by "
-         + ", ".join(AUTHORS[:-1]) + f" and {AUTHORS[-1]}, has been carried out under "
-         "my supervision in the Department of Computer Science, American International "
-         "University-Bangladesh (AIUB). The work is original and, to the best of my "
-         "knowledge, has not been submitted elsewhere for the award of any degree or "
-         "diploma. I recommend that it be accepted in partial fulfilment of the "
-         "requirements for the degree of Bachelor of Science in Computer Science.",
-         align="justify", space_after=36)
-    for role in ("Supervisor", f"Head of Department, {DEPARTMENT}, AIUB"):
-        para(doc, "_____________________________", space_after=2)
-        para(doc, role, bold=True, space_after=2)
-        para(doc, "Date: ______________________", size=10, space_after=26)
-
-
-def acknowledgement(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "Acknowledgement", align="center", size=H1_PT, bold=True, space_after=18)
-    para(doc,
+ACKNOWLEDGEMENT = [
          "We are grateful to our supervisor for guidance and for the freedom to report "
          "results as we found them, including the ones that did not go our way. We "
          "thank the Department of Computer Science at American International "
@@ -368,12 +335,11 @@ def acknowledgement(doc: Document) -> None:
          "also thank the open-source community whose tools this project rests on, and "
          "the contributor who improved our evaluation toolkit after its public release. "
          "Finally, we thank our families for their patience and support throughout.",
-         align="justify")
+]
 
 
-def abstract(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "Abstract", align="center", size=H1_PT, bold=True, space_after=14)
+def _abstract_chunks() -> list[str]:
+    """The abstract's paragraphs; the template's Abstract page holds them."""
 
     floor6 = num("horizon_comparison.json:rows.6.observed.macro_f1", "h6 persistence floor")
     floor1 = num("horizon_comparison.json:rows.1.observed.macro_f1", "h1 persistence floor")
@@ -403,7 +369,7 @@ def abstract(doc: Document) -> None:
     rows_pct, span_pct = _audit_fractions()
     oaq = num("openaq_survey.json:assessment.n_passing", "OpenAQ stations passing", ".0f")
 
-    for chunk in [
+    return [
         f"Wearable air-quality devices are typically evaluated by reporting a headline "
         f"accuracy for a proposed model. This thesis argues that such a number is "
         f"uninterpretable without the zero-parameter baseline it must beat, and "
@@ -452,14 +418,12 @@ def abstract(doc: Document) -> None:
         f"and a compressed ONNX predictor with measured latency. The device itself is "
         f"a design, not a fabricated artefact. All code, metrics and figures are "
         f"public.",
-    ]:
-        para(doc, chunk, align="justify", space_after=8)
+    ]
 
-    para(doc, "", space_after=4)
-    para(doc, "Keywords: air-quality forecasting; persistence baseline; rolling-origin "
-              "cross-validation; class imbalance; conformal prediction; uncertainty "
-              "quantification; data integrity; edge deployment.",
-         align="justify", size=10, italic=True)
+
+KEYWORDS = ("air-quality forecasting; persistence baseline; rolling-origin "
+            "cross-validation; class imbalance; conformal prediction; uncertainty "
+            "quantification; data integrity; edge deployment.")
 
 
 # ------------------------------------------------------------- derived quantities
@@ -527,100 +491,8 @@ def figsrc(png: str) -> str:
 # ------------------------------------------------------------------ generated lists
 
 
-def toc(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "Table of Contents", align="center", size=H1_PT, bold=True, space_after=14)
-    entries = [
-        ("Declaration", 1), ("Certificate of Approval", 1), ("Acknowledgement", 1),
-        ("Abstract", 1), ("List of Figures", 1), ("List of Tables", 1),
-        ("List of Abbreviations", 1),
-        ("1. Introduction", 1),
-        ("1.1 Background and motivation", 2),
-        ("1.2 The evaluation problem in this literature", 2),
-        ("1.3 Objectives and contributions", 2),
-        ("2. Related Work and Theoretical Background", 1),
-        ("2.1 Ensemble methods: Random Forest and gradient boosting", 2),
-        ("2.2 Sequence models: LSTM and Transformer", 2),
-        ("2.3 Synthetic tabular data: CTGAN", 2),
-        ("2.4 Classical resampling: SMOTE and class weighting", 2),
-        ("2.5 Conformal prediction", 2),
-        ("2.6 Explainability: SHAP", 2),
-        ("2.7 Evaluation protocol: rolling-origin cross-validation", 2),
-        ("2.8 Multiple comparisons", 2),
-        ("2.9 Uncertainty quantification", 2),
-        ("2.10 Edge deployment and TinyML", 2),
-        ("2.11 Language models for risk communication", 2),
-        ("3. Materials and Methods", 1),
-        ("3.1 Datasets", 2), ("3.2 Preprocessing", 2), ("3.3 Horizon selection", 2),
-        ("3.4 Baseline models and evaluation protocol", 2),
-        ("3.5 Class-imbalance interventions", 2),
-        ("3.6 Sequence models and uncertainty decomposition", 2),
-        ("3.7 Conformal prediction", 2),
-        ("3.8 Explainability and the LLM advisory layer", 2),
-        ("3.9 Compression and edge deployment", 2),
-        ("3.10 Rolling-origin cross-validation", 2),
-        ("3.11 Multiple-comparisons correction", 2),
-        ("3.12 The PulseBench toolkit", 2),
-        ("4. Results", 1),
-        ("4.1 The persistence floor", 2),
-        ("4.2 Baseline models and rolling-origin cross-validation", 2),
-        ("4.3 Class-imbalance interventions and the validity-metric failure", 2),
-        ("4.4 Sequence models, capacity and uncertainty", 2),
-        ("4.5 Conformal coverage", 2),
-        ("4.6 Compression and edge deployment", 2),
-        ("4.7 Sensitivity to the air-quality standard", 2),
-        ("4.8 Multiple-comparisons correction", 2),
-        ("4.9 External validation: Bangladesh", 2),
-        ("4.10 Ground truth: the US Embassy Dhaka monitor", 2),
-        ("4.11 The validated Hazardous detector", 2),
-        ("4.12 Monitoring infrastructure: the OpenAQ survey", 2),
-        ("4.13 The deployed system", 2),
-        ("4.14 Explainability: SHAP case studies", 2),
-        ("4.15 Extended validation and robustness", 2),
-        ("4.15.1 Holm–Bonferroni over the persistence family", 3),
-        ("4.15.2 Rolling-origin cross-validation at eight folds", 3),
-        ("4.15.3 Leave-one-station-out generalisation", 3),
-        ("4.15.4 Robustness to low-cost-sensor noise", 3),
-        ("4.15.5 Selective prediction on the conformal sets", 3),
-        ("4.15.6 An independent data-integrity audit", 3),
-        ("5. Discussion", 1),
-        ("5.1 An average says nothing about its tail", 2),
-        ("5.2 The ceiling is in the data", 2),
-        ("5.3 Methodology transferred; weights did not", 2),
-        ("5.4 Data integrity is a result, not a preliminary", 2),
-        ("5.5 Cheap controls change conclusions", 2),
-        ("5.6 What reproducibility required in practice", 2), ("6. Limitations", 1),
-        ("7. Proposed Wearable Device (Concept — Not Yet Fabricated)", 1),
-        ("8. Conclusion and Future Work", 1),
-        ("Data and Code Availability", 1), ("References", 1),
-        ("Appendix A: Full Hyperparameter Tables", 1),
-        ("Appendix B: Glossary of Terms", 1),
-        ("Appendix C: Index of Generated Reports", 1),
-    ]
-    for text, lvl in entries:
-        p = para(doc, ("    " * (lvl - 1)) + text,
-                 size=10.5 if lvl == 1 else 10, bold=(lvl == 1), space_after=2)
-
-
-def list_of_figures(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "List of Figures", align="center", size=H1_PT, bold=True, space_after=14)
-    if not REG.figures:
-        para(doc, "[MISSING: no figures were embedded]")
-        return
-    for label, source in REG.figures:
-        para(doc, f"{label}  (from {source})", size=10, space_after=3)
-
-
-def list_of_tables(doc: Document) -> None:
-    page_break(doc)
-    para(doc, "List of Tables", align="center", size=H1_PT, bold=True, space_after=14)
-    if not REG.tables:
-        para(doc, "[MISSING: no tables were embedded]")
-        return
-    for label, source in REG.tables:
-        suffix = f"  (from {source})" if source else ""
-        para(doc, f"{label}{suffix}", size=10, space_after=3)
+# The Table of Content, List of Figures and List of Tables are Word fields placed on
+# the template's own pages (aiub_template.fill_front_matter).
 
 
 ABBREVIATIONS = {
@@ -658,27 +530,11 @@ ABBREVIATIONS = {
 }
 
 
-def list_of_abbreviations(doc: Document, body_text: str) -> None:
-    page_break(doc)
-    para(doc, "List of Abbreviations", align="center", size=H1_PT, bold=True,
-         space_after=14)
+def _abbreviations_used(body_text: str) -> list[tuple[str, str]]:
     # Built from the document text, not from a generic list: an abbreviation the
     # thesis never uses has no business in its glossary.
-    used = [(k, v) for k, v in sorted(ABBREVIATIONS.items())
+    return [(k, v) for k, v in sorted(ABBREVIATIONS.items())
             if re.search(re.escape(k), body_text)]
-    rows = [[k, v] for k, v in used]
-    if not rows:
-        para(doc, "[MISSING: no abbreviations detected in the document text]")
-        return
-    t = doc.add_table(rows=0, cols=2)
-    t.style = "Light List Accent 1"
-    for k, v in rows:
-        cells = t.add_row().cells
-        cells[0].text = ""
-        _rich(cells[0].paragraphs[0], k, size=TABLE_PT, bold=True)
-        cells[1].text = ""
-        _rich(cells[1].paragraphs[0], v, size=TABLE_PT)
-        cells[0].width, cells[1].width = Inches(1.4), Inches(4.9)
 
 
 # ------------------------------------------------------------------- chapter one
@@ -1176,6 +1032,48 @@ def chapter_methods(doc: Document) -> None:
          "the public repository; Appendix A reproduces that file's contents in full. "
          "Every count and threshold is read from the committed metrics files.",
          align="justify")
+    para(doc,
+         f"**How to read the source notes.** Each table and data-driven figure in this "
+         f"thesis carries a short note naming the file its numbers were read from, for "
+         f"example reports/metrics/horizon_comparison.json. These are machine-readable "
+         f"results files written by the experiment code and committed to the public "
+         f"PulseAir repository ({REPO_URL}); a reader can open the named file to check "
+         f"any number in the table or figure against the experiment that produced it. "
+         f"Diagrams that describe structure rather than results are marked as "
+         f"schematics drawn by the authors.",
+         align="justify")
+    figure(doc, "29_methodology_workflow.png",
+           "Methodology workflow of this thesis, from data collection to the validated "
+           "advisory. Stages are read left to right on the first row, right to left on "
+           "the second and left to right on the third; colour marks the phase.",
+           figsrc("29_methodology_workflow.png"))
+    para(doc,
+         f"**The workflow at a glance.** The figure summarises the whole study as twelve "
+         f"stages in the order they were carried out, each with an icon for its role. "
+         f"The blue stages prepare the data: four sources are collected (Section 3.1); "
+         f"missing values are forward-filled within each station while a provenance flag "
+         f"keeps imputed rows out of every score (Section 3.2); the published Bangladesh "
+         f"file is audited and only its verified-clean window is kept (Section 4.9); and "
+         f"the five sensor channels plus cyclical hour and month encodings are arranged "
+         f"into {SRC.cfg.get('preprocessing', {}).get('window', '[MISSING: window]')}-hour windows "
+         f"with a {SRC.cfg.get('preprocessing', {}).get('horizon', '[MISSING: horizon]')}-hour "
+         f"forecast horizon (Sections 3.2 and 3.3). The green stages build the "
+         f"models: a chronological split with training-only scaling and the persistence "
+         f"floor of {num('horizon_comparison.json:rows.6.observed.macro_f1', 'h6 floor')} "
+         f"(Section 3.4), the Random Forest and XGBoost baselines (Section 3.4), the three "
+         f"class-imbalance interventions under the protected-class rule (Section 3.5), "
+         f"and the LSTM and Transformer sequence models (Section 3.6). The purple stages "
+         f"evaluate and qualify the predictions: paired bootstrap tests, rolling-origin "
+         f"cross-validation with an embargo and family-wise correction (Sections 3.4, "
+         f"3.10 and 3.11), followed by Monte Carlo dropout, Mondrian conformal sets and "
+         f"SHAP attributions (Sections 3.6 to 3.8). The red stages turn the predictions "
+         f"into something a wearer can use: the Gemini advisory with its external "
+         f"validator and template fallback (Section 3.8), and the compressed, "
+         f"ONNX-exported forest that is validated on Bangladesh and wrapped as the "
+         f"proposed device (Sections 3.9, 4.9 and 4.13). The arrows mark dependence, not "
+         f"only order: no stage uses information that a later stage produces, which is "
+         f"what keeps the evaluation free of leakage.",
+         align="justify")
 
     heading(doc, "3.1 Datasets", 2)
     para(doc,
@@ -1556,6 +1454,19 @@ def chapter_results(doc: Document) -> None:
            "bootstrap intervals on the difference. The dashed rule is the floor.",
            figsrc("02_master_model_comparison.png"))
     para(doc,
+         "**How to read the figure.** Each row is one model variant evaluated on the same "
+         "observed-label test rows. The marker is the variant's macro-F1 minus the "
+         "persistence floor, and the horizontal bar is the 95% paired-bootstrap interval "
+         "on that difference. The dashed vertical rule at zero is the floor itself: a bar "
+         "that lies wholly to the right of it is significantly better than doing nothing, "
+         "a bar wholly to the left is significantly worse, and a bar that crosses it is "
+         "indistinguishable from persistence. Read this way, the figure carries the "
+         "thesis's first warning. Every interval sits within about two hundredths of the "
+         "rule, so even the variants that are statistically better than the floor are "
+         "better by an amount that is small next to the fold-to-fold variation reported "
+         "later in this section.",
+         align="justify")
+    para(doc,
          f"On the single chronological split the Random Forest clears the floor by "
          f"{num('ablation_h6.json:vs_persistence.unaugmented.observed_diff', 'RF delta', '+.4f')} "
          f"[{num('ablation_h6.json:vs_persistence.unaugmented.ci_low', 'RF ci low', '+.4f')}, "
@@ -1568,10 +1479,46 @@ def chapter_results(doc: Document) -> None:
            "Precision, recall and F1 per class for the selected Beijing forest on "
            "observed test rows, with per-class support.",
            figsrc("16_precision_recall_beijing.png"))
+    pc = "baseline_h6.json:results.RandomForest.test.observed.per_class"
+    para(doc,
+         f"**Per-class behaviour of the selected forest.** The figure separates precision "
+         f"(how often a predicted class is right), recall (how much of a class is found) "
+         f"and their harmonic mean, F1, for each AQI category, with the number of test "
+         f"rows in each class. The aggregate hides a very uneven profile. The forest finds "
+         f"{num(pc + '.Unhealthy.recall', 'U recall', '.1%')} of Unhealthy hours, the "
+         f"largest class, but only "
+         f"{num(pc + '.Unhealthy (sensitive).recall', 'USG recall', '.1%')} of "
+         f"Unhealthy-for-sensitive-groups hours, whose F1 is "
+         f"{num(pc + '.Unhealthy (sensitive).f1', 'USG f1', '.3f')}: that intermediate "
+         f"band is squeezed between two larger neighbours and is mostly predicted as one "
+         f"of them. The Hazardous class, with "
+         f"{num(pc + '.Hazardous.support', 'Haz support', ',.0f')} test rows, is found with "
+         f"recall {num(pc + '.Hazardous.recall', 'Haz recall', '.3f')} and precision "
+         f"{num(pc + '.Hazardous.precision', 'Haz precision', '.3f')}, so roughly two in "
+         f"five hazardous hours are still missed six hours ahead. These are the numbers a "
+         f"wearer would actually experience, and they are why the rest of this chapter "
+         f"tracks the advisory classes separately rather than relying on macro-F1 alone.",
+         align="justify")
     figure(doc, "17_split_class_prevalence.png",
            "Class prevalence across the chronological splits, and the validation-minus-"
            "test gap that drives repeated disagreement between them.",
            figsrc("17_split_class_prevalence.png"))
+    ds = "hj633_h6.json:results.EPA.distribution"
+    para(doc,
+         f"**Why validation and test disagree.** The left panel shows the share of each "
+         f"class in the training, validation and test periods; the right panel shows the "
+         f"validation-minus-test gap. Because the splits are chronological, each covers "
+         f"different seasons and years, and the class mix shifts with them. Very unhealthy "
+         f"hours make up {num(ds + '.val.Very unhealthy.pct', 'VU val pct', '.2f')}% of the "
+         f"validation period but {num(ds + '.test.Very unhealthy.pct', 'VU test pct', '.2f')}% "
+         f"of the test period, and Hazardous hours rise from "
+         f"{num(ds + '.val.Hazardous.pct', 'Haz val pct', '.2f')}% to "
+         f"{num(ds + '.test.Hazardous.pct', 'Haz test pct', '.2f')}%. A model chosen on the "
+         f"validation period is therefore being asked to perform on a test period with "
+         f"almost twice the share of Very unhealthy air. That shift, not a modelling "
+         f"error, explains why the two splits repeatedly ranked models differently, and "
+         f"it is the reason the comparison was moved to rolling-origin folds.",
+         align="justify")
     para(doc,
          "Because validation and test disagreed repeatedly, the comparison was re-run "
          "over rolling-origin folds. That is the decisive experiment.",
@@ -1580,6 +1527,27 @@ def chapter_results(doc: Document) -> None:
            "Beijing rolling-origin cross-validation: per-fold macro-F1 across five "
            "chronological folds, with mean and standard deviation across folds.",
            figsrc("13_rolling_cv_beijing.png"))
+    rc = "rolling_cv_h6.json:aggregate.per_model"
+    para(doc,
+         f"**Reading the fold plot.** Each line joins one model's macro-F1 across the five "
+         f"chronological evaluation blocks, so the horizontal axis is time and the "
+         f"vertical axis is skill. The lines cross repeatedly: persistence is above both "
+         f"forests in some blocks and below them in others, and no model sits above the "
+         f"floor throughout. The spread is also visible within the advisory classes. "
+         f"Persistence's Hazardous-class F1 has a mean of "
+         f"{num(rc + '.Persistence.f1_Hazardous.mean', 'pers haz mean', '.3f')} across the "
+         f"folds but a standard deviation of "
+         f"{num(rc + '.Persistence.f1_Hazardous.std', 'pers haz sd', '.3f')}. The second block, "
+         f"which runs from {need('rolling_cv_h6.json:folds.1.eval_start', 'f2 start')[:10]} to "
+         f"{need('rolling_cv_h6.json:folds.1.eval_end', 'f2 end')[:10]}, contains only "
+         f"{num('rolling_cv_h6.json:folds.1.support.Hazardous', 'f2 haz support', ',.0f')} "
+         f"Hazardous rows out of "
+         f"{num('rolling_cv_h6.json:folds.1.n_eval_observed', 'f2 n', ',.0f')}, so its "
+         f"Hazardous F1 rests on very few events and swings far from the other blocks. "
+         f"A single split could have landed in "
+         f"either kind of block, which is exactly why one split cannot settle the "
+         f"comparison.",
+         align="justify")
     _rolling_table(doc, "rolling_cv_h6.json", "Beijing")
     _per_fold_table(doc, "rolling_cv_h6.json", "Beijing")
     para(doc,
@@ -1603,6 +1571,23 @@ def chapter_results(doc: Document) -> None:
            "Per-class F1 across every Beijing variant, in absolute terms and as a "
            "change against the persistence floor.",
            figsrc("05_per_class_f1_heatmap.png"))
+    sm = "smote_h6.json:tests.RandomForest (unweighted)"
+    para(doc,
+         f"**How the two figures show the trade.** The advisory-class figure places each "
+         f"intervention's aggregate macro-F1 beside its Very unhealthy and Hazardous F1, "
+         f"with grey rules at the persistence values; the heatmap then shows every class "
+         f"for every variant, first as absolute F1 and then as the change against the "
+         f"floor, with darker cells for larger changes. The pattern is consistent: the "
+         f"augmented variants gain in the common middle classes and lose in the two "
+         f"advisory classes. Measured against the unaugmented forest on the same rows, "
+         f"SMOTE changes Very unhealthy F1 by "
+         f"{num(sm + '.Very unhealthy.observed_diff', 'smote VU diff', '+.4f')} and "
+         f"Hazardous F1 by {num(sm + '.Hazardous.observed_diff', 'smote haz diff', '+.4f')}, "
+         f"while raising macro-F1 by only "
+         f"{num(sm + '.macro_f1.observed_diff', 'smote macro diff', '+.4f')}. The heatmap "
+         f"makes it visible that the aggregate gain is bought from the rows a warning "
+         f"device exists to protect.",
+         align="justify")
     para(doc,
          "**Both augmentation methods fail in the same direction.** CTGAN and SMOTE "
          "each raise aggregate macro-F1 significantly and each significantly degrade "
@@ -1651,6 +1636,15 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "06_capacity_sweep.png",
            "Validation macro-F1 against trainable parameter count for both sequence "
            "architectures.", figsrc("06_capacity_sweep.png"))
+    para(doc,
+         "**Reading the capacity plot.** The horizontal axis is the number of trainable "
+         "parameters on a logarithmic scale and the vertical axis is validation "
+         "macro-F1; each architecture contributes three points, one per hidden size. If "
+         "the sequence models had been held back by their size, the curves would rise to "
+         "the right. Both fall instead. The capacity table also shows that the larger models "
+         "reached their best validation score in an earlier epoch than the smallest ones, "
+         "after which further training no longer improved validation macro-F1.",
+         align="justify")
     cap = SRC.j("capacity_sweep_h6.json")
     if cap:
         para(doc,
@@ -1673,6 +1667,23 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "07_uncertainty_decomposition.png",
            "Decomposition of mean predictive entropy into aleatoric and epistemic "
            "components, by architecture.", figsrc("07_uncertainty_decomposition.png"))
+    un = "dl_h6.json:uncertainty"
+    para(doc,
+         f"**What the decomposition plots.** For each architecture the figure splits the "
+         f"mean predictive entropy of the Monte Carlo dropout ensemble into the part that "
+         f"varies between dropout samples (epistemic) and the part that remains when the "
+         f"samples agree (aleatoric). The LSTM's mean total entropy is "
+         f"{num(un + '.lstm.mean_entropy', 'lstm entropy', '.4f')} nats, of which only "
+         f"{num(un + '.lstm.mean_epistemic', 'lstm epistemic', '.4f')} is epistemic; the "
+         f"Transformer's is {num(un + '.transformer.mean_entropy', 'tr entropy', '.4f')} "
+         f"nats with {num(un + '.transformer.mean_epistemic', 'tr epistemic', '.4f')} "
+         f"epistemic. For six classes the largest possible entropy is ln 6, about 1.79 "
+         f"nats, so both models spread their probability over several categories on a "
+         f"typical row; their mean top-class confidence is "
+         f"{num(un + '.lstm.mean_confidence', 'lstm conf', '.3f')} and "
+         f"{num(un + '.transformer.mean_confidence', 'tr conf', '.3f')} respectively. "
+         f"Almost all of that spread is the irreducible kind.",
+         align="justify")
     para(doc,
          f"The decomposition explains the sweep. **{_epistemic_share()} of predictive "
          f"entropy is aleatoric** — irreducible given these channels and this horizon — "
@@ -1700,6 +1711,24 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "08_conformal_coverage.png",
            "Per-class empirical coverage under marginal and Mondrian conformal "
            "calibration, against the target.", figsrc("08_conformal_coverage.png"))
+    cf = "conformal_h6.json"
+    para(doc,
+         f"**Reading the coverage plot.** Each pair of bars is one class: the first bar is "
+         f"the empirical coverage under marginal calibration and the second under Mondrian "
+         f"calibration, with a horizontal line at the 90% target. Under marginal "
+         f"calibration the guarantee is met on average because the largest class is "
+         f"over-covered — Unhealthy reaches "
+         f"{num(cf + ':test.per_class.Unhealthy.coverage', 'marg U cov', '.4f')} — while "
+         f"the smaller classes fall short, most visibly Unhealthy for sensitive groups at "
+         f"{num(cf + ':test.per_class.Unhealthy (sensitive).coverage', 'marg USG cov', '.4f')}. "
+         f"Mondrian calibration evens the bars out, raising that class to "
+         f"{num(cf + ':mondrian.test.per_class.Unhealthy (sensitive).coverage', 'mond USG cov', '.4f')} "
+         f"and the Hazardous class above the target, while the previously over-covered "
+         f"Unhealthy class falls to "
+         f"{num(cf + ':mondrian.test.per_class.Unhealthy.coverage', 'mond U cov', '.4f')}: "
+         f"Mondrian calibration redistributes coverage between classes rather than "
+         f"adding it everywhere.",
+         align="justify")
     para(doc,
          f"Split conformal delivered "
          f"{num('conformal_h6.json:test.coverage', 'marginal coverage')} marginal "
@@ -1718,6 +1747,19 @@ def chapter_results(doc: Document) -> None:
            "Distribution of prediction-set size under both calibrations.",
            figsrc("09_conformal_set_sizes.png"))
     para(doc,
+         f"**Reading the set-size histogram.** The bars count how many test rows received "
+         f"a prediction set of one, two, three or more categories. Under marginal "
+         f"calibration {num('conformal_h6.json:test.size_histogram.1', 'marg singletons', ',.0f')} "
+         f"rows received a single category; under Mondrian calibration only "
+         f"{num('conformal_h6.json:mondrian.test.size_histogram.1', 'mond singletons', ',.0f')} "
+         f"did, and sets of five categories rose from "
+         f"{num('conformal_h6.json:test.size_histogram.5', 'marg size5', ',.0f')} to "
+         f"{num('conformal_h6.json:mondrian.test.size_histogram.5', 'mond size5', ',.0f')}. "
+         f"Two and three categories dominate under both. For the advisory layer this is "
+         f"the practical meaning of honest uncertainty at six hours: most forecasts can "
+         f"narrow the air down to two or three adjacent bands, not to one.",
+         align="justify")
+    para(doc,
          f"The cost is reported rather than hidden: mean set size rises from "
          f"{num('conformal_h6.json:test.mean_set_size', 'marginal mean set', '.3f')} to "
          f"{num('conformal_h6.json:mondrian.test.mean_set_size', 'Mondrian mean set', '.3f')} "
@@ -1734,6 +1776,24 @@ def chapter_results(doc: Document) -> None:
            "Serialised model size at each stage of the deployment pipeline, for both "
            "datasets, with the macro-F1 cost of compression.",
            figsrc("10_compression_funnel.png"))
+    bdp = "deployment_h6_bd.json"
+    para(doc,
+         f"**Reading the compression figure.** For each dataset the bars trace the "
+         f"serialised size of the forest at each stage — the full model, the compressed "
+         f"model and its ONNX export — and the annotation gives the change in validation "
+         f"macro-F1 that compression cost. For the deployed Bangladesh model the pickle "
+         f"shrinks from {num(bdp + ':baseline.pickle_kb', 'bd full kb', ',.0f')} KB to "
+         f"{num(bdp + ':compressed.pickle_kb', 'bd comp kb', ',.0f')} KB, about an eighth "
+         f"of its size. Speed changed even more than size: single-sample inference through "
+         f"ONNX Runtime took a mean of "
+         f"{num(bdp + ':latency.onnx_single.mean_ms', 'onnx ms', '.4f')} ms against "
+         f"{num(bdp + ':latency.sklearn_single.mean_ms', 'sk ms', '.2f')} ms through "
+         f"scikit-learn on the same workstation, and adding the conformal step raised the "
+         f"ONNX figure only to "
+         f"{num(bdp + ':latency.onnx_plus_conformal_single.mean_ms', 'onnx+conf ms', '.4f')} ms. "
+         f"These are workstation timings, used to compare the two runtimes, not "
+         f"measurements on the microcontroller.",
+         align="justify")
     _compression_table(doc)
     _compression_sweep_table(doc)
     para(doc,
@@ -1765,6 +1825,19 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "11_epa_vs_hj633.png",
            "Class balance under EPA and HJ 633-2012 breakpoints, and each standard's "
            "model-versus-floor comparison.", figsrc("11_epa_vs_hj633.png"))
+    hj = "hj633_h6.json:results"
+    para(doc,
+         f"**Reading the standards comparison.** The upper panels show how the same "
+         f"hourly PM2.5 values are distributed across the six categories under each "
+         f"standard, and the lower panel compares the forest with its own persistence "
+         f"floor under each. The Chinese standard's lowest band is much wider, so its "
+         f"first category holds {num(hj + '.HJ 633-2012.distribution.train.Excellent.pct', 'hj excellent pct', '.2f')}% "
+         f"of training rows, and the category stays unchanged over six hours more often "
+         f"({num(hj + '.HJ 633-2012.label_unchanged_pct', 'hj unchanged', '.2f')}% against "
+         f"{num(hj + '.EPA.label_unchanged_pct', 'epa unchanged', '.2f')}% under EPA "
+         f"breakpoints). Under both standards the forest's lead over its own floor is "
+         f"small, and under HJ 633-2012 it is not significant.",
+         align="justify")
     _hj_table(doc)
     para(doc,
          "The class boundaries are a policy choice, not a property of the air, so the "
@@ -1780,6 +1853,17 @@ def chapter_results(doc: Document) -> None:
            "Every persistence comparison under family-wise correction, on a log p-axis, "
            "with the uncorrected threshold, the corrected threshold and the bootstrap "
            "resolution floor marked.", figsrc("12_bonferroni_correction.png"))
+    para(doc,
+         "**Reading the correction plot.** Each point is one variant's two-sided p-value "
+         "against persistence, drawn on a logarithmic axis so that small values are "
+         "spread out. Three vertical references are marked: the conventional 0.05 "
+         "threshold, the Bonferroni threshold obtained by dividing 0.05 by the number of "
+         "comparisons in the family, and the bootstrap's resolution floor, below which "
+         "no p-value can be resolved with 1,000 resamples. Points to the left of the "
+         "corrected threshold survive correction. Several points sit exactly at the "
+         "resolution floor, which is why the table that follows reports them as bounded "
+         "values rather than as exact numbers.",
+         align="justify")
     _bonferroni_table(doc)
     para(doc,
          "The p-values at the bootstrap's resolution floor are reported as bounded "
@@ -1798,6 +1882,18 @@ def chapter_results(doc: Document) -> None:
            "Coverage of each dataset: what is advertised against what survives "
            "inspection, with the verified-clean boundary marked.",
            figsrc("23_dataset_coverage_timeline.png"))
+    para(doc,
+         "**Reading the coverage timeline.** Each horizontal band is one data source "
+         "drawn against calendar time. The lighter extent is what the source advertises; "
+         "the darker extent is what survived inspection and was used. For the UCI "
+         "Beijing data the two coincide. For the Mendeley Bangladesh file they do not: "
+         "the advertised band starts in 2000, while the verified-clean window begins at "
+         "the boundary marked on the figure, 2022-08-05, and the hatched portion before "
+         "it is the part discarded by the audit. The US Embassy reference series is "
+         "drawn on the same axis, so its overlap with the clean Bangladesh window, which "
+         "is what made the ground-truth comparison of Section 4.10 possible, can be read "
+         "directly.",
+         align="justify")
     _audit_table(doc)
     rows_pct, span_pct = _audit_fractions()
     para(doc,
@@ -1849,11 +1945,39 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "14_rolling_cv_bangladesh.png",
            "Bangladesh rolling-origin cross-validation: per-fold macro-F1 across five "
            "chronological folds.", figsrc("14_rolling_cv_bangladesh.png"))
+    bm = "rolling_cv_h6_bangladesh.json:aggregate.per_model"
+    para(doc,
+         f"**Reading the Bangladesh fold plot.** The layout matches the Beijing fold plot, "
+         f"so the two can be compared directly. Here the class-weighted forest's line "
+         f"stays above persistence in every block. Its mean macro-F1 across folds is "
+         f"{num(bm + '.RandomForest (class_weight=balanced).mean', 'bd cw mean', '.4f')} "
+         f"(standard deviation "
+         f"{num(bm + '.RandomForest (class_weight=balanced).std', 'bd cw sd', '.4f')}) "
+         f"against {num(bm + '.Persistence.mean', 'bd pers mean', '.4f')} "
+         f"({num(bm + '.Persistence.std', 'bd pers sd', '.4f')}) for the floor. The "
+         f"unweighted forest is steadier, with the smallest spread of the three, but its "
+         f"mean of {num(bm + '.RandomForest (unweighted).mean', 'bd rf mean', '.4f')} is "
+         f"lower and it does not lead in every block. The weighting therefore buys a "
+         f"consistent lead over the floor at the cost of more fold-to-fold variation.",
+         align="justify")
     _rolling_table(doc, "rolling_cv_h6_bangladesh.json", "Bangladesh")
     _per_fold_table(doc, "rolling_cv_h6_bangladesh.json", "Bangladesh")
     figure(doc, "15_folds_won_summary.png",
            "Folds won against persistence on each dataset, under the same protocol.",
            figsrc("15_folds_won_summary.png"))
+    para(doc,
+         "**Reading the folds-won summary.** Each bar counts the rolling-origin blocks in "
+         "which a model's macro-F1 exceeded persistence on that block, out of five, for "
+         "the unweighted and class-weighted forests on each dataset, and the dashed line "
+         "marks half the folds, the count a coin flip would be expected to reach. On "
+         "Beijing both forests stay below that line; on Bangladesh the unweighted forest "
+         "sits just above it and the class-weighted forest reaches every fold. Because it "
+         "counts wins rather than averaging scores, this summary does not depend on the "
+         "fold-independence assumption discussed in Section 3.10, and it is the form in "
+         "which the central contrast of the thesis is easiest to see: the identical "
+         "protocol produces a majority of losses on Beijing and a clean sweep on "
+         "Bangladesh.",
+         align="justify")
     bd = "rolling_cv_h6_bangladesh.json:aggregate.tests.RandomForest (class_weight=balanced)"
     para(doc,
          f"**On Bangladesh the class-weighted forest beats persistence in "
@@ -1885,6 +2009,25 @@ def chapter_results(doc: Document) -> None:
            "The reanalysis against the reference monitor over their overlapping period: "
            "advisory-class hours and the PM2.5 distribution.",
            figsrc("18_mendeley_vs_embassy.png"))
+    gt = "dhaka_ground_truth.json:comparison"
+    para(doc,
+         f"**Reading the ground-truth comparison.** The first panel counts hours in each "
+         f"advisory class in both series over their overlap, and the second compares the "
+         f"two PM2.5 distributions. The distributions part company in the upper tail: "
+         f"the reference monitor's 95th percentile is "
+         f"{num(gt + '.reference.p95', 'ref p95', '.1f')} µg/m³ against "
+         f"{num(gt + '.reanalysis.p95', 'rea p95', '.1f')} µg/m³ in the reanalysis, and its "
+         f"maximum is {num(gt + '.reference.max', 'ref max', '.0f')} against "
+         f"{num(gt + '.reanalysis.max', 'rea max', '.1f')}. The rank correlation is higher "
+         f"than the linear one (Spearman {num(gt + '.spearman_r', 'spearman', '.3f')}), "
+         f"so the reanalysis orders hours sensibly but compresses their magnitudes, and "
+         f"the two series place an hour in the same AQI category only "
+         f"{num(gt + '.class_agreement', 'class agree', '.1%')} of the time. The "
+         f"two sources aligned best at an offset of "
+         f"{num(gt + '.best_hour_offset', 'offset', '+.0f')} hours, found by scanning the "
+         f"correlation over a range of offsets rather than assumed, which is consistent "
+         f"with one source using local time and the other UTC.",
+         align="justify")
     _ground_truth_table(doc)
     para(doc,
          f"**The reanalysis flattens the peaks.** Over "
@@ -1921,6 +2064,14 @@ def chapter_results(doc: Document) -> None:
            "Hazardous-class and aggregate performance against the persistence floor "
            "across seven rolling-origin folds, with every fold shown.",
            figsrc("19_phase11b_hazardous.png"))
+    para(doc,
+         "**Reading the fold-by-fold detector plot.** Each fold contributes a pair of "
+         "points, the model's Hazardous F1 and the persistence floor's on the same block, "
+         "joined so that the direction of the gap is visible; the aggregate macro-F1 is "
+         "shown the same way. Every pair slopes the same way: in each of the seven blocks "
+         "the detector's Hazardous F1 is above the floor's, so the aggregate result is "
+         "not produced by one or two exceptional years.",
+         align="justify")
     _phase11b_table(doc)
     _phase11b_folds_table(doc)
     g = "dhaka_pm25_model_h6.json:cv.aggregate.f1_Hazardous"
@@ -1954,6 +2105,20 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "20_openaq_survey.png",
            "Stations near Dhaka by provider and by reported pollutant, and the number "
            "surviving each coverage filter.", figsrc("20_openaq_survey.png"))
+    pr = "openaq_survey.json:probe"
+    para(doc,
+         f"**Reading the survey figure.** The left panels group the stations found within "
+         f"the search radius by data provider and by pollutant reported; the right panel "
+         f"is a funnel showing how many survive each successive requirement. The one "
+         f"station that reported a companion pollutant was probed in detail: it provided "
+         f"{num(pr + '.joint_hours', 'joint hours', ',.0f')} hours with both channels "
+         f"over {num(pr + '.span_days', 'span days', '.0f')} days, from "
+         f"{need(pr + '.start', 'probe start')} to {need(pr + '.end', 'probe end')}, "
+         f"including {num(pr + '.hazardous_hours', 'probe haz hours', ',.0f')} hazardous "
+         f"hours. It passed the completeness test but failed the duration test, so it "
+         f"could not support the multi-year rolling-origin evaluation used everywhere "
+         f"else in this thesis.",
+         align="justify")
     _openaq_table(doc)
     para(doc,
          f"**No station qualifies.** Of "
@@ -1997,12 +2162,43 @@ def chapter_results(doc: Document) -> None:
     figure(doc, "22_deployed_architecture.png",
            "The deployed Bangladesh predictor, stage by stage, with the validator drawn "
            "outside the model column.", figsrc("22_deployed_architecture.png"))
+    cj = "deployment_h6_bd.json:conformal_json"
+    para(doc,
+         f"**Reading the architecture diagram.** The model column runs from the seven "
+         f"input channels through the compressed forest to class probabilities and then "
+         f"to the Mondrian conformal step, which turns the probabilities into a set of "
+         f"categories using one stored threshold per class. The thresholds travel with "
+         f"the model in a {num('deployment_h6_bd.json:conformal_json_bytes', 'conf json bytes', ',.0f')}-byte "
+         f"JSON file, so applying the uncertainty layer needs only one comparison per "
+         f"class against a stored threshold. The explanation and advisory steps sit outside that column, and "
+         f"the validator is drawn outside the language model to make the design point "
+         f"explicit: the honesty rules are checked by ordinary code after generation, "
+         f"not requested from the model. The Hazardous threshold is stored as "
+         f"{num(cj + '.thresholds.Hazardous', 'haz threshold', '.1f')}, which always "
+         f"admits that class to the set, because the calibration split contained too "
+         f"few Hazardous rows to estimate a tighter one.",
+         align="justify")
     _deployed_table(doc)
     _advisory_examples(doc)
     figure(doc, "21_pipeline_overview.png",
            "The full project pipeline: the Beijing methodology track, the Bangladesh "
            "deployment track, and what each produced.",
            figsrc("21_pipeline_overview.png"))
+    para(doc,
+         "**Reading the pipeline overview.** The left column is the Beijing methodology "
+         "track, read from top to bottom: preprocessing, the persistence floor, the "
+         "augmentation and sequence-model experiments, the uncertainty layer and the "
+         "rolling-origin evaluation, ending in the finding that no Beijing model is "
+         "deployed. The right column is the Bangladesh deployment track: the integrity "
+         "audit, the shared channels, rolling-origin validation, the reference-monitor "
+         "comparison, the PM2.5-only detector and the OpenAQ survey. The single arrow "
+         "between the columns is labelled 'protocol transfers': what crosses from Beijing "
+         "to Bangladesh is the evaluation protocol, not model weights. Both columns feed "
+         "the deployed predictor at the bottom, under which the ESP32 neckband is drawn "
+         "with the reminder that no model has yet run on the target silicon. The "
+         "box colours distinguish the floor, what worked, negative results and the "
+         "uncertainty layer.",
+         align="justify")
     para(doc,
          "**The deployed system is the Bangladesh model; the Beijing pipeline is the "
          "methodology that produced it.** Those are two artefacts with two statuses, "
@@ -2079,6 +2275,16 @@ def chapter_results(doc: Document) -> None:
            "tabular families. Persistence (grey, dashed) interleaves with the models; "
            "the best reaches four of eight folds and gradient boosting is significantly "
            "worse.", figsrc("24_rolling_cv_8fold.png"))
+    para(doc,
+         f"**Reading the eight-fold plot.** The figure extends the five-fold plot to eight "
+         f"narrower blocks and adds XGBoost. With more blocks the pattern is clearer "
+         f"rather than different: the unweighted forest leads in "
+         f"{num(f8 + ':aggregate.tests.RandomForest (unweighted).wins', 'f8 rfu wins', '.0f')} "
+         f"of the eight blocks, the class-weighted forest in "
+         f"{num(f8 + ':aggregate.tests.RandomForest (class_weight=balanced).wins', 'f8 rfcw wins', '.0f')}, "
+         f"and XGBoost in {num(f8 + ':aggregate.tests.XGBoost.wins', 'f8 xgb wins', '.0f')}, "
+         f"so its line runs below the dashed persistence line throughout.",
+         align="justify")
 
     heading(doc, "4.15.3 Leave-one-station-out generalisation", 3)
     sh = "station_holdout_h6.json"
@@ -2103,6 +2309,17 @@ def chapter_results(doc: Document) -> None:
            "Leave-one-station-out: each held-out Beijing station's macro-F1 for the "
            "class-weighted forest against its own persistence floor. Every station "
            "clears its floor.", figsrc("25_station_holdout.png"))
+    para(doc,
+         f"**Reading the station plot.** Each held-out station appears once, with the "
+         f"forest's macro-F1 beside the floor computed on that station's own rows. The "
+         f"smallest gain over the floor is "
+         f"{num(sh + ':aggregate.min_delta_macro', 'sh min', '+.4f')} and the largest "
+         f"{num(sh + ':aggregate.max_delta_macro', 'sh max', '+.4f')}; the forest also "
+         f"leads on the Hazardous class at "
+         f"{num(sh + ':aggregate.wins_hazardous', 'sh haz wins', '.0f')} of the "
+         f"{need(sh + ':n_stations', 'stations')} stations. No single station drives the "
+         f"result, but the time-overlap caveat above applies to every bar.",
+         align="justify")
 
     heading(doc, "4.15.4 Robustness to low-cost-sensor noise", 3)
     sn = "sensor_noise_robustness_h6.json"
@@ -2127,6 +2344,19 @@ def chapter_results(doc: Document) -> None:
            "Hazardous F1 and macro-F1 on clean input, on noisy input, and against a "
            "persistence floor recomputed on the noisy input. The detector degrades but "
            "stays above its noisy floor.", figsrc("26_sensor_noise_robustness.png"))
+    para(doc,
+         f"**Reading the noise plot.** The bars compare the detector on clean input, the "
+         f"detector on noisy input, and persistence recomputed on the noisy input, for the "
+         f"Hazardous class and for macro-F1. The aggregate suffers more than the advisory "
+         f"class: macro-F1 falls from {num(sn + ':summary.macro_f1.clean.mean', 'sn macro clean')} "
+         f"to {num(sn + ':summary.macro_f1.noisy.mean', 'sn macro noisy')}, a larger "
+         f"relative loss than the Hazardous class suffers, which is consistent with noise "
+         f"blurring the boundaries between adjacent middle categories more than it moves "
+         f"an hour out of the highest band. "
+         f"The comparison that matters for the device is the last one: the noisy "
+         f"detector against the noisy floor, which is the competition a low-cost sensor "
+         f"would actually face.",
+         align="justify")
 
     heading(doc, "4.15.5 Selective prediction on the conformal sets", 3)
     sp = "selective_prediction_h6.json"
@@ -2148,6 +2378,16 @@ def chapter_results(doc: Document) -> None:
            "Accuracy and macro-F1 on all predictions against the confident subset "
            "selected by conformal set size. Accuracy rises; macro-F1 does not.",
            figsrc("27_selective_prediction.png"))
+    para(doc,
+         f"**Reading the selective-prediction plot.** The paired bars show accuracy and "
+         f"macro-F1 on all {num(sp + ':n_total', 'sp n', ',.0f')} predictions and on the "
+         f"confident subset, defined as rows whose conformal set has at most "
+         f"{num(sp + ':max_set_for_confident', 'sp max set', '.0f')} categories. The "
+         f"model abstains on {num(sp + ':abstain_fraction', 'sp abstain', '.1%')} of rows. "
+         f"Accuracy rewards the abstention, whereas macro-F1, which weights every class "
+         f"equally, shows no gain, because, as stated above, the rows set aside are "
+         f"disproportionately those of the safety-critical classes.",
+         align="justify")
 
     heading(doc, "4.15.6 An independent data-integrity audit", 3)
     ia = "integrity_audit_bangladesh.json"
@@ -3388,7 +3628,7 @@ def appendix_hyperparameters(doc: Document) -> None:
                     rows.append([f"{k}.{k2}", _fmt_cfg(v2)])
             else:
                 rows.append([k, _fmt_cfg(v)])
-        table(doc, f"{title[5:]} parameters.", ["Key", "Value"], rows,
+        table(doc, f"{title.split(' ', 1)[1]} parameters.", ["Key", "Value"], rows,
               source="configs/default.yaml", widths=[2.6, 3.7])
 
 
@@ -3445,20 +3685,19 @@ GLOSSARY = [
 def appendix_glossary(doc: Document) -> None:
     heading(doc, "Appendix B: Glossary of Terms", 1)
     t = doc.add_table(rows=0, cols=2)
-    t.style = "Light List Accent 1"
     for term, definition in GLOSSARY:
         cells = t.add_row().cells
         cells[0].text = ""
         _rich(cells[0].paragraphs[0], term, size=TABLE_PT, bold=True)
         cells[1].text = ""
         _rich(cells[1].paragraphs[0], definition, size=TABLE_PT)
-        cells[0].width, cells[1].width = Inches(1.9), Inches(4.4)
+    tpl.style_table(t, [1.9, 4.4], header=False)
 
 
 # ------------------------------------------------------------------------ driver
 
 
-def _body(doc: Document) -> None:
+def _main_matter(doc: Document) -> None:
     chapter_intro(doc)
     chapter_related(doc)
     chapter_methods(doc)
@@ -3469,6 +3708,9 @@ def _body(doc: Document) -> None:
     chapter_conclusion(doc)
     availability(doc)
     references(doc)
+
+
+def _appendices(doc: Document) -> None:
     appendix_hyperparameters(doc)
     appendix_glossary(doc)
     appendix_reports(doc)
@@ -3482,54 +3724,53 @@ def _all_text(doc: Document) -> str:
     return "\n".join(parts)
 
 
+LAYOUT: tpl.Layout | None = None
+SUPERVISOR, CO_SUPERVISOR = "Mirza Asif Mahmud", "Dipta Justin Gomes"
+
+
 def assemble() -> Document:
-    """Build the body first, then move the front matter in front of it.
+    """Fill a copy of the AIUB template.
 
-    The lists of figures, tables and abbreviations cannot be written until the body
-    exists, but they must appear before it. An earlier version built the body in a
-    separate document and moved its XML elements across, which silently dropped every
-    image: the drawing elements moved, but the image parts and their relationship
-    entries stayed behind in the discarded package, so the output referenced
-    relationship IDs it did not contain. The result had 23 figure captions and no
-    figures.
-
-    Everything is therefore built in one document, which keeps each image part and
-    relationship attached to the package that will be saved. Only the front matter is
-    relocated, and it contains no images.
+    Everything is built inside the one template document, so every image part and its
+    relationship belong to the package that is saved. (An earlier version built the
+    body in a separate document and moved its XML across, which silently dropped every
+    image.) The body is appended at the end and then moved in front of the template's
+    main-body section break; moving within one package is safe. The appendices stay in
+    the template's final (appendix) section.
     """
-    doc = Document()
-    setup_styles(doc)
-    _body(doc)
-    text = _all_text(doc)
-
+    global LAYOUT
+    doc = tpl.open_template()
+    LAYOUT = tpl.Layout(doc)
+    main_break = tpl.strip_template_body(doc)
     body = doc.element.body
-    n_body = len(body) - 1          # python-docx keeps w:sectPr last
-
-    title_page(doc)
-    declaration(doc)
-    certificate(doc)
-    acknowledgement(doc)
-    abstract(doc)
-    toc(doc)
-    list_of_figures(doc)
-    list_of_tables(doc)
-    list_of_abbreviations(doc, text)
-
-    front = list(body)[n_body:-1]
-    for i, el in enumerate(front):
-        body.remove(el)
-        body.insert(i, el)
+    n0 = len(body) - 1
+    _main_matter(doc)
+    n1 = len(body) - 1
+    _appendices(doc)
+    text = _all_text(doc)
+    tpl.finish(doc, main_break, n0, n1)
+    tpl.fill_front_matter(
+        doc, title=TITLE, authors=AUTHORS, supervisor=SUPERVISOR,
+        co_supervisor=CO_SUPERVISOR, acknowledgement=ACKNOWLEDGEMENT,
+        abstract_chunks=_abstract_chunks(), keywords=KEYWORDS,
+        abbreviations=_abbreviations_used(text))
     return doc
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", type=Path, default=OUT_DOCX)
+    ap.add_argument("--pages-from", type=Path, default=None,
+                    help="a PDF rendered from a previous build; its page numbers pre-fill "
+                         "the Table of Content, List of Figures and List of Tables")
     ap.add_argument("--check", action="store_true",
                     help="resolve every value and report gaps, write nothing")
     args = ap.parse_args(argv)
 
     doc = assemble()
+    if args.pages_from:
+        got = tpl.fill_lists(doc, args.pages_from)
+        print(f"pre-filled lists (entries, without page): {got}")
     if not args.check:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         doc.save(args.out)

@@ -83,3 +83,8 @@ dist/
 # policy). build_thesis.py still writes it here for local use; it must never be committed.
 /docs/PulseAir_Thesis.docx
 /docs/PulseAir_Thesis.pdf
+
+# AIUB templates and generated deliverables are not distributed
+/docs/template/
+/docs/thesis/
+/docs/*.pptx

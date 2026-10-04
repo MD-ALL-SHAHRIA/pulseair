@@ -20,6 +20,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture(scope="module")
 def built(tmp_path_factory):
+    # The AIUB template is not distributed with the repository (docs/template/ is
+    # gitignored), so the document-building tests run only where it is present.
+    from src.reporting import aiub_template
+    if not aiub_template.TEMPLATE.exists():
+        pytest.skip(f"AIUB thesis template not present at {aiub_template.TEMPLATE}")
     bt.REG.figures.clear()
     bt.REG.tables.clear()
     bt.CITED.clear()
@@ -49,7 +54,8 @@ def test_every_figure_is_embedded_not_just_captioned(built):
     doc, path = built
     with zipfile.ZipFile(path) as z:
         media = [n for n in z.namelist() if n.startswith("word/media/")]
-    assert len(media) == len(bt.REG.figures), (
+    # the AIUB template contributes one image of its own: the university logo
+    assert len(media) == len(bt.REG.figures) + 1, (
         f"{len(bt.REG.figures)} figures registered but {len(media)} media parts "
         f"embedded")
     assert len(media) >= 20, f"only {len(media)} figures embedded"
@@ -79,9 +85,10 @@ def test_every_citation_exists_in_the_reference_list(built):
 def test_front_matter_is_in_order(built):
     doc, _ = built
     text = [p.text.strip() for p in doc.paragraphs]
-    wanted = ["Declaration", "Certificate of Approval", "Acknowledgement", "Abstract",
-              "Table of Contents", "List of Figures", "List of Tables",
-              "List of Abbreviations"]
+    # the AIUB template's own front-matter order
+    wanted = ["Declaration", "Approval", "Acknowledgement", "Table of Content",
+              "List of Figures", "List of Tables", "List of Abbreviations", "Abstract",
+              "Keywords"]
     seen = [t for t in text if t in wanted]
     first = []
     for w in wanted:
@@ -95,7 +102,7 @@ def test_lists_of_figures_and_tables_are_populated(built):
     assert len(bt.REG.figures) >= 20
     assert len(bt.REG.tables) >= 30
     text = "\n".join(p.text for p in doc.paragraphs)
-    assert "Figure 1." in text and "Table 1." in text
+    assert "Figure 1:" in text and "Table 1:" in text
 
 
 def test_abbreviations_are_only_those_actually_used(built):

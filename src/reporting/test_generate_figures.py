@@ -31,7 +31,7 @@ def rendered():
     return gf.generate()
 
 
-EXPECTED_FIGURES = 28
+EXPECTED_FIGURES = 29
 
 
 def test_registry_holds_the_expected_figure_count():
@@ -47,9 +47,9 @@ def test_schematics_declare_no_metrics_sources_but_still_carry_a_caveat():
     and is not would be the problem this whole module exists to avoid.
     """
     schematics = [f for f in gf.REGISTRY if not f.sources]
-    assert len(schematics) == 3, (
-        f"expected 3 schematics (pipeline overview, deployed architecture, coverage "
-        f"timeline), found {[f.slug for f in schematics]}")
+    assert len(schematics) == 4, (
+        f"expected 4 schematics (pipeline overview, deployed architecture, coverage "
+        f"timeline, methodology workflow), found {[f.slug for f in schematics]}")
     for f in schematics:
         assert "chematic" in f.caveat, f"{f.slug} does not declare itself a schematic"
 
